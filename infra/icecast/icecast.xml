@@ -1,0 +1,50 @@
+<icecast>
+    <location>Brasil</location>
+    <admin>admin@localhost</admin>
+    <hostname>localhost</hostname>
+
+    <limits>
+        <clients>1000</clients>
+        <sources>5</sources>
+        <queue-size>524288</queue-size>
+        <client-timeout>30</client-timeout>
+        <header-timeout>15</header-timeout>
+        <source-timeout>10</source-timeout>
+        <burst-on-connect>1</burst-on-connect>
+        <burst-size>65535</burst-size>
+    </limits>
+
+    <!-- Os marcadores __X__ são trocados pelo entrypoint.sh com as senhas do .env -->
+    <authentication>
+        <source-password>__SOURCE_PASSWORD__</source-password>
+        <relay-password>__RELAY_PASSWORD__</relay-password>
+        <admin-user>admin</admin-user>
+        <admin-password>__ADMIN_PASSWORD__</admin-password>
+    </authentication>
+
+    <listen-socket>
+        <port>8000</port>
+    </listen-socket>
+
+
+    <fileserve>1</fileserve>
+
+    <paths>
+        <basedir>/usr/share/icecast</basedir>
+        <logdir>/var/log/icecast</logdir>
+        <webroot>/usr/share/icecast/web</webroot>
+        <adminroot>/usr/share/icecast/admin</adminroot>
+        <alias source="/" destination="/status.xsl"/>
+    </paths>
+
+    <logging>
+        <!-- "-" manda o log para a saída padrão, visível em "docker compose logs icecast" -->
+        <accesslog>-</accesslog>
+        <errorlog>-</errorlog>
+        <loglevel>3</loglevel>
+    </logging>
+
+    <security>
+        <chroot>0</chroot>
+    </security>
+</icecast>

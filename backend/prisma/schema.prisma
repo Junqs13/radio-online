@@ -1,0 +1,88 @@
+generator client {
+  provider      = "prisma-client-js"
+  // "linux-musl-openssl-3.0.x" é o alvo da imagem node:20-alpine usada no Docker
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Program {
+  id          Int           @id @default(autoincrement())
+  title       String // Ex: "Morning Soundscape"
+  host        String // Ex: "Alexandre Lima"
+  category    String // Ex: "Rock / Alternativo"
+  description String?
+  color       String        @default("#dc2626") // Cor identificadora na grade
+  // Pasta do acervo que o programa toca (ex: "Rock Anos 70"). Vazio = só as faixas vinculadas ao programa.
+  mediaFolder String?
+  slots       ProgramSlot[]
+  mediaItems  MediaItem[]
+  history     PlayHistory[]
+  createdAt   DateTime      @default(now())
+}
+
+model ProgramSlot {
+  id             Int     @id @default(autoincrement())
+  programId      Int
+  program        Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+  dayOfWeek      Int // 0 = Domingo, 1 = Segunda, ..., 6 = Sábado
+  startTime      String // "HH:MM"
+  endTime        String // "HH:MM"
+  transitionType String  @default("crossfade") // crossfade, fade-in, hard-cut
+  jingleEnabled  Boolean @default(true)
+}
+
+model MediaItem {
+  id           Int           @id @default(autoincrement())
+  title        String
+  artist       String?
+  filename     String        @unique // nome do arquivo dentro da pasta de mídia
+  type         String        @default("music") // 'music', 'jingle', 'spot'
+  duration     Int           @default(0) // segundos
+  category     String? // subpasta do acervo (ex: "Coldplay")
+  enabled      Boolean       @default(true) // false = fora da rotação
+  playCount    Int           @default(0)
+  lastPlayedAt DateTime?
+  programId    Int?
+  program      Program?      @relation(fields: [programId], references: [id], onDelete: SetNull)
+  requests     SongRequest[]
+  history      PlayHistory[]
+  createdAt    DateTime      @default(now())
+
+  @@index([type, enabled])
+}
+
+model SongRequest {
+  id           Int        @id @default(autoincrement())
+  trackTitle   String     @map("track_title")
+  listenerName String     @map("listener_name")
+  // pending = aguardando o locutor, queued = na fila para tocar, sent = enviado ao Auto-DJ,
+  // played = já tocou, rejected = recusado
+  status       String     @default("pending")
+  mediaItemId  Int?       @map("media_item_id")
+  mediaItem    MediaItem? @relation(fields: [mediaItemId], references: [id], onDelete: SetNull)
+  queuedAt     DateTime?  @map("queued_at")
+  playedAt     DateTime?  @map("played_at")
+  createdAt    DateTime   @default(now()) @map("created_at")
+
+  @@index([status, queuedAt])
+  @@map("song_requests")
+}
+
+model PlayHistory {
+  id          Int        @id @default(autoincrement())
+  mediaItemId Int?       @map("media_item_id")
+  mediaItem   MediaItem? @relation(fields: [mediaItemId], references: [id], onDelete: SetNull)
+  title       String
+  artist      String?
+  source      String // music, request, jingle, fallback
+  programId   Int?       @map("program_id")
+  program     Program?   @relation(fields: [programId], references: [id], onDelete: SetNull)
+  playedAt    DateTime   @default(now()) @map("played_at")
+
+  @@index([playedAt])
+  @@map("play_history")
+}

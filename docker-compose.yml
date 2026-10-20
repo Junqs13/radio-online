@@ -1,0 +1,106 @@
+# Rádio online: Postgres + Icecast + Liquidsoap + API + site
+# Todas as senhas vêm do arquivo .env na raiz do projeto.
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: radio_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    # Só acessível pelo próprio computador (para rodar o backend fora do Docker em dev)
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  icecast:
+    build: ./infra/icecast
+    container_name: radio_icecast
+    environment:
+      ICECAST_SOURCE_PASSWORD: ${ICECAST_SOURCE_PASSWORD}
+      ICECAST_ADMIN_PASSWORD: ${ICECAST_ADMIN_PASSWORD}
+      ICECAST_RELAY_PASSWORD: ${ICECAST_RELAY_PASSWORD}
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  liquidsoap:
+    image: savonet/liquidsoap:v2.2.0
+    container_name: radio_liquidsoap
+    environment:
+      ICECAST_HOST: icecast
+      ICECAST_PORT: "8000"
+      ICECAST_SOURCE_PASSWORD: ${ICECAST_SOURCE_PASSWORD}
+      ICECAST_MOUNT: ${ICECAST_MOUNT}
+      # O Liquidsoap pergunta à API qual é a próxima faixa e avisa o que tocou
+      AUTODJ_API_URL: http://backend:3001/api
+      AUTODJ_TOKEN: ${AUTODJ_TOKEN:?defina AUTODJ_TOKEN no .env}
+      MEDIA_DIR: /storage
+    volumes:
+      - ./storage:/storage:ro
+      - ./infra/liquidsoap/radio.liq:/app/radio.liq:ro
+    entrypoint: ["liquidsoap"]
+    command: ["/app/radio.liq"]
+    depends_on:
+      - icecast
+      - backend
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    container_name: radio_backend
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      PORT: "3001"
+      MEDIA_DIR: /storage
+      ICECAST_URL: http://icecast:8000
+      ICECAST_MOUNT: ${ICECAST_MOUNT}
+      # Segurança do painel (obrigatórios: a API não sobe sem eles)
+      ADMIN_USER: ${ADMIN_USER:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?defina ADMIN_PASSWORD no .env}
+      SESSION_SECRET: ${SESSION_SECRET:?defina SESSION_SECRET no .env}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      TRUST_PROXY: ${TRUST_PROXY:-0}
+      # Auto-DJ
+      AUTODJ_TOKEN: ${AUTODJ_TOKEN:?defina AUTODJ_TOKEN no .env}
+      LIQUIDSOAP_MEDIA_DIR: /storage
+      RADIO_TIMEZONE: ${RADIO_TIMEZONE:-America/Sao_Paulo}
+      JINGLE_EVERY_MIN: ${JINGLE_EVERY_MIN:-30}
+      REQUEST_COOLDOWN_MIN: ${REQUEST_COOLDOWN_MIN:-60}
+      MAX_QUEUED_REQUESTS: ${MAX_QUEUED_REQUESTS:-5}
+    volumes:
+      # Mesma pasta que o Liquidsoap lê: upload pelo painel entra na rotação
+      - ./storage:/storage
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      icecast:
+        condition: service_started
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${PUBLIC_API_URL}
+        NEXT_PUBLIC_STREAM_URL: ${PUBLIC_STREAM_URL}
+    container_name: radio_frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  pgdata:

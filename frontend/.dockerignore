@@ -1,0 +1,4 @@
+# Sem isso o "COPY . ." levava o node_modules e o .next do Windows para dentro da imagem Linux
+node_modules
+.next
+.env.local

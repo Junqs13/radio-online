@@ -1,0 +1,12 @@
+.env
+**/.env
+**/.env.local
+node_modules/
+**/node_modules/
+frontend/.next/
+backend/dist/
+storage/*
+!storage/.gitkeep
+
+# Catálogo do acervo (as músicas em si ficam fora do Git)
+!storage/_catalogo.csv
