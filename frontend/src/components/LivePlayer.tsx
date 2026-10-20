@@ -60,6 +60,47 @@ export default function LivePlayer() {
     }
   };
 
+  // Controles do sistema: tela bloqueada, fone Bluetooth, central multimídia e CarPlay
+  // mostram o nome da música e respondem a play/pause usando a Media Session do navegador.
+  const togglePlayRef = useRef(togglePlay);
+  togglePlayRef.current = togglePlay;
+  const isPlayingRef = useRef(isPlaying);
+  isPlayingRef.current = isPlaying;
+
+  useEffect(() => {
+    if (typeof navigator === 'undefined' || !('mediaSession' in navigator)) return;
+    const ms = navigator.mediaSession;
+    const start = () => { if (!isPlayingRef.current) togglePlayRef.current(); };
+    const stop = () => { if (isPlayingRef.current) togglePlayRef.current(); };
+    const actions: [MediaSessionAction, MediaSessionActionHandler][] = [['play', start], ['pause', stop], ['stop', stop]];
+    for (const [action, handler] of actions) {
+      try { ms.setActionHandler(action, handler); } catch { /* ação não suportada neste navegador */ }
+    }
+    return () => {
+      for (const [action] of actions) {
+        try { ms.setActionHandler(action, null); } catch { /* idem */ }
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof navigator === 'undefined' || !('mediaSession' in navigator) || typeof MediaMetadata === 'undefined') return;
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: nowPlaying.title,
+      artist: nowPlaying.artist,
+      album: 'Antena Rock',
+      artwork: [
+        { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+        { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+      ],
+    });
+  }, [nowPlaying.title, nowPlaying.artist]);
+
+  useEffect(() => {
+    if (typeof navigator === 'undefined' || !('mediaSession' in navigator)) return;
+    navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+  }, [isPlaying]);
+
   const toggleMute = () => {
     if (!audioRef.current) return;
     audioRef.current.muted = !isMuted;
