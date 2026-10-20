@@ -50,14 +50,34 @@ export async function isPlayableAudio(filePath: string) {
 let lastSync: { at: Date; added: number; removed: number; total: number } | null = null;
 export const getLastSync = () => lastSync;
 
+/**
+ * O Liquidsoap roda com outro usuário dentro do Docker. Arquivos enviados por scp
+ * podem chegar legíveis só pelo dono, e aí a rádio fica muda com "Read permission denied".
+ * Garante leitura para todos (e entrada nas pastas) sem mexer no resto das permissões.
+ */
+function ensureReadable(p: string, isDir: boolean) {
+  try {
+    const mode = fs.statSync(p).mode & 0o7777;
+    const want = isDir ? mode | 0o555 : mode | 0o444;
+    if (want !== mode) fs.chmodSync(p, want);
+  } catch (err) {
+    console.warn(`Não consegui liberar leitura de ${p}:`, (err as Error).message);
+  }
+}
+
 /** Lista os arquivos de áudio da pasta de mídia, incluindo subpastas, como caminhos relativos ("Categoria/Arquivo.mp3"). */
 export function listAudioFiles(dir = config.mediaDir, prefix = ''): string[] {
   const out: string[] = [];
+  ensureReadable(dir, true);
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     if (entry.name.startsWith('.')) continue;
     const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
-    if (entry.isDirectory()) out.push(...listAudioFiles(path.join(dir, entry.name), rel));
-    else if (entry.isFile() && isAudioFile(entry.name)) out.push(rel);
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) out.push(...listAudioFiles(full, rel));
+    else if (entry.isFile() && isAudioFile(entry.name)) {
+      ensureReadable(full, false);
+      out.push(rel);
+    }
   }
   return out;
 }
