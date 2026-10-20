@@ -24,6 +24,10 @@ Endereços locais:
 
 Para ver o que está acontecendo: `docker compose logs -f liquidsoap backend`.
 
+## Produção
+
+O passo a passo para colocar a rádio no ar na Oracle Cloud, com HTTPS em `antenarock.com.br`, está em [docs/PRODUCAO.md](docs/PRODUCAO.md). Em produção use `docker-compose.prod.yml`. Nele só o Caddy fica exposto, nas portas 80 e 443.
+
 ## Rodar o backend ou o site fora do Docker
 
 Com a stack de pé (`docker compose up -d postgres icecast liquidsoap`):

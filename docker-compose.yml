@@ -33,7 +33,7 @@ services:
     restart: unless-stopped
 
   liquidsoap:
-    image: savonet/liquidsoap:v2.2.0
+    image: savonet/liquidsoap:v2.2.5
     container_name: radio_liquidsoap
     environment:
       ICECAST_HOST: icecast

@@ -10,3 +10,4 @@ storage/*
 
 # Catálogo do acervo (as músicas em si ficam fora do Git)
 !storage/_catalogo.csv
+backups/

@@ -1,0 +1,135 @@
+# Produção (servidor na Oracle Cloud).
+# Só o Caddy fica exposto na internet (portas 80 e 443). Ele cuida do HTTPS
+# e encaminha /api para a API, /live.mp3 para o Icecast e o resto para o site.
+#
+# Uso: docker compose -f docker-compose.prod.yml up -d --build
+# Todas as senhas vêm do arquivo .env (gerado pelo infra/server/setup.sh).
+
+x-logging: &logging
+  # Limita o log de cada container a 30 MB, para o disco não encher com o tempo
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  caddy:
+    image: caddy:2.8-alpine
+    container_name: radio_caddy
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:?defina SITE_DOMAIN no .env}
+      ACME_EMAIL: ${ACME_EMAIL:?defina ACME_EMAIL no .env}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./infra/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - frontend
+      - backend
+      - icecast
+    restart: unless-stopped
+    logging: *logging
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: radio_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+    logging: *logging
+
+  icecast:
+    build: ./infra/icecast
+    container_name: radio_icecast
+    environment:
+      ICECAST_SOURCE_PASSWORD: ${ICECAST_SOURCE_PASSWORD}
+      ICECAST_ADMIN_PASSWORD: ${ICECAST_ADMIN_PASSWORD}
+      ICECAST_RELAY_PASSWORD: ${ICECAST_RELAY_PASSWORD}
+    restart: unless-stopped
+    logging: *logging
+
+  liquidsoap:
+    image: savonet/liquidsoap:v2.2.5
+    container_name: radio_liquidsoap
+    environment:
+      ICECAST_HOST: icecast
+      ICECAST_PORT: "8000"
+      ICECAST_SOURCE_PASSWORD: ${ICECAST_SOURCE_PASSWORD}
+      ICECAST_MOUNT: ${ICECAST_MOUNT:-/live.mp3}
+      AUTODJ_API_URL: http://backend:3001/api
+      AUTODJ_TOKEN: ${AUTODJ_TOKEN:?defina AUTODJ_TOKEN no .env}
+      MEDIA_DIR: /storage
+      STATION_URL: https://${SITE_DOMAIN}
+    volumes:
+      - ./storage:/storage:ro
+      - ./infra/liquidsoap/radio.liq:/app/radio.liq:ro
+    entrypoint: ["liquidsoap"]
+    command: ["/app/radio.liq"]
+    depends_on:
+      - icecast
+      - backend
+    restart: unless-stopped
+    logging: *logging
+
+  backend:
+    build: ./backend
+    container_name: radio_backend
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      PORT: "3001"
+      MEDIA_DIR: /storage
+      ICECAST_URL: http://icecast:8000
+      ICECAST_MOUNT: ${ICECAST_MOUNT:-/live.mp3}
+      ADMIN_USER: ${ADMIN_USER:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?defina ADMIN_PASSWORD no .env}
+      SESSION_SECRET: ${SESSION_SECRET:?defina SESSION_SECRET no .env}
+      # Site e API no mesmo domínio, atrás do Caddy com HTTPS
+      CORS_ORIGINS: https://${SITE_DOMAIN}
+      COOKIE_SECURE: "true"
+      TRUST_PROXY: "1"
+      AUTODJ_TOKEN: ${AUTODJ_TOKEN:?defina AUTODJ_TOKEN no .env}
+      LIQUIDSOAP_MEDIA_DIR: /storage
+      RADIO_TIMEZONE: ${RADIO_TIMEZONE:-America/Sao_Paulo}
+      JINGLE_EVERY_MIN: ${JINGLE_EVERY_MIN:-30}
+      REQUEST_COOLDOWN_MIN: ${REQUEST_COOLDOWN_MIN:-60}
+      MAX_QUEUED_REQUESTS: ${MAX_QUEUED_REQUESTS:-5}
+    volumes:
+      - ./storage:/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+      icecast:
+        condition: service_started
+    restart: unless-stopped
+    logging: *logging
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # Endereços que o navegador do ouvinte usa: mesmo domínio, via Caddy
+        NEXT_PUBLIC_API_URL: https://${SITE_DOMAIN}/api
+        NEXT_PUBLIC_STREAM_URL: https://${SITE_DOMAIN}${ICECAST_MOUNT:-/live.mp3}
+    container_name: radio_frontend
+    depends_on:
+      - backend
+    restart: unless-stopped
+    logging: *logging
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:

@@ -13,6 +13,7 @@ icecast_mount    = environment.get(default="/live.mp3", "ICECAST_MOUNT")
 api_url          = environment.get(default="http://backend:3001/api", "AUTODJ_API_URL")
 api_token        = environment.get("AUTODJ_TOKEN")
 media_dir        = environment.get(default="/storage", "MEDIA_DIR")
+station_url      = environment.get(default="http://localhost:3000", "STATION_URL")
 
 auth = [("Authorization", "Bearer #{api_token}")]
 
@@ -76,7 +77,7 @@ output.icecast(
   name="SonicWave Radio",
   description="Radio online 24 horas",
   genre="Rock",
-  url="http://localhost:3000",
+  url=station_url,
   encoding="UTF-8",
   radio
 )

@@ -1,0 +1,40 @@
+# HTTPS automático (Let's Encrypt) para o domínio da rádio.
+# SITE_DOMAIN e ACME_EMAIL vêm do .env pelo docker-compose.prod.yml.
+{
+	email {$ACME_EMAIL}
+}
+
+# www.dominio -> dominio
+www.{$SITE_DOMAIN} {
+	redir https://{$SITE_DOMAIN}{uri} permanent
+}
+
+{$SITE_DOMAIN} {
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		-Server
+	}
+
+	# Rotas que só o Liquidsoap usa, por dentro da rede do Docker. Não ficam abertas na internet.
+	handle /api/autodj/* {
+		respond 404
+	}
+
+	# API do backend
+	handle /api/* {
+		reverse_proxy backend:3001
+	}
+
+	# Stream de áudio. flush_interval -1 manda cada pedaço de áudio na hora, sem guardar em buffer.
+	handle /live.mp3 {
+		reverse_proxy icecast:8000 {
+			flush_interval -1
+		}
+	}
+
+	# Site e painel
+	handle {
+		encode zstd gzip
+		reverse_proxy frontend:3000
+	}
+}
