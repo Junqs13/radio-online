@@ -11,3 +11,10 @@ storage/*
 # Catálogo do acervo (as músicas em si ficam fora do Git)
 !storage/_catalogo.csv
 backups/
+
+# Configurações locais de editores e assistentes (não fazem parte do projeto)
+.agents/
+.claude/
+.windsurf/
+skills-lock.json
+.git-antigo-com-senhas/
