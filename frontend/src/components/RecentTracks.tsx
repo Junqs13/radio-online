@@ -26,7 +26,8 @@ export default function RecentTracks() {
     const load = async () => {
       try {
         const res = await fetch(`${API_URL}/stream/history?limit=6`);
-        if (res.ok) setHistory((await res.json()).history ?? []);
+        // A primeira linha é a faixa que está tocando agora (já aparece no card "O que toca")
+        if (res.ok) setHistory(((await res.json()).history ?? []).slice(1, 6));
       } catch {
         /* sem conexão: mantém o que já estava na tela */
       }

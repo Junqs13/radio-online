@@ -7,7 +7,6 @@ import { Play, Pause, Radio, Disc, Sparkles, Music, Activity } from 'lucide-reac
 import SmoothScroll from '@/components/SmoothScroll';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import MediaCatalog from '@/components/MediaCatalog';
 import RecentTracks from '@/components/RecentTracks';
 import RockMagneticCarousel from '@/components/RockMagneticCarousel';
 import SmoothScrollSlider from '@/components/SmoothScrollSlider';
@@ -24,7 +23,7 @@ if (typeof window !== 'undefined') {
 
 export default function Home() {
   const [nowPlaying, setNowPlaying] = useState({ 
-    title: 'Sua Rádio Web Online', 
+    title: 'Antena Rock', 
     artist: 'Auto-DJ Ativo', 
     listeners: 0 
   });
@@ -138,7 +137,7 @@ export default function Home() {
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-red-600 to-purple-600 flex items-center justify-center shadow-lg shadow-red-600/20 group-hover:scale-105 transition-transform">
               <Radio className="text-white w-5 h-5 animate-pulse" />
             </div>
-            <span className="font-black tracking-[0.2em] text-sm lg:text-base">SONIC<span className="text-red-600">WAVE</span></span>
+            <span className="font-black tracking-[0.2em] text-sm lg:text-base">ANTENA<span className="text-red-600">ROCK</span></span>
           </div>
 
           <nav className="hidden md:flex items-center gap-10 text-xs uppercase tracking-widest text-gray-400 font-medium">
@@ -158,15 +157,15 @@ export default function Home() {
 
           <div ref={heroRef} className="max-w-4xl z-10 space-y-6">
             <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-white/10 bg-white/[0.03] text-xs text-gray-300 backdrop-blur-md">
-              <Sparkles className="w-4 h-4 text-red-500" /> Transmissão Imersiva 24/7
+              <Sparkles className="w-4 h-4 text-red-500" /> No ar 24 horas
             </div>
             
             <h1 className="text-6xl sm:text-7xl lg:text-9xl font-black tracking-tighter uppercase leading-[0.9]">
-              Sound <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-rose-400 to-purple-600">Reimagined</span>.
+              Antena <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-rose-400 to-purple-600">Rock</span>.
             </h1>
             
             <p className="text-gray-400 text-base sm:text-xl max-w-2xl mx-auto font-light leading-relaxed">
-              Uma fusão entre curadoria musical autônoma, estética imersiva e atmosfera cinematográfica.
+              Rock nacional e internacional, das décadas de 50 até hoje, tocando sem parar.
             </p>
           </div>
         </section>
@@ -218,17 +217,8 @@ export default function Home() {
           <RockMagneticCarousel />
         </section>
 
-        {/* ACERVO MUSICAL RECENTE */}
-        <section className="py-10 px-6 lg:px-16 max-w-7xl mx-auto relative z-10">
-          <div className="mb-8">
-            <h2 className="text-xs uppercase tracking-[0.4em] text-red-500 font-bold mb-2">Banco de Dados</h2>
-            <h3 className="text-3xl font-black tracking-tight">Acervo Musical Recente</h3>
-          </div>
-          <MediaCatalog />
-        </section>
-
-        {/* HISTÓRICO RECENTE */}
-        <section className="py-8 px-6 lg:px-16 max-w-7xl mx-auto relative z-10">
+        {/* ÚLTIMAS TOCADAS */}
+        <section className="py-10 px-6 lg:px-16 max-w-4xl mx-auto relative z-10">
           <RecentTracks />
         </section>
 
@@ -276,14 +266,14 @@ export default function Home() {
             <div className="w-8 h-8 rounded-lg bg-red-600/20 flex items-center justify-center">
               <Radio className="text-red-500 w-4 h-4" />
             </div>
-            <span className="font-bold tracking-[0.2em] text-gray-300">SONICWAVE RADIO ECOSYSTEM</span>
+            <span className="font-bold tracking-[0.2em] text-gray-300">ANTENA <span className="text-red-500">ROCK</span></span>
           </div>
 
           <div className="flex justify-center">
             <InteractiveGrid />
           </div>
 
-          <p>© {new Date().getFullYear()} — Desenvolvido com arquitetura moderna e alta performance.</p>
+          <p>© {new Date().getFullYear()} Antena Rock</p>
         </footer>
 
       </div>

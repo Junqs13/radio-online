@@ -33,7 +33,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <Radio className="w-4 h-4 animate-pulse" />
               </div>
               <span className="font-black tracking-wider text-xs lg:text-sm">
-                ADMIN <span className="text-red-600">SONICWAVE</span>
+                ADMIN <span className="text-red-600">ANTENA ROCK</span>
               </span>
             </div>
 

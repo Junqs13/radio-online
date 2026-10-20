@@ -9,7 +9,7 @@ export default function LivePlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(0.8);
-  const [nowPlaying, setNowPlaying] = useState({ title: 'A carregar antena...', artist: 'SonicWave', listeners: 0 });
+  const [nowPlaying, setNowPlaying] = useState({ title: 'Carregando...', artist: 'Antena Rock', listeners: 0 });
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const apiUrl = API_URL;
@@ -24,8 +24,8 @@ export default function LivePlayer() {
         if (res.ok) {
           const data = await res.json();
           setNowPlaying({
-            title: data.title || 'Transmissão em Direto',
-            artist: data.artist || 'SonicWave Studio',
+            title: data.title || 'Antena Rock ao vivo',
+            artist: data.artist || 'Antena Rock',
             listeners: data.listeners || 0,
           });
         }
@@ -91,7 +91,7 @@ export default function LivePlayer() {
         <div className="space-y-1 overflow-hidden">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
-            <span className="text-[10px] uppercase tracking-widest text-red-500 font-bold">Em Direto 24/7</span>
+            <span className="text-[10px] uppercase tracking-widest text-red-500 font-bold">Ao vivo 24h</span>
             <span className="text-[10px] bg-white/5 px-2 py-0.5 rounded text-gray-400 flex items-center gap-1">
               <Users className="w-3 h-3" /> {nowPlaying.listeners} ouvintes
             </span>

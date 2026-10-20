@@ -1,4 +1,4 @@
-# SonicWave Radio
+# Antena Rock
 
 Rádio online com Auto-DJ: Liquidsoap toca os arquivos da pasta `storage/` e transmite pelo Icecast. A API (Express + Prisma + Postgres) cuida do acervo, da grade e dos pedidos. O site e o painel são em Next.js.
 

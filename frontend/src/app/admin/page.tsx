@@ -88,7 +88,7 @@ export default function AdminDashboard() {
             <Radio className="text-white w-5 h-5 animate-pulse" />
           </div>
           <div>
-            <h1 className="font-black tracking-widest text-lg">SONICWAVE <span className="text-red-500">ADMIN</span></h1>
+            <h1 className="font-black tracking-widest text-lg">ANTENA ROCK <span className="text-red-500">ADMIN</span></h1>
             <p className="text-xs text-gray-400">Dashboard de Métricas e Controle de Programação</p>
           </div>
         </div>
