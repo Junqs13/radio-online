@@ -16,6 +16,8 @@ interface MediaItem {
 export default function MediaCatalog() {
   const [mediaList, setMediaList] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
+  // A home mostra só as faixas mais novas; o resto abre aos poucos
+  const [visible, setVisible] = useState(6);
 
   const apiUrl = API_URL;
 
@@ -27,7 +29,8 @@ export default function MediaCatalog() {
           const data = await res.json();
           // Garante que extraímos o array independentemente de vir direto ou dentro de um objeto { media: [...] }
           const rawList = Array.isArray(data) ? data : (data.media || data.items || []);
-          setMediaList(Array.isArray(rawList) ? rawList : []);
+          const list: MediaItem[] = Array.isArray(rawList) ? rawList : [];
+          setMediaList(list.filter((m) => m.type === 'music'));
         }
       } catch (err) {
         console.error('Erro ao carregar acervo:', err);
@@ -48,9 +51,12 @@ export default function MediaCatalog() {
     return <div className="text-center text-gray-500 py-12">Nenhum áudio cadastrado no banco ainda.</div>;
   }
 
+  const shown = mediaList.slice(0, visible);
+
   return (
+    <div className="space-y-6">
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {(mediaList || []).map((item) => (
+      {shown.map((item) => (
         <div key={item.id} className="border border-white/10 bg-white/[0.02] hover:bg-white/[0.05] p-6 rounded-3xl transition-all duration-300 flex items-center gap-4">
           <div className="w-12 h-12 bg-red-600/10 border border-red-500/20 rounded-2xl flex items-center justify-center flex-shrink-0 text-red-500">
             <Music className="w-5 h-5" />
@@ -61,6 +67,17 @@ export default function MediaCatalog() {
           </div>
         </div>
       ))}
+    </div>
+      {visible < mediaList.length && (
+        <div className="text-center">
+          <button
+            onClick={() => setVisible((v) => v + 12)}
+            className="px-6 py-3 rounded-full border border-white/10 bg-white/[0.03] hover:bg-white/[0.08] text-sm text-gray-300 transition-colors"
+          >
+            Mostrar mais ({mediaList.length - visible} restantes)
+          </button>
+        </div>
+      )}
     </div>
   );
 }
