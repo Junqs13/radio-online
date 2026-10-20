@@ -103,7 +103,8 @@ fi
 say "Agendando backup diário do banco (03:17)"
 chmod +x infra/server/*.sh
 CRON_LINE="17 3 * * * $APP_DIR/infra/server/backup.sh >> $APP_DIR/backups/backup.log 2>&1"
-( crontab -l 2>/dev/null | grep -v 'infra/server/backup.sh' ; echo "$CRON_LINE" ) | crontab -
+# Servidor novo não tem crontab: "crontab -l" falha e, com pipefail, derrubaria o script aqui
+{ crontab -l 2>/dev/null | grep -v 'infra/server/backup.sh' || true; echo "$CRON_LINE"; } | crontab -
 
 say "Construindo e subindo os containers (a primeira vez demora uns 10 minutos)"
 sudo docker compose -f docker-compose.prod.yml up -d --build
@@ -121,7 +122,7 @@ Rádio instalada em $APP_DIR.
    O HTTPS é emitido sozinho alguns minutos depois que o DNS propagar.
 
 2. Envie as músicas do seu PC (PowerShell):
-     scp -r "C:\\Users\\EMERSON\\radio-online\\storage" ubuntu@$IP:$APP_DIR/
+     scp -i \$HOME\\.ssh\\oracle_radio -r "C:\\Users\\EMERSON\\radio-online\\storage" ubuntu@$IP:$APP_DIR/
    Elas entram no acervo sozinhas em até 5 minutos.
 
 3. Site:   https://$DOMAIN
