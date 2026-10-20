@@ -2,12 +2,17 @@
 # Instala a rádio num servidor Ubuntu novo (Oracle Cloud, ARM ou x86).
 # Rodar uma vez, como o usuário "ubuntu":
 #   curl -fsSL https://raw.githubusercontent.com/Junqs13/radio-online/main/infra/server/setup.sh | bash
+# Sem perguntas (ex: cloud-init na criação da máquina): defina SITE_DOMAIN antes.
+#   SITE_DOMAIN=antenarock.com.br bash setup.sh
 # Pode rodar de novo sem problema: ele pula o que já está feito.
 set -euo pipefail
 
 REPO_URL="${REPO_URL:-https://github.com/Junqs13/radio-online.git}"
 APP_DIR="${APP_DIR:-/opt/radio-online}"
 DOMAIN_DEFAULT="antenarock.com.br"
+
+# Na primeira inicialização o Ubuntu costuma estar rodando atualizações sozinho: espera a vez em vez de falhar
+APT="sudo DEBIAN_FRONTEND=noninteractive apt-get -o DPkg::Lock::Timeout=900"
 
 say() { printf '\n\033[1;32m==> %s\033[0m\n' "$*"; }
 
@@ -17,9 +22,9 @@ if [ "$(id -u)" -eq 0 ]; then
 fi
 
 say "Atualizando o sistema"
-sudo apt-get update -y
-sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
-sudo DEBIAN_FRONTEND=noninteractive apt-get install -y ca-certificates curl git openssl unattended-upgrades iptables-persistent
+$APT update -y
+$APT upgrade -y
+$APT install -y ca-certificates curl git openssl unattended-upgrades iptables-persistent
 
 say "Ativando atualizações automáticas de segurança"
 sudo dpkg-reconfigure -f noninteractive unattended-upgrades
@@ -31,8 +36,8 @@ if ! command -v docker >/dev/null 2>&1; then
   sudo chmod a+r /etc/apt/keyrings/docker.asc
   echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" \
     | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
-  sudo apt-get update -y
-  sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  $APT update -y
+  $APT install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
   sudo usermod -aG docker "$USER"
 fi
 sudo systemctl enable --now docker
@@ -60,16 +65,17 @@ mkdir -p storage backups
 
 if [ ! -f .env ]; then
   say "Criando o .env com senhas aleatórias"
-  read -r -p "Domínio da rádio [$DOMAIN_DEFAULT]: " DOMAIN < /dev/tty || true
+  DOMAIN="${SITE_DOMAIN:-}"
+  if [ -z "$DOMAIN" ] && [ -r /dev/tty ]; then
+    read -r -p "Domínio da rádio [$DOMAIN_DEFAULT]: " DOMAIN < /dev/tty || true
+  fi
   DOMAIN="${DOMAIN:-$DOMAIN_DEFAULT}"
-  read -r -p "Seu e-mail (avisos do certificado HTTPS): " EMAIL < /dev/tty
   rnd() { openssl rand -base64 48 | tr -dc 'A-Za-z0-9' | head -c "$1"; }
   ADMIN_PASS="$(rnd 20)"
   umask 077
   cat > .env <<ENV
 # Gerado por infra/server/setup.sh em $(date -u +%Y-%m-%dT%H:%MZ). Não versionar.
 SITE_DOMAIN=$DOMAIN
-ACME_EMAIL=$EMAIL
 
 POSTGRES_USER=radio_user
 POSTGRES_PASSWORD=$(rnd 32)
@@ -123,5 +129,5 @@ Rádio instalada em $APP_DIR.
 MSG
 if [ "${CREATED_ENV:-0}" = 1 ]; then
   echo "   Senha do painel: $ADMIN_PASS"
-  echo "   Guarde agora. Ela também fica em $APP_DIR/.env"
+  echo "   Guarde agora. Para ver de novo: grep ADMIN_PASSWORD $APP_DIR/.env"
 fi

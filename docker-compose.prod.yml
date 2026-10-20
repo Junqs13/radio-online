@@ -18,7 +18,6 @@ services:
     container_name: radio_caddy
     environment:
       SITE_DOMAIN: ${SITE_DOMAIN:?defina SITE_DOMAIN no .env}
-      ACME_EMAIL: ${ACME_EMAIL:?defina ACME_EMAIL no .env}
     ports:
       - "80:80"
       - "443:443"

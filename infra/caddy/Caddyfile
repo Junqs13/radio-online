@@ -1,8 +1,5 @@
 # HTTPS automático (Let's Encrypt) para o domínio da rádio.
-# SITE_DOMAIN e ACME_EMAIL vêm do .env pelo docker-compose.prod.yml.
-{
-	email {$ACME_EMAIL}
-}
+# SITE_DOMAIN vem do .env pelo docker-compose.prod.yml.
 
 # www.dominio -> dominio
 www.{$SITE_DOMAIN} {

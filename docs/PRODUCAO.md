@@ -33,6 +33,8 @@ No console da Oracle: menu → Compute → Instances → Create instance.
 - Add SSH keys: "Upload public key files" e escolha o `oracle_radio.pub`.
 - Boot volume: marque "Specify a custom boot volume size" e coloque 100 GB.
 
+- Advanced options → Management → "Paste cloud-init script": cole o conteúdo de `infra/server/cloud-init.sh`. Assim a máquina já instala a rádio sozinha quando ligar pela primeira vez, e o passo 4 vira só conferência.
+
 Se aparecer "Out of capacity", tente de novo mais tarde ou troque o "Availability domain". Isso acontece com o plano grátis.
 
 Quando a máquina ficar "Running", anote o "Public IP address".
@@ -54,7 +56,13 @@ No PowerShell (troque `IP` pelo IP da máquina):
 ssh -i $HOME\.ssh\oracle_radio ubuntu@IP
 ```
 
-Já dentro do servidor:
+Se você usou o cloud-init no passo 2, a instalação já está rodando sozinha. Acompanhe (leva uns 15 minutos) e veja a senha do painel no final:
+
+```
+sudo tail -f /var/log/radio-setup.log
+```
+
+Sem cloud-init, rode a instalação na mão, já dentro do servidor:
 
 ```
 curl -fsSL https://raw.githubusercontent.com/Junqs13/radio-online/main/infra/server/setup.sh | bash
@@ -70,7 +78,7 @@ O script vai fazer isto:
 6. Agenda o backup diário.
 7. Sobe a rádio.
 
-Ele pergunta o domínio (Enter aceita `antenarock.com.br`) e o seu e-mail. No fim, mostra a senha do painel. Guarde essa senha.
+Ele pergunta o domínio (Enter aceita `antenarock.com.br`). No fim, mostra a senha do painel. Guarde essa senha. Para ver de novo depois: `grep ADMIN_PASSWORD /opt/radio-online/.env`.
 
 ## 5. Apontar o domínio no Registro.br
 
