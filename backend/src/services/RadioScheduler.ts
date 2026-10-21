@@ -1,5 +1,6 @@
 import cron from 'node-cron';
 import { syncMediaDir } from './MediaLibrary.js';
+import { purgeOld } from './Stats.js';
 
 export class RadioScheduler {
   private static running = false;
@@ -22,6 +23,8 @@ export class RadioScheduler {
   public static init() {
     this.runTask();
     cron.schedule('*/5 * * * *', () => this.runTask());
+    // Limpeza diária das estatísticas antigas, às 4h10
+    cron.schedule('10 4 * * *', () => purgeOld().catch((e) => console.error('[estatísticas] erro na limpeza:', e)));
     console.log('[Auto-DJ] Sincronização da pasta de mídia ativa (a cada 5 minutos).');
   }
 }

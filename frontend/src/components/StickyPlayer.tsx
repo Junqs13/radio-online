@@ -22,6 +22,7 @@ export default function StickyPlayer({ watchId = 'player' }: { watchId?: string 
 
   return (
     <div
+      data-section="barra-player"
       aria-hidden={!visible}
       className={`fixed bottom-0 inset-x-0 z-50 transition-transform duration-300 ${visible ? 'translate-y-0' : 'translate-y-full'}`}
     >

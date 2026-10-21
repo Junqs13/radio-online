@@ -142,6 +142,21 @@ scp -i $HOME\.ssh\oracle_radio -r "C:\Users\EMERSON\radio-online\storage\Vinheta
 
 A rádio encontra os arquivos novos sozinha em até 5 minutos. Para criar uma vinheta nova de um programa, é só criar a subpasta com o nome exato do programa na grade.
 
+## Conteúdo do site e estatísticas
+
+No painel, em **Conteúdo**, você cria, edita, esconde e apaga as lendas do carrossel e as curiosidades. Não precisa de deploy: salvou, já aparece no site.
+
+- O carrossel mostra 6 lendas. A mais recente abre, a segunda mais recente fecha e as do meio são sorteadas a cada visita. "Subir para o topo" faz uma lenda antiga voltar para a frente.
+- Lenda pode ter foto (enviada pelo painel, até 5 MB, ou um endereço https://) ou ficar só com o degradê colorido e o nome da banda. As fotos enviadas ficam em `storage/_site/`, que entra no backup junto com o acervo.
+- A curiosidade é sorteada a cada visita, sem repetir a última que a pessoa viu.
+
+Em **Estatísticas** ficam visitas, pessoas, tempo no site, quem deu play e quanto tempo ouviu, cliques, partes da página, lendas abertas, curiosidades curtidas e compartilhadas, cidade, estado, país, aparelho e de onde a pessoa veio.
+
+- Tudo roda no próprio servidor, sem Google Analytics. O IP é usado só na hora para estimar a cidade (base DB-IP Lite, CC BY 4.0) e não é guardado.
+- Quem liga "Não rastrear" no navegador fica de fora. Robôs também.
+- Visitas com mais de 400 dias são apagadas sozinhas toda madrugada.
+- Para saber de onde vem cada divulgação, use links com `?utm_source=`, por exemplo `https://antenarock.com.br/?utm_source=instagram`.
+
 ## 7. Evitar que a Oracle desligue a máquina
 
 No plano grátis, a Oracle pode recuperar máquinas que considera paradas. Para evitar isso:

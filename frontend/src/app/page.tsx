@@ -15,6 +15,7 @@ import SongRequestWidget from '@/components/SongRequestWidget';
 import LivePlayer from '@/components/LivePlayer';
 import StickyPlayer from '@/components/StickyPlayer';
 import { PlayerProvider } from '@/components/PlayerContext';
+import { startAnalytics } from '@/lib/analytics';
 import ProgramGrid from '@/components/ProgramGrid';
 import ContactSection from '@/components/ContactSection';
 import CuriosityPost from '@/components/CuriosityPost';
@@ -31,6 +32,7 @@ export default function Home() {
   const progRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    startAnalytics(); // estatísticas próprias do site, sem cookie
     // 1. Animação do Hero Inicial
     if (heroRef.current) {
       gsap.fromTo(
@@ -219,6 +221,10 @@ export default function Home() {
           </div>
 
           <p>© {new Date().getFullYear()} Antena Rock · Sorocaba, SP · <a href="#fale-conosco" className="hover:text-white">Fale conosco</a></p>
+          <p className="text-[11px] text-gray-600 max-w-xl mx-auto">
+            Contamos visitas, cliques e tempo ouvindo para melhorar a rádio. Não usamos cookies de anúncio, não guardamos seu IP e
+            a cidade é estimada pela conexão. Se o seu navegador pede para não rastrear, nada é registrado.
+          </p>
         </footer>
 
       </div>

@@ -11,6 +11,8 @@ import requestRoutes from './routes/requests.routes.js';
 import scheduleRoutes from './routes/schedule.routes.js';
 import autodjRoutes from './routes/autodj.routes.js';
 import contactRoutes from './routes/contact.routes.js';
+import contentRoutes from './routes/content.routes.js';
+import statsRoutes from './routes/stats.routes.js';
 import { RadioScheduler } from './services/RadioScheduler.js';
 import { HealthController } from './controllers/health.controller.js';
 import { prisma } from './lib/prisma.js';
@@ -52,6 +54,8 @@ app.use('/api/requests', requestRoutes);
 app.use('/api/schedule', scheduleRoutes);
 app.use('/api/autodj', autodjRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/content', contentRoutes);
+app.use('/api/stats', statsRoutes);
 
 app.use('/api', (req, res) => {
   res.status(404).json({ success: false, error: 'Rota não encontrada.' });

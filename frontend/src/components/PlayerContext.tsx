@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { API_URL, STREAM_URL } from '@/lib/config';
+import { track, onLeave } from '@/lib/analytics';
 
 export interface NowPlaying {
   title: string;
@@ -75,9 +76,29 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
+  // Tempo ouvindo, para as estatísticas: conta desde o play e manda em pedaços
+  const listenFrom = useRef<number | null>(null);
+  const reportListen = useCallback(() => {
+    if (listenFrom.current === null) return;
+    const secs = Math.round((Date.now() - listenFrom.current) / 1000);
+    if (secs > 0) track('listen', undefined, { value: secs, section: 'player' });
+    listenFrom.current = Date.now();
+  }, []);
+  useEffect(() => {
+    onLeave(reportListen);
+    const t = setInterval(reportListen, 60_000);
+    return () => clearInterval(t);
+  }, [reportListen]);
+  const nowPlayingRef = useRef('');
+
   const stop = useCallback(() => {
     const audio = audioRef.current;
     if (!audio) return;
+    if (listenFrom.current !== null) {
+      reportListen();
+      listenFrom.current = null;
+      track('pause', nowPlayingRef.current, { section: 'player' });
+    }
     // Em rádio ao vivo, pausar = desconectar. Senão o navegador segue baixando
     // e, no próximo play, toca o áudio atrasado que ficou guardado.
     audio.pause();
@@ -85,7 +106,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     audio.load();
     setIsPlaying(false);
     setLoading(false);
-  }, []);
+  }, [reportListen]);
 
   const start = useCallback(() => {
     const audio = audioRef.current;
@@ -96,7 +117,11 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     setLoading(true);
     audio
       .play()
-      .then(() => setIsPlaying(true))
+      .then(() => {
+        setIsPlaying(true);
+        listenFrom.current = Date.now();
+        track('play', nowPlayingRef.current, { section: 'player' });
+      })
       .catch(() => setIsPlaying(false))
       .finally(() => setLoading(false));
   }, [volume, muted]);
@@ -126,6 +151,10 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     const audio = audioRef.current;
     if (!audio) return;
     const onError = () => {
+      if (listenFrom.current !== null) {
+        reportListen();
+        listenFrom.current = null; // conexão caiu: para de contar tempo ouvindo
+      }
       if (audio.getAttribute('src')) setIsPlaying(false);
       setLoading(false);
     };
@@ -139,7 +168,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       audio.removeEventListener('waiting', onWaiting);
       audio.removeEventListener('playing', onPlaying);
     };
-  }, []);
+  }, [reportListen]);
 
   // Tela bloqueada, fone Bluetooth, central do carro e CarPlay: nome da música e play/pause
   const toggleRef = useRef(toggle);
@@ -159,6 +188,10 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       }
     };
   }, []);
+
+  useEffect(() => {
+    nowPlayingRef.current = `${nowPlaying.artist} - ${nowPlaying.title}`;
+  }, [nowPlaying.artist, nowPlaying.title]);
 
   useEffect(() => {
     if (typeof navigator === 'undefined' || !('mediaSession' in navigator) || typeof MediaMetadata === 'undefined') return;

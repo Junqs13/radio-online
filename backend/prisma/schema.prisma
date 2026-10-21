@@ -100,3 +100,77 @@ model ContactMessage {
   @@index([read, createdAt])
   @@map("contact_messages")
 }
+
+// Cards de "Lendas & Histórias" do site, editáveis no painel
+model Legend {
+  id          Int      @id @default(autoincrement())
+  artist      String
+  title       String // música ou obra em destaque
+  description String
+  imageUrl    String?  @map("image_url") // foto; sem foto o card usa o degradê
+  gradient    String   @default("vermelho") // nome da cor do degradê (lista fixa no site)
+  year        String?
+  origin      String?
+  enabled     Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([enabled, createdAt])
+  @@map("legends")
+}
+
+// "Curiosidade do dia" do site, editável no painel
+model Curiosity {
+  id        Int      @id @default(autoincrement())
+  text      String
+  tags      String[] @default([])
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([enabled])
+  @@map("curiosities")
+}
+
+// Estatísticas do site: uma visita (aba aberta) e o que aconteceu nela. Sem IP guardado.
+model StatSession {
+  id            String      @id // gerado no navegador
+  visitorId     String      @map("visitor_id") // número aleatório guardado no navegador, para contar quem volta
+  startedAt     DateTime    @default(now()) @map("started_at")
+  lastSeenAt    DateTime    @default(now()) @map("last_seen_at")
+  landingPath   String?     @map("landing_path")
+  referrer      String? // domínio de onde veio
+  utmSource     String?     @map("utm_source")
+  country       String?
+  region        String?
+  city          String?
+  device        String? // celular, computador, tablet
+  os            String?
+  browser       String?
+  lang          String?
+  timezone      String?
+  pageviews     Int         @default(0)
+  listenSeconds Int         @default(0) @map("listen_seconds")
+  played        Boolean     @default(false)
+  events        StatEvent[]
+
+  @@index([startedAt])
+  @@index([visitorId])
+  @@map("stat_sessions")
+}
+
+model StatEvent {
+  id        Int         @id @default(autoincrement())
+  sessionId String      @map("session_id")
+  session   StatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  type      String // pageview, click, play, pause, open, like, share
+  name      String? // o que foi clicado ou aberto
+  section   String? // parte da página
+  path      String?
+  value     Int? // segundos ouvindo, por exemplo
+  createdAt DateTime    @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@index([type, createdAt])
+  @@map("stat_events")
+}
