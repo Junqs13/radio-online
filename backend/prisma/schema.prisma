@@ -86,3 +86,17 @@ model PlayHistory {
   @@index([playedAt])
   @@map("play_history")
 }
+
+// Mensagens enviadas pelo formulário "Fale conosco" do site
+model ContactMessage {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  subject   String?
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([read, createdAt])
+  @@map("contact_messages")
+}

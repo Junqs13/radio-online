@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { BRAND_ICONS, type SocialKey } from "@/lib/brandIcons";
+import { SITE } from "@/lib/site";
 
 const DEFAULTS = {
   padding: "20px",
-  columns: 5,
+  columns: 6,
   rows: 1,
   gap: 8,
   rounded: 12,
@@ -22,14 +24,15 @@ const DEFAULTS = {
   rotateY: 0,
 };
 
-// Ícones de Redes Sociais e Plataformas de Streaming em SVG otimizados
-const SOCIAL_ICONS = [
-  { name: "YouTube", src: "https://api.iconify.design/lucide:youtube.svg?color=%23ef4444", url: "https://youtube.com" },
-  { name: "Instagram", src: "https://api.iconify.design/lucide:instagram.svg?color=%23ec4899", url: "https://instagram.com" },
-  { name: "Spotify", src: "https://api.iconify.design/lucide:headphones.svg?color=%2322c55e", url: "https://spotify.com" },
-  { name: "GitHub", src: "https://api.iconify.design/lucide:github.svg?color=%23ffffff", url: "https://github.com" },
-  { name: "Twitter/X", src: "https://api.iconify.design/lucide:twitter.svg?color=%2338bdf8", url: "https://twitter.com" },
-];
+// Ícones das redes sociais da rádio (links em src/lib/site.ts)
+const svgData = (path: string, color: string) =>
+  `data:image/svg+xml;utf8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${color}"><path d="${path}"/></svg>`)}`;
+
+const SOCIAL_ICONS: { name: string; src: string; url: string }[] = (Object.keys(BRAND_ICONS) as SocialKey[]).map((key) => ({
+  name: BRAND_ICONS[key].label,
+  src: svgData(BRAND_ICONS[key].path, BRAND_ICONS[key].color),
+  url: SITE.social[key],
+}));
 
 const MAX_GLOW_BLUR = 16;
 const DURATION = 200;
@@ -183,8 +186,8 @@ export default function InteractiveGrid(props: Partial<InteractiveGridProps>) {
         onPointerLeave={onLeave}
         style={{
           display: "grid",
-          gridTemplateColumns: `repeat(${cols}, minmax(60px, 90px))`,
-          gridTemplateRows: `repeat(${rowCount}, minmax(60px, 90px))`,
+          gridTemplateColumns: `repeat(${cols}, minmax(44px, 90px))`,
+          gridTemplateRows: `repeat(${rowCount}, auto)`,
           gap,
           transform: `perspective(${perspective}px) rotateX(${rotateY}deg) rotateY(${rotateX}deg)`,
           transformStyle: "preserve-3d",
@@ -196,9 +199,11 @@ export default function InteractiveGrid(props: Partial<InteractiveGridProps>) {
           return (
             <a
               key={i}
-              href={item.url}
-              target="_blank"
-              rel="noopener noreferrer"
+              href={item.url || undefined}
+              target={item.url ? "_blank" : undefined}
+              rel={item.url ? "noopener noreferrer" : undefined}
+              aria-label={item.url ? `${item.name} da Antena Rock` : `${item.name} (em breve)`}
+              aria-disabled={!item.url}
               onPointerEnter={() => onEnter(i)}
               className={[
                 `${NS}-card`,
@@ -212,20 +217,22 @@ export default function InteractiveGrid(props: Partial<InteractiveGridProps>) {
                 .join(" ")}
               style={{
                 position: "relative",
+                aspectRatio: "1 / 1",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                padding: "12px",
+                padding: 0,
                 background: cardFill,
                 border: `1px solid ${cardBorder}`,
                 borderRadius: rounded,
                 boxSizing: "border-box",
-                cursor: "pointer",
+                cursor: item.url ? "pointer" : "default",
+                opacity: item.url ? 1 : 0.5,
                 overflow: "visible",
                 zIndex: isBig ? count + 1 : i + 1,
                 textDecoration: "none",
               }}
-              title={item.name}
+              title={item.url ? item.name : `${item.name} (em breve)`}
             >
               <img
                 src={item.src}

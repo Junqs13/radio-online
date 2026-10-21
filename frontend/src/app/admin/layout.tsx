@@ -4,7 +4,7 @@ import AdminAuth from '@/components/AdminAuth';
 import { API_URL } from '@/lib/config';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Radio, Music, Calendar, Inbox, LogOut } from 'lucide-react';
+import { Radio, Music, Calendar, Inbox, LogOut, Mail } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -19,6 +19,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Programas', href: '/admin/programs', icon: Radio },
     { name: 'Grade', href: '/admin/schedule', icon: Calendar },
     { name: 'Acervo', href: '/admin/media', icon: Music },
+    { name: 'Mensagens', href: '/admin/messages', icon: Mail },
   ];
 
   return (

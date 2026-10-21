@@ -15,6 +15,7 @@ import ScrollLineBackground from '@/components/ScrollLineBackground';
 import SongRequestWidget from '@/components/SongRequestWidget';
 import LivePlayer from '@/components/LivePlayer';
 import ProgramGrid from '@/components/ProgramGrid';
+import ContactSection from '@/components/ContactSection';
 
 // Registra o plugin de ScrollTrigger no GSAP
 if (typeof window !== 'undefined') {
@@ -132,7 +133,7 @@ export default function Home() {
         <ScrollLineBackground />
 
         {/* HEADER REATIVO */}
-        <header className="fixed top-0 left-0 w-full z-50 backdrop-blur-2xl bg-[#050507]/70 border-b border-white/5 px-8 lg:px-16 py-5 flex items-center justify-between transition-all">
+        <header className="fixed top-0 left-0 w-full z-50 backdrop-blur-2xl bg-[#050507]/70 border-b border-white/5 px-5 sm:px-8 lg:px-16 py-4 lg:py-5 flex flex-wrap items-center justify-between gap-y-3 transition-all">
           <div className="flex items-center gap-3 group cursor-pointer">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-red-600 to-purple-600 flex items-center justify-center shadow-lg shadow-red-600/20 group-hover:scale-105 transition-transform">
               <Radio className="text-white w-5 h-5 animate-pulse" />
@@ -140,13 +141,23 @@ export default function Home() {
             <span className="font-black tracking-[0.2em] text-sm lg:text-base">ANTENA<span className="text-red-600">ROCK</span></span>
           </div>
 
-          <nav className="hidden md:flex items-center gap-10 text-xs uppercase tracking-widest text-gray-400 font-medium">
+          <nav className="hidden lg:flex items-center gap-6 xl:gap-10 text-xs uppercase tracking-widest text-gray-400 font-medium">
             <a href="#home" className="hover:text-white transition-colors">Início</a>
             <a href="#tocando" className="hover:text-white transition-colors">Ao Vivo</a>
             <a href="#player" className="hover:text-white transition-colors">Player</a>
             <a href="#pedidos" className="hover:text-white transition-colors">Pedidos</a>
             <a href="#historia" className="hover:text-white transition-colors">Manifesto</a>
             <a href="#programacao" className="hover:text-white transition-colors">Grade</a>
+            <a href="#fale-conosco" className="hover:text-white transition-colors">Fale conosco</a>
+          </nav>
+
+          {/* Celular e tablet: links numa faixa que rola para o lado */}
+          <nav className="lg:hidden w-full flex gap-4 sm:gap-6 overflow-x-auto text-[11px] uppercase tracking-wider text-gray-400 font-medium -mb-1 pb-1">
+            <a href="#player" className="flex-shrink-0 hover:text-white">Ouvir</a>
+            <a href="#pedidos" className="flex-shrink-0 hover:text-white">Pedidos</a>
+            <a href="#programacao" className="flex-shrink-0 hover:text-white">Grade</a>
+            <a href="#historia" className="flex-shrink-0 hover:text-white">Manifesto</a>
+            <a href="#fale-conosco" className="flex-shrink-0 hover:text-white">Fale conosco</a>
           </nav>
         </header>
 
@@ -157,7 +168,7 @@ export default function Home() {
 
           <div ref={heroRef} className="max-w-4xl z-10 space-y-6">
             <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-white/10 bg-white/[0.03] text-xs text-gray-300 backdrop-blur-md">
-              <Sparkles className="w-4 h-4 text-red-500" /> No ar 24 horas
+              <Sparkles className="w-4 h-4 text-red-500" /> De Sorocaba, no ar 24 horas
             </div>
             
             <h1 className="text-6xl sm:text-7xl lg:text-9xl font-black tracking-tighter uppercase leading-[0.9]">
@@ -227,10 +238,13 @@ export default function Home() {
           <div ref={manifestoRef} className="space-y-6">
             <h2 className="text-xs uppercase tracking-[0.4em] text-red-500 font-bold">O Manifesto</h2>
             <h3 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
-              Arquitetado para quem exige excelência sonora e visual.
+              De Sorocaba para o mundo, no volume que o rock merece.
             </h3>
             <p className="text-gray-400 text-base sm:text-lg font-light leading-relaxed max-w-3xl mx-auto">
-              Cada frequência transmitida via Icecast e gerida por nossa inteligência de backend reflete uma atmosfera única. Sem ruídos, sem interrupções bruscas, puro design em movimento.
+              A Antena Rock é uma rádio feita em Sorocaba por quem gosta de rock alto. Aqui toca o riff que fez muita gente pegar numa guitarra e o refrão que um estádio inteiro canta junto.
+            </p>
+            <p className="text-gray-400 text-base sm:text-lg font-light leading-relaxed max-w-3xl mx-auto">
+              Tem Raul e Legião, tem Iron Maiden e Elvis. A programação atravessa as décadas sem pedir licença, de dia e de madrugada. Esteja você aqui na cidade, do outro lado do país ou fora dele, aumenta o som. A gente toca para quem ouve.
             </p>
           </div>
         </section>
@@ -247,6 +261,11 @@ export default function Home() {
           <div ref={progRef}>
             <ProgramGrid />
           </div>
+        </section>
+
+        {/* FALE CONOSCO */}
+        <section id="fale-conosco" className="py-16 px-6 lg:px-16 max-w-6xl mx-auto relative z-10 scroll-mt-24">
+          <ContactSection />
         </section>
 
         {/* SMOOTH SCROLL SLIDER */}
@@ -273,7 +292,7 @@ export default function Home() {
             <InteractiveGrid />
           </div>
 
-          <p>© {new Date().getFullYear()} Antena Rock</p>
+          <p>© {new Date().getFullYear()} Antena Rock · Sorocaba, SP · <a href="#fale-conosco" className="hover:text-white">Fale conosco</a></p>
         </footer>
 
       </div>
