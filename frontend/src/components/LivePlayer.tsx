@@ -1,172 +1,72 @@
 'use client';
 
-import { API_URL, STREAM_URL } from '@/lib/config';
+import { Play, Pause, Volume2, VolumeX, Users, Disc, Loader2 } from 'lucide-react';
+import { usePlayer } from './PlayerContext';
 
-import { useState, useEffect, useRef } from 'react';
-import { Play, Pause, Volume2, VolumeX, Radio, Music, Users } from 'lucide-react';
-
+/** Card principal: player e "o que toca agora" juntos. */
 export default function LivePlayer() {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const [volume, setVolume] = useState(0.8);
-  const [nowPlaying, setNowPlaying] = useState({ title: 'Carregando...', artist: 'Antena Rock', listeners: 0 });
-  
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const apiUrl = API_URL;
-  // URL pública do stream (mount /live.mp3 do Icecast)
-  const streamUrl = STREAM_URL;
-
-  // Buscar metadados em tempo real (Now Playing) a cada 10 segundos
-  useEffect(() => {
-    const fetchMetadata = async () => {
-      try {
-        const res = await fetch(`${apiUrl}/stream/now-playing`);
-        if (res.ok) {
-          const data = await res.json();
-          setNowPlaying({
-            title: data.title || 'Antena Rock ao vivo',
-            artist: data.artist || 'Antena Rock',
-            listeners: data.listeners || 0,
-          });
-        }
-      } catch (err) {
-        console.error('Erro ao atualizar metadados:', err);
-      }
-    };
-
-    fetchMetadata();
-    const interval = setInterval(fetchMetadata, 10000);
-    return () => clearInterval(interval);
-  }, [apiUrl]);
-
-  const togglePlay = () => {
-    if (!audioRef.current) return;
-    const audio = audioRef.current;
-    if (isPlaying) {
-      // Em rádio ao vivo, pausar = desconectar. Senão o navegador continua baixando
-      // e, ao dar play de novo, toca o áudio atrasado que ficou no buffer.
-      audio.pause();
-      audio.removeAttribute('src');
-      audio.load();
-      setIsPlaying(false);
-    } else {
-      audio.src = `${streamUrl}?t=${Date.now()}`; // parâmetro evita cache de conexão antiga
-      audio.volume = volume;
-      audio.play().then(() => {
-        setIsPlaying(true);
-      }).catch(err => {
-        console.error('Erro ao reproduzir stream:', err);
-      });
-    }
-  };
-
-  // Controles do sistema: tela bloqueada, fone Bluetooth, central multimídia e CarPlay
-  // mostram o nome da música e respondem a play/pause usando a Media Session do navegador.
-  const togglePlayRef = useRef(togglePlay);
-  togglePlayRef.current = togglePlay;
-  const isPlayingRef = useRef(isPlaying);
-  isPlayingRef.current = isPlaying;
-
-  useEffect(() => {
-    if (typeof navigator === 'undefined' || !('mediaSession' in navigator)) return;
-    const ms = navigator.mediaSession;
-    const start = () => { if (!isPlayingRef.current) togglePlayRef.current(); };
-    const stop = () => { if (isPlayingRef.current) togglePlayRef.current(); };
-    const actions: [MediaSessionAction, MediaSessionActionHandler][] = [['play', start], ['pause', stop], ['stop', stop]];
-    for (const [action, handler] of actions) {
-      try { ms.setActionHandler(action, handler); } catch { /* ação não suportada neste navegador */ }
-    }
-    return () => {
-      for (const [action] of actions) {
-        try { ms.setActionHandler(action, null); } catch { /* idem */ }
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (typeof navigator === 'undefined' || !('mediaSession' in navigator) || typeof MediaMetadata === 'undefined') return;
-    navigator.mediaSession.metadata = new MediaMetadata({
-      title: nowPlaying.title,
-      artist: nowPlaying.artist,
-      album: 'Antena Rock',
-      artwork: [
-        { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-        { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
-      ],
-    });
-  }, [nowPlaying.title, nowPlaying.artist]);
-
-  useEffect(() => {
-    if (typeof navigator === 'undefined' || !('mediaSession' in navigator)) return;
-    navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
-  }, [isPlaying]);
-
-  const toggleMute = () => {
-    if (!audioRef.current) return;
-    audioRef.current.muted = !isMuted;
-    setIsMuted(!isMuted);
-  };
-
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = parseFloat(e.target.value);
-    setVolume(val);
-    if (audioRef.current) {
-      audioRef.current.volume = val;
-    }
-  };
+  const { nowPlaying, isPlaying, loading, volume, muted, toggle, setVolume, toggleMute } = usePlayer();
 
   return (
-    <div className="w-full bg-black/60 border border-white/10 backdrop-blur-2xl rounded-3xl p-6 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6">
-      
-      {/* Elemento de Áudio Oculto */}
-      <audio ref={audioRef} preload="none" />
-
-      {/* Info da Música Atual (Now Playing) */}
-      <div className="flex items-center gap-4 w-full md:w-auto">
-        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${
-          isPlaying ? 'bg-red-600 text-white shadow-lg shadow-red-600/40 animate-pulse' : 'bg-white/5 border border-white/10 text-gray-400'
-        }`}>
-          {isPlaying ? <Radio className="w-7 h-7" /> : <Music className="w-7 h-7" />}
-        </div>
-        
-        <div className="space-y-1 overflow-hidden">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
-            <span className="text-[10px] uppercase tracking-widest text-red-500 font-bold">Ao vivo 24h</span>
-            <span className="text-[10px] bg-white/5 px-2 py-0.5 rounded text-gray-400 flex items-center gap-1">
-              <Users className="w-3 h-3" /> {nowPlaying.listeners} ouvintes
-            </span>
-          </div>
-          <h3 className="text-sm font-black text-white truncate max-w-xs sm:max-w-md">{nowPlaying.title}</h3>
-          <p className="text-xs text-gray-400 truncate max-w-xs sm:max-w-md">{nowPlaying.artist}</p>
-        </div>
+    <div className="w-full border border-white/10 bg-gradient-to-br from-white/[0.05] to-black/60 backdrop-blur-2xl rounded-[2rem] p-5 sm:p-8 shadow-2xl relative overflow-hidden">
+      <div className="absolute -right-16 -bottom-16 opacity-[0.04] pointer-events-none">
+        <Disc className={`w-72 h-72 ${isPlaying ? 'animate-spin-slow' : ''}`} />
       </div>
 
-      {/* Controlos do Player (Play/Pause e Volume) */}
-      <div className="flex items-center gap-4 w-full md:w-auto justify-end">
+      <div className="relative z-10 flex flex-wrap items-center gap-3 mb-5">
+        <span className="inline-flex items-center gap-2 bg-red-500/10 border border-red-500/20 px-3 py-1 rounded-full text-red-500 text-[10px] font-bold tracking-widest uppercase">
+          <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" /> Ao vivo agora
+        </span>
+        <span className="text-[10px] bg-white/5 px-2.5 py-1 rounded-full text-gray-400 flex items-center gap-1">
+          <Users className="w-3 h-3" /> {nowPlaying.listeners} {nowPlaying.listeners === 1 ? 'ouvinte' : 'ouvintes'}
+        </span>
+        {nowPlaying.program && (
+          <span className="text-[10px] bg-white/5 px-2.5 py-1 rounded-full text-gray-300">
+            {nowPlaying.program.title} · {nowPlaying.program.startTime} às {nowPlaying.program.endTime}
+          </span>
+        )}
+      </div>
+
+      <div className="relative z-10 flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-8">
         <button
-          onClick={togglePlay}
-          className="w-14 h-14 rounded-2xl bg-red-600 hover:bg-red-700 text-white flex items-center justify-center shadow-xl shadow-red-600/30 transition-all transform hover:scale-105 cursor-pointer"
+          onClick={toggle}
+          aria-label={isPlaying ? 'Pausar a rádio' : 'Ouvir a rádio ao vivo'}
+          className="w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 rounded-3xl bg-red-600 hover:bg-red-700 text-white flex items-center justify-center shadow-xl shadow-red-600/30 transition-transform hover:scale-105 cursor-pointer self-start sm:self-auto"
         >
-          {isPlaying ? <Pause className="w-6 h-6 fill-current" /> : <Play className="w-6 h-6 fill-current ml-0.5" />}
+          {loading ? (
+            <Loader2 className="w-8 h-8 animate-spin" />
+          ) : isPlaying ? (
+            <Pause className="w-8 h-8 fill-current" />
+          ) : (
+            <Play className="w-8 h-8 fill-current ml-1" />
+          )}
         </button>
 
-        <div className="flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-3 rounded-2xl">
-          <button onClick={toggleMute} className="text-gray-400 hover:text-white transition-colors cursor-pointer">
-            {isMuted || volume === 0 ? <VolumeX className="w-4 h-4 text-red-500" /> : <Volume2 className="w-4 h-4" />}
+        <div className="min-w-0 flex-1 space-y-1">
+          <p className="text-xs uppercase tracking-[0.25em] text-gray-500 font-bold">O que toca agora</p>
+          <h2 className="text-2xl sm:text-3xl font-black tracking-tight truncate" title={nowPlaying.title}>
+            {nowPlaying.title}
+          </h2>
+          <p className="text-sm uppercase tracking-[0.15em] text-red-400 font-bold truncate">{nowPlaying.artist}</p>
+          {!isPlaying && <p className="text-xs text-gray-500 pt-1">Aperte o play para ouvir.</p>}
+        </div>
+
+        <div className="hidden sm:flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-3 rounded-2xl flex-shrink-0">
+          <button onClick={toggleMute} aria-label={muted ? 'Ativar som' : 'Silenciar'} className="text-gray-400 hover:text-white cursor-pointer">
+            {muted || volume === 0 ? <VolumeX className="w-4 h-4 text-red-500" /> : <Volume2 className="w-4 h-4" />}
           </button>
-          <input 
-            type="range" 
-            min="0" 
-            max="1" 
-            step="0.01" 
-            value={isMuted ? 0 : volume}
-            onChange={handleVolumeChange}
-            className="w-20 accent-red-600 cursor-pointer h-1 bg-white/20 rounded-lg"
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            value={muted ? 0 : volume}
+            onChange={(e) => setVolume(parseFloat(e.target.value))}
+            aria-label="Volume"
+            className="w-24 accent-red-600 cursor-pointer h-1"
           />
         </div>
       </div>
-
     </div>
   );
 }

@@ -1,14 +1,18 @@
 'use client';
 
 import { useState, useEffect, useRef } from "react"
-import { Music, Sparkles, X } from "lucide-react"
+import { Music, Sparkles, X, CalendarDays } from "lucide-react"
+import { LEGENDS } from "@/lib/legends"
+import { pickDaily } from "@/lib/daily"
 
 interface RockStarItem {
     id?: string;
     title: string;       
     artist: string;      
-    src: string;         
+    src?: string;
     description?: string;
+    /** Lenda do dia: card sem foto, com degradê e o nome da banda */
+    daily?: { song: string; year: string; origin: string; gradient: string };
 }
 
 // ARQUIVOS LOCAIS: Aponte para a pasta /public/images/ do seu projeto
@@ -47,6 +51,22 @@ const DEFAULT_ROCK_STARS: RockStarItem[] = [
 
 export default function RockMagneticCarousel(props: any) {
     const [items, setItems] = useState<RockStarItem[]>(DEFAULT_ROCK_STARS);
+
+    // Uma banda do acervo por dia, a mesma para todos os ouvintes. Calculada no
+    // navegador para a página do servidor não divergir na virada do dia.
+    useEffect(() => {
+        const l = pickDaily(LEGENDS, 11);
+        setItems([
+            ...DEFAULT_ROCK_STARS,
+            {
+                id: `lenda-${l.artist}`,
+                artist: l.artist,
+                title: l.title,
+                description: l.description,
+                daily: { song: l.title, year: l.year, origin: l.origin, gradient: l.gradient },
+            },
+        ]);
+    }, []);
 
     const collapsedWidth = props.collapsedWidth || 110;
     const hoverWidth = props.hoverWidth || 220;
@@ -139,10 +159,10 @@ export default function RockMagneticCarousel(props: any) {
         setOpen(null);
     };
 
-    const sizeFor = (i: number) => {
+    const sizeFor = (i: number): { width: number | string; height: number | string } => {
         if (open !== null) {
             return i === open
-                ? { width: openSize, height: openSize }
+                ? { width: `min(${openSize}px, calc(100vw - 2rem))`, height: `min(${openSize}px, calc(100dvh - 6rem))` }
                 : { width: collapsedWidth, height: collapsedHeight };
         }
         const f = factors[i] ?? 0;
@@ -153,15 +173,16 @@ export default function RockMagneticCarousel(props: any) {
     };
 
     return (
-        <div className="w-full max-w-7xl mx-auto px-6 lg:px-16 py-12 flex flex-col">
+        <div className={`w-full max-w-7xl mx-auto px-6 lg:px-16 py-12 flex flex-col relative ${open !== null ? "z-[60]" : "z-10"}`}>
             <div className="mb-8 space-y-2">
                 <span className="text-xs uppercase tracking-[0.3em] text-red-500 font-bold flex items-center gap-2">
                     <Sparkles className="w-4 h-4" /> Arquivos Secretos do Rock
                 </span>
                 <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-white">Lendas & Histórias</h2>
-                <p className="text-gray-400 text-xs sm:text-sm">Passe o mouse para explorar e clique em uma lenda para revelar sua história.</p>
+                <p className="text-gray-400 text-xs sm:text-sm">Toque numa lenda para ler a história. O último card muda todo dia com uma banda que toca aqui na rádio.</p>
             </div>
 
+            <div className="-mx-6 px-6 overflow-x-auto lg:overflow-visible [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <div
                 ref={containerRef}
                 style={{
@@ -172,7 +193,8 @@ export default function RockMagneticCarousel(props: any) {
                     gap,
                     position: "relative",
                     overflow: "visible",
-                    minHeight: "440px"
+                    minHeight: "440px",
+                    minWidth: count * collapsedWidth + (count - 1) * gap,
                 }}
                 onMouseMove={onMove}
                 onMouseLeave={onLeave}
@@ -213,11 +235,23 @@ export default function RockMagneticCarousel(props: any) {
                                 isOpen ? 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2' : ''
                             }`}
                         >
-                            {/* Imagem Local ou de Fundo */}
-                            <div 
-                                className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-700 group-hover:scale-105 bg-[#111]"
-                                style={{ backgroundImage: `url(${item.src})` }}
-                            />
+                            {/* Foto, ou degradê com o nome da banda na lenda do dia */}
+                            {item.daily ? (
+                                <div className={`absolute inset-0 bg-gradient-to-br ${item.daily.gradient} transition-transform duration-700 group-hover:scale-105 overflow-hidden`}>
+                                    <span
+                                        aria-hidden
+                                        className="absolute inset-0 flex items-center justify-center font-black uppercase text-white/15 leading-none select-none whitespace-nowrap"
+                                        style={{ fontSize: isOpen ? "7rem" : "3.2rem", writingMode: isOpen ? "horizontal-tb" : "vertical-rl" }}
+                                    >
+                                        {item.artist}
+                                    </span>
+                                </div>
+                            ) : (
+                                <div
+                                    className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-700 group-hover:scale-105 bg-[#111]"
+                                    style={{ backgroundImage: `url(${item.src})` }}
+                                />
+                            )}
 
                             {/* Gradiente Escuro para Legibilidade */}
                             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
@@ -225,7 +259,7 @@ export default function RockMagneticCarousel(props: any) {
                             {/* Conteúdo do Card (Colapsado / Hover) */}
                             {!isOpen && (
                                 <div className="absolute bottom-6 left-6 right-6 z-10">
-                                    <span className="text-[10px] uppercase tracking-widest text-red-400 font-bold block mb-1">Ícone</span>
+                                    <span className="text-[10px] uppercase tracking-widest text-red-400 font-bold block mb-1">{item.daily ? "Lenda do dia" : "Ícone"}</span>
                                     <h4 className="text-white font-black text-sm truncate">{item.artist}</h4>
                                 </div>
                             )}
@@ -235,7 +269,7 @@ export default function RockMagneticCarousel(props: any) {
                                 <div className="absolute inset-0 p-8 lg:p-12 flex flex-col justify-between z-10 text-white animate-fade-in">
                                     <div className="flex justify-between items-start">
                                         <div className="inline-flex items-center gap-2 bg-red-600/30 border border-red-500/40 px-4 py-1.5 rounded-full text-xs font-bold tracking-widest uppercase text-red-400 backdrop-blur-md">
-                                            <Music className="w-3.5 h-3.5" /> História em Destaque
+                                            {item.daily ? <><CalendarDays className="w-3.5 h-3.5" /> Lenda do dia</> : <><Music className="w-3.5 h-3.5" /> História em Destaque</>}
                                         </div>
                                         <button 
                                             onClick={(e) => { e.stopPropagation(); close(); }}
@@ -248,6 +282,9 @@ export default function RockMagneticCarousel(props: any) {
                                     <div className="space-y-4 max-w-lg">
                                         <span className="text-xs uppercase tracking-[0.2em] text-red-400 font-bold block">{item.artist}</span>
                                         <h3 className="text-3xl sm:text-4xl font-black tracking-tight">{item.title}</h3>
+                                        {item.daily && (
+                                            <p className="text-xs text-gray-300 uppercase tracking-widest">{item.daily.origin} · {item.daily.year} · toca na Antena Rock</p>
+                                        )}
                                         <p className="text-gray-300 text-sm sm:text-base leading-relaxed font-light">
                                             {item.description}
                                         </p>
@@ -257,6 +294,7 @@ export default function RockMagneticCarousel(props: any) {
                         </div>
                     );
                 })}
+            </div>
             </div>
         </div>
     );

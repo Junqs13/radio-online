@@ -1,9 +1,8 @@
 'use client';
 
-import { API_URL } from '@/lib/config';
 
-import { useState, useEffect, useRef } from 'react';
-import { Play, Pause, Radio, Disc, Sparkles, Music, Activity } from 'lucide-react';
+import { useEffect, useRef } from 'react';
+import { Radio, Sparkles } from 'lucide-react';
 import SmoothScroll from '@/components/SmoothScroll';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -14,8 +13,11 @@ import InteractiveGrid from '@/components/InteractiveGrid';
 import ScrollLineBackground from '@/components/ScrollLineBackground'; 
 import SongRequestWidget from '@/components/SongRequestWidget';
 import LivePlayer from '@/components/LivePlayer';
+import StickyPlayer from '@/components/StickyPlayer';
+import { PlayerProvider } from '@/components/PlayerContext';
 import ProgramGrid from '@/components/ProgramGrid';
 import ContactSection from '@/components/ContactSection';
+import CuriosityPost from '@/components/CuriosityPost';
 
 // Registra o plugin de ScrollTrigger no GSAP
 if (typeof window !== 'undefined') {
@@ -23,17 +25,8 @@ if (typeof window !== 'undefined') {
 }
 
 export default function Home() {
-  const [nowPlaying, setNowPlaying] = useState({ 
-    title: 'Antena Rock', 
-    artist: 'Auto-DJ Ativo', 
-    listeners: 0 
-  });
-
-  const apiUrl = API_URL;
-
   // Referências para animações via ScrollTrigger
   const heroRef = useRef<HTMLDivElement>(null);
-  const tocandoRef = useRef<HTMLDivElement>(null);
   const manifestoRef = useRef<HTMLDivElement>(null);
   const progRef = useRef<HTMLDivElement>(null);
 
@@ -44,26 +37,6 @@ export default function Home() {
         heroRef.current.children,
         { opacity: 0, y: 50 },
         { opacity: 1, y: 0, duration: 1.2, stagger: 0.2, ease: 'power3.out' }
-      );
-    }
-
-    // 2. Revelação progressiva do Card "Tocando Agora" via Scroll
-    if (tocandoRef.current) {
-      gsap.fromTo(
-        tocandoRef.current,
-        { opacity: 0, y: 50, scale: 0.95 },
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          duration: 1,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: tocandoRef.current,
-            start: 'top 85%',
-            toggleActions: 'play none none reverse',
-          },
-        }
       );
     }
 
@@ -107,25 +80,10 @@ export default function Home() {
       );
     }
 
-    // Polling do Tocando Agora
-    const fetchNowPlaying = async () => {
-      try {
-        const res = await fetch(`${apiUrl}/stream/now-playing`);
-        if (res.ok) {
-          const data = await res.json();
-          setNowPlaying(data);
-        }
-      } catch (e) {
-        console.error('Erro ao buscar faixa atual');
-      }
-    };
-
-    fetchNowPlaying();
-    const interval = setInterval(fetchNowPlaying, 5000);
-    return () => clearInterval(interval);
-  }, [apiUrl]);
+  }, []);
 
   return (
+    <PlayerProvider>
     <SmoothScroll>
       <div className="min-h-screen bg-[#050507] text-white selection:bg-red-600 selection:text-white font-sans overflow-x-hidden relative">
         
@@ -143,8 +101,7 @@ export default function Home() {
 
           <nav className="hidden lg:flex items-center gap-6 xl:gap-10 text-xs uppercase tracking-widest text-gray-400 font-medium">
             <a href="#home" className="hover:text-white transition-colors">Início</a>
-            <a href="#tocando" className="hover:text-white transition-colors">Ao Vivo</a>
-            <a href="#player" className="hover:text-white transition-colors">Player</a>
+            <a href="#player" className="hover:text-white transition-colors">Ao vivo</a>
             <a href="#pedidos" className="hover:text-white transition-colors">Pedidos</a>
             <a href="#historia" className="hover:text-white transition-colors">Manifesto</a>
             <a href="#programacao" className="hover:text-white transition-colors">Grade</a>
@@ -181,41 +138,9 @@ export default function Home() {
           </div>
         </section>
 
-        {/* SECÇÃO DO PLAYER FLUTUANTE/FIXO AO VIVO */}
+        {/* PLAYER AO VIVO + O QUE TOCA AGORA */}
         <section id="player" className="py-6 px-6 lg:px-16 max-w-5xl mx-auto relative z-20 -mt-10">
           <LivePlayer />
-        </section>
-
-        {/* CENA 2: TOCANDO AGORA */}
-        <section id="tocando" className="py-16 px-6 lg:px-16 max-w-7xl mx-auto relative z-10">
-          <div ref={tocandoRef} className="border border-white/10 bg-gradient-to-br from-white/[0.04] to-transparent rounded-[2.5rem] p-8 lg:p-12 backdrop-blur-2xl relative overflow-hidden shadow-2xl">
-            <div className="absolute -right-20 -bottom-20 opacity-5 pointer-events-none">
-              <Disc className="w-96 h-96 animate-spin-slow" />
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center relative z-10">
-              <div className="space-y-4">
-                <div className="inline-flex items-center gap-2.5 bg-red-500/10 border border-red-500/20 px-4 py-1.5 rounded-full text-red-500 text-xs font-bold tracking-widest uppercase">
-                  <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span> Transmissão Ao Vivo • {nowPlaying.listeners} Ouvintes
-                </div>
-                <h2 className="text-4xl sm:text-5xl font-black tracking-tight">O que toca <br />neste momento</h2>
-                <p className="text-gray-400 text-sm leading-relaxed">O motor autônomo gerencia transições perfeitas entre curadoria musical e identidade de marca em tempo real.</p>
-              </div>
-
-              <div className="bg-black/60 border border-white/10 p-6 rounded-3xl flex items-center gap-6 backdrop-blur-xl shadow-2xl relative group hover:border-red-500/40 transition-colors">
-                <div className="w-20 h-20 bg-gradient-to-br from-red-600 via-rose-700 to-purple-900 rounded-2xl flex items-center justify-center shadow-inner flex-shrink-0 group-hover:scale-105 transition-transform relative overflow-hidden">
-                  <Music className="w-8 h-8 text-white z-10" />
-                </div>
-                <div className="space-y-2 overflow-hidden">
-                  <span className="text-xs uppercase tracking-[0.2em] text-red-400 font-bold block">{nowPlaying.artist}</span>
-                  <h3 className="text-xl sm:text-2xl font-black tracking-tight truncate">{nowPlaying.title}</h3>
-                  <div className="w-full bg-white/10 h-1 rounded-full mt-3 overflow-hidden">
-                    <div className="bg-gradient-to-r from-red-500 to-purple-500 h-full w-3/4 animate-pulse"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         </section>
 
         {/* WIDGET DE PEDIDOS DE MÚSICA */}
@@ -224,13 +149,14 @@ export default function Home() {
         </section>
 
         {/* CARROSSEL MAGNÉTICO DE LENDAS DO ROCK */}
-        <section className="py-10 bg-transparent relative z-10">
+        <section className="py-10 bg-transparent relative">
           <RockMagneticCarousel />
         </section>
 
-        {/* ÚLTIMAS TOCADAS */}
-        <section className="py-10 px-6 lg:px-16 max-w-4xl mx-auto relative z-10">
+        {/* ÚLTIMAS TOCADAS + CURIOSIDADE DO DIA */}
+        <section className="py-10 px-6 lg:px-16 max-w-6xl mx-auto relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
           <RecentTracks />
+          <CuriosityPost />
         </section>
 
         {/* MANIFESTO */}
@@ -280,7 +206,7 @@ export default function Home() {
         </section>
 
         {/* RODAPÉ */}
-        <footer className="border-t border-white/10 py-12 px-8 lg:px-16 text-center text-xs text-gray-500 space-y-6 relative z-10 bg-[#050507]/90 backdrop-blur-md">
+        <footer className="border-t border-white/10 pt-12 pb-28 px-8 lg:px-16 text-center text-xs text-gray-500 space-y-6 relative z-10 bg-[#050507]/90 backdrop-blur-md">
           <div className="flex items-center justify-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-red-600/20 flex items-center justify-center">
               <Radio className="text-red-500 w-4 h-4" />
@@ -297,5 +223,7 @@ export default function Home() {
 
       </div>
     </SmoothScroll>
+    <StickyPlayer />
+    </PlayerProvider>
   );
 }
