@@ -4,6 +4,7 @@ import { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
 import { config } from '../lib/config.js';
 import { currentSlot } from './Schedule.js';
+import { ruleFor, allowed, isSpecific } from './JingleRules.js';
 
 type Media = Prisma.MediaItemGetPayload<{}>;
 export type Source = 'music' | 'request' | 'jingle';
@@ -28,7 +29,25 @@ const remember = (id: number) => {
   if (recentlySent.size > 10) recentlySent.delete(recentlySent.keys().next().value as number);
 };
 
-let lastJingleSentAt = 0;
+// Vinheta a cada N músicas, com N sorteado entre o mínimo e o máximo da configuração (5 a 7).
+// O contador vive em memória; ao reiniciar o backend ele é refeito pelo histórico.
+let songsSinceJingle: number | null = null;
+let nextJingleGap = 0;
+const drawGap = () =>
+  config.jingleEverySongsMin + Math.floor(Math.random() * (config.jingleEverySongsMax - config.jingleEverySongsMin + 1));
+
+async function songsSinceLastJingle() {
+  if (songsSinceJingle !== null) return songsSinceJingle;
+  const lastJingle = await prisma.playHistory.findFirst({ where: { source: 'jingle' }, orderBy: { playedAt: 'desc' } });
+  songsSinceJingle = await prisma.playHistory.count({
+    where: { source: { in: ['music', 'request'] }, ...(lastJingle ? { playedAt: { gt: lastJingle.playedAt } } : {}) },
+  });
+  nextJingleGap = drawGap();
+  return songsSinceJingle;
+}
+const countSong = () => {
+  songsSinceJingle = (songsSinceJingle ?? 0) + 1;
+};
 
 const fileExists = (m: Media) => fs.existsSync(path.join(config.mediaDir, m.filename));
 const pick = <T>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
@@ -49,29 +68,33 @@ export async function pickNext(now = new Date()): Promise<NextTrack | null> {
     await prisma.songRequest.update({ where: { id: queued.id }, data: { status: 'sent' } });
     if (queued.mediaItem && fileExists(queued.mediaItem)) {
       remember(queued.mediaItem.id);
+      countSong();
       return { media: queued.mediaItem, source: 'request', requestId: queued.id, programId, crossfade };
     }
   }
 
-  // 2. Vinheta, se o bloco permite e já passou o intervalo desde a última
-  if (slot?.jingleEnabled ?? true) {
-    const lastJingle = await prisma.playHistory.findFirst({ where: { source: 'jingle' }, orderBy: { playedAt: 'desc' } });
-    const last = Math.max(lastJingle?.playedAt.getTime() ?? 0, lastJingleSentAt);
-    const due = now.getTime() - last >= config.jingleEveryMin * 60_000;
-    if (due) {
-      const jingles = (
-        await prisma.mediaItem.findMany({
-          where: { type: 'jingle', enabled: true, OR: [{ programId }, { programId: null }] },
-        })
-      ).filter(fileExists);
-      // Vinheta do próprio programa tem preferência sobre a geral
-      const own = jingles.filter((j) => programId && j.programId === programId);
-      const chosen = pick(own.length ? own : jingles);
-      if (chosen) {
-        remember(chosen.id);
-        lastJingleSentAt = now.getTime();
-        return { media: chosen, source: 'jingle', programId, crossfade: 1 };
-      }
+  // 2. Vinheta, se o bloco permite e já tocaram de 5 a 7 músicas desde a última
+  if ((slot?.jingleEnabled ?? true) && (await songsSinceLastJingle()) >= nextJingleGap) {
+    const all = (await prisma.mediaItem.findMany({ where: { type: 'jingle', enabled: true } })).filter(fileExists);
+    const titles = (await prisma.program.findMany({ select: { title: true } })).map((p) => p.title);
+    const programTitle = slot?.program.title ?? null;
+    // Só as que podem tocar agora: programa no ar, horário e dia da semana (regra pela subpasta)
+    const eligible = all
+      .map((m) => ({ m, rule: ruleFor(m.filename, titles) }))
+      .filter(({ m, rule }) => (m.programId == null || m.programId === programId) && allowed(rule, programTitle, now));
+    // Metade das vezes, se houver, usa a vinheta específica do programa ou do horário; senão, a geral
+    const specific = eligible.filter(({ m, rule }) => isSpecific(rule) || (programId != null && m.programId === programId));
+    const general = eligible.filter((e) => !specific.includes(e));
+    const pool = (specific.length && (Math.random() < 0.5 || !general.length) ? specific : general).map((e) => e.m);
+    // Entre as candidatas, sorteia entre as que estão há mais tempo sem tocar
+    const lastOfJ = (m: Media) => Math.max(m.lastPlayedAt?.getTime() ?? 0, recentlySent.get(m.id) ?? 0);
+    const rested = [...pool].sort(() => Math.random() - 0.5).sort((a, b) => lastOfJ(a) - lastOfJ(b));
+    const chosen = pick(rested.slice(0, Math.max(1, Math.ceil(rested.length / 3))));
+    if (chosen) {
+      remember(chosen.id);
+      songsSinceJingle = 0;
+      nextJingleGap = drawGap();
+      return { media: chosen, source: 'jingle', programId, crossfade: 1 };
     }
   }
 
@@ -119,6 +142,7 @@ export async function pickNext(now = new Date()): Promise<NextTrack | null> {
   const top = candidates.slice(0, Math.max(1, Math.min(5, Math.ceil(candidates.length * 0.2))));
   const chosen = pick(top);
   remember(chosen.id);
+  countSong();
   return { media: chosen, source: 'music', programId, crossfade };
 }
 

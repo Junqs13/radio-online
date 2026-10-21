@@ -121,6 +121,27 @@ cd /opt/radio-online && sudo docker compose -f docker-compose.prod.yml exec -T p
 
 Depois, ajuste no painel em Grade: arraste um bloco sobre outro para trocar os dois, ou arraste um programa da lista para um bloco. Em Programas, cada programa pode tocar mais de uma pasta.
 
+## Vinhetas
+
+As vinhetas ficam em `storage/Vinhetas`, separadas em subpastas. O nome da subpasta diz onde a vinheta pode tocar:
+
+| Subpasta | Quando toca |
+|---|---|
+| `Geral` | Qualquer hora, em qualquer programa |
+| Nome de um programa, ex: `Especial Elvis Presley`, `Rock Anos 70`, `Alternativo` | Só durante esse programa |
+| Com horário, ex: `Almoco 11h-14h`, `Noite 18h-24h` | Só nesse horário |
+| Com dia, ex: `Sexta`, `Promo Elvis seg-sex 06h-11h` | Só nesses dias (e no horário, se tiver) |
+
+Toca uma vinheta a cada 5 a 7 músicas, sorteado a cada vez. Quando existe uma vinheta do programa ou do horário que está no ar, ela tem metade das chances e a geral fica com a outra metade. A mesma vinheta não se repete em seguida.
+
+Para mandar as vinhetas para o servidor:
+
+```powershell
+scp -i $HOME\.ssh\oracle_radio -r "C:\Users\EMERSON\radio-online\storage\Vinhetas" ubuntu@IP:/opt/radio-online/storage/
+```
+
+A rádio encontra os arquivos novos sozinha em até 5 minutos. Para criar uma vinheta nova de um programa, é só criar a subpasta com o nome exato do programa na grade.
+
 ## 7. Evitar que a Oracle desligue a máquina
 
 No plano grátis, a Oracle pode recuperar máquinas que considera paradas. Para evitar isso:

@@ -20,6 +20,9 @@ export const config = {
   timezone: process.env.RADIO_TIMEZONE || 'America/Sao_Paulo', // fuso usado na grade
   autodjToken: process.env.AUTODJ_TOKEN || '', // senha que o Liquidsoap usa para falar com a API
   jingleEveryMin: Number(process.env.JINGLE_EVERY_MIN || 30),
+  // Vinheta a cada 5 a 7 músicas (sorteado a cada vez)
+  jingleEverySongsMin: Number(process.env.JINGLE_EVERY_SONGS_MIN || 5),
+  jingleEverySongsMax: Number(process.env.JINGLE_EVERY_SONGS_MAX || 7),
   maxQueuedRequests: Number(process.env.MAX_QUEUED_REQUESTS || 5),
   requestCooldownMin: Number(process.env.REQUEST_COOLDOWN_MIN || 60), // música pedida não repete antes disso
 
