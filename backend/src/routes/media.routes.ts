@@ -6,6 +6,7 @@ import { prisma } from '../lib/prisma.js';
 import { config } from '../lib/config.js';
 import { ensureMediaDir, isAudioFile, readAudioInfo, isPlayableAudio } from '../services/MediaLibrary.js';
 import { requireAdmin } from '../lib/auth.js';
+import { mediaUsage } from '../services/MediaUsage.js';
 
 const router = Router();
 ensureMediaDir();
@@ -65,6 +66,16 @@ router.get('/folders', async (req: Request, res: Response): Promise<void> => {
   } catch (err) {
     console.error('Erro ao listar pastas:', err);
     res.status(500).json({ success: false, error: 'Erro ao listar pastas.' });
+  }
+});
+
+// GET: onde cada faixa toca (programas e horários da grade)
+router.get('/usage', requireAdmin, async (req: Request, res: Response): Promise<void> => {
+  try {
+    res.json({ success: true, ...(await mediaUsage()) });
+  } catch (err) {
+    console.error('Erro ao calcular uso do acervo:', err);
+    res.status(500).json({ success: false, error: 'Erro ao calcular uso do acervo.' });
   }
 });
 
