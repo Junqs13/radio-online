@@ -80,7 +80,10 @@ export async function pickNext(now = new Date()): Promise<NextTrack | null> {
   let pool: Media[] = [];
   if (slot) {
     const or: Prisma.MediaItemWhereInput[] = [{ programId: slot.programId }];
-    if (slot.program.mediaFolder) or.push({ filename: { startsWith: `${slot.program.mediaFolder}/` } });
+    // Um programa pode tocar várias pastas, separadas por "|" (ex: "Iron Maiden|Megadeth")
+    for (const folder of (slot.program.mediaFolder ?? '').split('|').map((f) => f.trim()).filter(Boolean)) {
+      or.push({ filename: { startsWith: `${folder}/` } });
+    }
     pool = await prisma.mediaItem.findMany({ where: { ...music, OR: or } });
   }
   if (pool.length === 0) pool = await prisma.mediaItem.findMany({ where: music });

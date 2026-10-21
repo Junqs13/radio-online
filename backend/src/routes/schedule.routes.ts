@@ -28,6 +28,7 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
       host: program.host,
       category: program.category,
       color: program.color,
+      mediaFolder: program.mediaFolder,
     }));
 
     res.status(200).json({
@@ -114,6 +115,57 @@ router.delete('/slots/:id', requireAdmin, async (req: Request, res: Response): P
   res.status(count ? 200 : 404).json({ success: count > 0 });
 });
 
+// POST: troca o conteúdo de dois blocos (quadro arrastável do painel).
+// Os horários ficam onde estão; o que muda de lugar é o programa, com a transição e as vinhetas dele.
+router.post('/slots/swap', requireAdmin, async (req: Request, res: Response): Promise<void> => {
+  const a = parseId(req.body?.a);
+  const b = parseId(req.body?.b);
+  if (!a || !b || a === b) {
+    res.status(400).json({ success: false, error: 'Informe dois blocos diferentes.' });
+    return;
+  }
+  try {
+    const [sa, sb] = await Promise.all([
+      prisma.programSlot.findUnique({ where: { id: a } }),
+      prisma.programSlot.findUnique({ where: { id: b } }),
+    ]);
+    if (!sa || !sb) {
+      res.status(404).json({ success: false, error: 'Bloco não encontrado.' });
+      return;
+    }
+    const content = (s: typeof sa) => ({ programId: s.programId, transitionType: s.transitionType, jingleEnabled: s.jingleEnabled });
+    await prisma.$transaction([
+      prisma.programSlot.update({ where: { id: a }, data: content(sb) }),
+      prisma.programSlot.update({ where: { id: b }, data: content(sa) }),
+    ]);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Erro ao trocar blocos:', err);
+    res.status(500).json({ success: false, error: 'Erro ao trocar os blocos.' });
+  }
+});
+
+// PATCH: põe outro programa num bloco, mantendo o horário
+router.patch('/slots/:id', requireAdmin, async (req: Request, res: Response): Promise<void> => {
+  const id = parseId(req.params.id);
+  const programId = parseId(req.body?.programId);
+  if (!id || !programId) {
+    res.status(400).json({ success: false, error: 'Bloco ou programa inválido.' });
+    return;
+  }
+  try {
+    if (!(await prisma.program.findUnique({ where: { id: programId } }))) {
+      res.status(404).json({ success: false, error: 'Programa não encontrado.' });
+      return;
+    }
+    const { count } = await prisma.programSlot.updateMany({ where: { id }, data: { programId } });
+    res.status(count ? 200 : 404).json({ success: count > 0 });
+  } catch (err) {
+    console.error('Erro ao trocar programa do bloco:', err);
+    res.status(500).json({ success: false, error: 'Erro ao trocar o programa.' });
+  }
+});
+
 // GET: programas cadastrados
 router.get('/programs', async (req: Request, res: Response): Promise<void> => {
   try {
@@ -134,7 +186,14 @@ const programData = (b: any) => ({
   category: String(b.category).slice(0, 120),
   description: b.description ? String(b.description).slice(0, 1000) : '',
   color: /^#[0-9a-fA-F]{6}$/.test(b.color) ? b.color : '#dc2626',
-  mediaFolder: b.mediaFolder ? String(b.mediaFolder).slice(0, 200) : null,
+  // Várias pastas separadas por "|"
+  mediaFolder:
+    String(b.mediaFolder ?? '')
+      .split('|')
+      .map((f: string) => f.trim().slice(0, 120))
+      .filter(Boolean)
+      .slice(0, 20)
+      .join('|') || null,
 });
 
 // POST: novo programa

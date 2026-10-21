@@ -108,7 +108,7 @@ export default function AdminProgramsPage() {
           <div>
             <h1 className="text-2xl font-black tracking-wider">Programas</h1>
             <p className="text-xs text-gray-400">
-              Cada programa toca as músicas de uma pasta do acervo. Depois de criar, coloque ele num horário da grade.
+              Cada programa toca as músicas de uma ou mais pastas do acervo. Depois de criar, coloque ele num horário da grade.
             </p>
           </div>
         </header>
@@ -133,18 +133,30 @@ export default function AdminProgramsPage() {
             <input value={form.host} onChange={set('host')} placeholder="Apresentador" aria-label="Apresentador" className={field} required />
             <input value={form.category} onChange={set('category')} placeholder="Estilo (ex: Rock nacional)" aria-label="Estilo" className={field} required />
 
-            <label className="sm:col-span-2 flex items-center gap-3 bg-black/40 border border-white/10 rounded-xl px-4 py-1">
-              <FolderOpen className="w-4 h-4 text-gray-400 flex-shrink-0" />
-              <span className="text-xs text-gray-400 flex-shrink-0">Toca a pasta</span>
-              <select value={form.mediaFolder} onChange={set('mediaFolder')} className="flex-1 bg-transparent py-2 text-sm text-white focus:outline-none cursor-pointer">
-                <option value="" className="bg-[#050507]">Nenhuma (só faixas ligadas ao programa)</option>
-                {folders.map((f) => (
-                  <option key={f.name} value={f.name} className="bg-[#050507]">
-                    {f.name} ({f.tracks} faixas, {hours(f.seconds)})
-                  </option>
-                ))}
-              </select>
-            </label>
+            <div className="sm:col-span-2 lg:col-span-3 bg-black/40 border border-white/10 rounded-xl px-4 py-3 space-y-2">
+              <span className="text-xs text-gray-400 flex items-center gap-2">
+                <FolderOpen className="w-4 h-4" /> Pastas que o programa toca (pode marcar mais de uma; nenhuma = só faixas ligadas ao programa)
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {folders.map((f) => {
+                  const chosen = form.mediaFolder.split('|').filter(Boolean);
+                  const on = chosen.includes(f.name);
+                  return (
+                    <button
+                      key={f.name}
+                      type="button"
+                      aria-pressed={on}
+                      onClick={() =>
+                        setForm({ ...form, mediaFolder: (on ? chosen.filter((x) => x !== f.name) : [...chosen, f.name]).join('|') })
+                      }
+                      className={`px-3 py-1.5 rounded-lg text-xs border cursor-pointer ${on ? 'bg-red-600 border-red-600 text-white' : 'bg-white/5 border-white/10 text-gray-300'}`}
+                    >
+                      {f.name} <span className="opacity-70">({f.tracks} faixas, {hours(f.seconds)})</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
             <label className="flex items-center gap-3 bg-black/40 border border-white/10 rounded-xl px-4 py-2">
               <span className="text-xs text-gray-400">Cor</span>
               <input type="color" value={form.color} onChange={set('color')} className="w-8 h-8 rounded-lg bg-transparent cursor-pointer" />
@@ -205,7 +217,7 @@ export default function AdminProgramsPage() {
                     <Mic className="w-3.5 h-3.5 text-red-500" /> {p.host}
                   </p>
                   <p className="text-xs text-gray-300 flex items-center gap-1">
-                    <FolderOpen className="w-3.5 h-3.5" /> {p.mediaFolder || 'Sem pasta'} · {p._count?.slots ?? 0} horário(s) na grade
+                    <FolderOpen className="w-3.5 h-3.5" /> {p.mediaFolder ? p.mediaFolder.split('|').join(', ') : 'Sem pasta'} · {p._count?.slots ?? 0} horário(s) na grade
                   </p>
                   {p.description && <p className="text-xs text-gray-400">{p.description}</p>}
                 </div>

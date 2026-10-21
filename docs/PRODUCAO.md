@@ -105,6 +105,22 @@ scp -i $HOME\.ssh\oracle_radio -r "C:\Users\EMERSON\radio-online\storage" ubuntu
 
 São uns 2 GB. Depende da velocidade de upload da sua internet. Em até 5 minutos depois de chegarem, as faixas aparecem no painel em Acervo. Enquanto isso, o Liquidsoap toca o que já chegou.
 
+Para mandar só uma pasta nova depois (ex: uma banda que entrou no acervo):
+
+```
+scp -i $HOME\.ssh\oracle_radio -r "C:\Users\EMERSON\radio-online\storage\Iron Maiden" ubuntu@IP:/opt/radio-online/storage/
+```
+
+## Grade da semana
+
+`infra/server/grade-semana.sql` monta a grade completa: blocos por estilo durante o dia, Especial Elvis Presley de segunda a sexta das 11h às 12h e especiais de 30 minutos de uma banda só entre 23h e 7h, intercalados com a Madrugada. Ele apaga a grade e os programas atuais antes de criar de novo. Rode no servidor depois que as músicas estiverem no acervo:
+
+```
+cd /opt/radio-online && sudo docker compose -f docker-compose.prod.yml exec -T postgres sh -c 'psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < infra/server/grade-semana.sql
+```
+
+Depois, ajuste no painel em Grade: arraste um bloco sobre outro para trocar os dois, ou arraste um programa da lista para um bloco. Em Programas, cada programa pode tocar mais de uma pasta.
+
 ## 7. Evitar que a Oracle desligue a máquina
 
 No plano grátis, a Oracle pode recuperar máquinas que considera paradas. Para evitar isso:

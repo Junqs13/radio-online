@@ -26,7 +26,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="min-h-screen bg-[#050507] text-white flex flex-col">
         
         {/* BARRA DE NAVEGAÇÃO SUPERIOR DO PAINEL ADMIN */}
-        <header className="border-b border-white/10 bg-[#050507]/90 backdrop-blur-md px-8 py-4 flex items-center justify-between sticky top-0 z-50">
+        <header className="border-b border-white/10 bg-[#050507]/90 backdrop-blur-md px-4 md:px-8 py-4 flex items-center justify-between sticky top-0 z-50">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-red-600/20 border border-red-500/30 flex items-center justify-center text-red-500">
@@ -68,6 +68,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <LogOut className="w-3.5 h-3.5" /> Sair
           </button>
         </header>
+
+        {/* No celular, as abas do painel ficam numa barra logo abaixo do topo */}
+        <nav className="md:hidden sticky top-[69px] z-40 flex gap-1 overflow-x-auto border-b border-white/10 bg-[#050507]/95 backdrop-blur-md px-4 py-2">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold ${
+                  isActive ? 'bg-red-600 text-white' : 'text-gray-400'
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {item.name}
+              </Link>
+            );
+          })}
+        </nav>
 
         {/* CONTEÚDO DA PÁGINA ATIVA (Requests, Schedule ou Media) */}
         <main className="flex-1">

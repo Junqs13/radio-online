@@ -1,21 +1,11 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Calendar, AlertTriangle, Clock, PlusCircle, CheckCircle2, Trash2, AlertCircle } from 'lucide-react';
+import { Calendar, AlertTriangle, PlusCircle, CheckCircle2, AlertCircle } from 'lucide-react';
 import { API_URL, apiFetch } from '@/lib/config';
+import ScheduleBoard, { type BoardSlot, type BoardProgram } from '@/components/ScheduleBoard';
 
-interface Slot {
-  id: number;
-  programId: number;
-  program_title: string;
-  host: string;
-  dayOfWeek: number;
-  startTime: string;
-  endTime: string;
-  transitionType: string;
-  jingleEnabled: boolean;
-  color: string;
-}
+type Slot = BoardSlot;
 
 interface Gap {
   day: string;
@@ -23,10 +13,7 @@ interface Gap {
   missingHours: string;
 }
 
-interface Program {
-  id: number;
-  title: string;
-}
+type Program = BoardProgram;
 
 const DAYS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 const TRANSITIONS: Record<string, string> = { crossfade: 'Crossfade (5 s)', 'fade-in': 'Fade curto (2 s)', 'hard-cut': 'Corte seco' };
@@ -185,35 +172,7 @@ export default function AdminSchedulePage() {
 
         <section className="space-y-4">
           <h2 className="text-xs uppercase tracking-[0.3em] text-gray-400 font-bold">Semana</h2>
-          <div className="grid grid-cols-1 md:grid-cols-7 gap-3">
-            {DAYS.map((dayName, dayIndex) => {
-              const daySlots = slots.filter((s) => s.dayOfWeek === dayIndex);
-              return (
-                <div key={dayIndex} className="bg-white/[0.02] border border-white/10 rounded-2xl p-3 space-y-3 min-h-[200px]">
-                  <div className="border-b border-white/5 pb-2 text-xs font-bold uppercase tracking-widest text-red-400">{dayName}</div>
-                  {daySlots.length === 0 ? (
-                    <p className="text-xs text-gray-400 py-6 text-center">Auto-DJ</p>
-                  ) : (
-                    daySlots.map((slot) => (
-                      <div key={slot.id} className="bg-black/50 border border-white/10 p-3 rounded-xl space-y-1 relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-1 h-full" style={{ backgroundColor: slot.color }} />
-                        <div className="flex items-center justify-between text-[11px] text-gray-400">
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" /> {slot.startTime} - {slot.endTime}
-                          </span>
-                          <button onClick={() => removeSlot(slot.id)} aria-label="Tirar da grade" className="text-gray-500 hover:text-red-400 cursor-pointer">
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                        <h4 className="text-xs font-bold text-white">{slot.program_title}</h4>
-                        <p className="text-[11px] text-gray-400">{TRANSITIONS[slot.transitionType] ?? slot.transitionType}{slot.jingleEnabled ? ' · vinhetas' : ''}</p>
-                      </div>
-                    ))
-                  )}
-                </div>
-              );
-            })}
-          </div>
+          <ScheduleBoard slots={slots} programs={programs} onChanged={load} onRemove={removeSlot} />
         </section>
       </div>
     </div>
