@@ -161,16 +161,16 @@ export default function RockMagneticCarousel(props: any) {
     };
 
     return (
-        <div data-section="lendas" className={`w-full max-w-7xl mx-auto px-6 lg:px-16 py-12 flex flex-col relative ${open !== null ? "z-[60]" : "z-10"}`}>
-            <div className="mb-8 space-y-2">
-                <span className="text-xs uppercase tracking-[0.3em] text-red-500 font-bold flex items-center gap-2">
+        <div data-section="lendas" className={`w-full max-w-7xl mx-auto px-6 lg:px-16 py-6 flex flex-col relative ${open !== null ? "z-[60]" : "z-10"}`}>
+            <div className="mb-6 space-y-2">
+                <span data-reveal="title" className="text-xs uppercase tracking-[0.3em] text-red-500 font-bold flex items-center gap-2">
                     <Sparkles className="w-4 h-4" /> Arquivos Secretos do Rock
                 </span>
-                <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-white">Lendas & Histórias</h2>
+                <h2 data-reveal="up" className="text-3xl sm:text-4xl font-black tracking-tight text-white">Lendas & Histórias</h2>
                 <p className="text-gray-400 text-xs sm:text-sm">Toque numa lenda para ler a história. A cada visita aparecem lendas diferentes.</p>
             </div>
 
-            <div className="-mx-6 px-6 overflow-x-auto lg:overflow-visible [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div data-reveal="zoom" className="-mx-6 px-6 overflow-x-auto lg:overflow-visible [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <div
                 ref={containerRef}
                 style={{

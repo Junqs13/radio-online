@@ -27,3 +27,62 @@ body {
 
 /* Âncoras do menu não ficam escondidas atrás do topo fixo */
 section[id] { scroll-margin-top: 7rem; }
+
+/* ---------- Entradas no scroll (ver src/lib/reveal.ts) ---------- */
+.reveal-ready [data-reveal],
+.reveal-ready [data-reveal-stagger] > * {
+  opacity: 0;
+  transform: translateY(42px);
+  transition:
+    opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 1s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.9s ease,
+    clip-path 1.1s cubic-bezier(0.77, 0, 0.18, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+.reveal-ready [data-reveal='zoom'] {
+  transform: scale(0.9) translateY(30px);
+  filter: blur(8px);
+}
+.reveal-ready [data-reveal='left'] {
+  transform: translateX(-70px);
+}
+.reveal-ready [data-reveal='right'] {
+  transform: translateX(70px);
+}
+.reveal-ready [data-reveal='tilt'],
+.reveal-ready [data-reveal-stagger='tilt'] > * {
+  transform: perspective(1000px) rotateX(16deg) translateY(70px) scale(0.96);
+  transform-origin: 50% 0%;
+}
+.reveal-ready [data-reveal='title'] {
+  opacity: 1;
+  transform: none;
+  clip-path: inset(0 100% 0 0);
+}
+.reveal-ready [data-reveal].is-in,
+.reveal-ready [data-reveal-stagger].is-in > * {
+  opacity: 1;
+  transform: none;
+  filter: none;
+  clip-path: inset(0 0 0 0);
+  will-change: auto; /* sem isso, um card "fixed" lá dentro (lenda aberta) ficaria preso no bloco */
+}
+
+/* Barra fina de progresso da leitura, logo abaixo do topo */
+.scroll-progress {
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-ready [data-reveal],
+  .reveal-ready [data-reveal-stagger] > * {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    clip-path: none !important;
+    transition: none !important;
+  }
+}

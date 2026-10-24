@@ -16,6 +16,7 @@ import LivePlayer from '@/components/LivePlayer';
 import StickyPlayer from '@/components/StickyPlayer';
 import { PlayerProvider } from '@/components/PlayerContext';
 import { startAnalytics } from '@/lib/analytics';
+import { startReveal } from '@/lib/reveal';
 import ProgramGrid from '@/components/ProgramGrid';
 import ContactSection from '@/components/ContactSection';
 import CuriosityPost from '@/components/CuriosityPost';
@@ -25,63 +26,79 @@ if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
 }
 
+// Cada palavra vira um span para o manifesto "acender" palavra por palavra conforme a rolagem
+function Words({ text }: { text: string }) {
+  return (
+    <>
+      {text.split(' ').map((w, i) => (
+        <span key={i} className="mf-word inline-block">
+          {w}&nbsp;
+        </span>
+      ))}
+    </>
+  );
+}
+
 export default function Home() {
-  // Referências para animações via ScrollTrigger
   const heroRef = useRef<HTMLDivElement>(null);
   const manifestoRef = useRef<HTMLDivElement>(null);
-  const progRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     startAnalytics(); // estatísticas próprias do site, sem cookie
-    // 1. Animação do Hero Inicial
-    if (heroRef.current) {
-      gsap.fromTo(
-        heroRef.current.children,
-        { opacity: 0, y: 50 },
-        { opacity: 1, y: 0, duration: 1.2, stagger: 0.2, ease: 'power3.out' }
-      );
-    }
+    const stopReveal = startReveal(); // entradas no scroll (data-reveal)
+    const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // 3. Storytelling do Manifesto
-    if (manifestoRef.current) {
-      gsap.fromTo(
-        manifestoRef.current.children,
-        { opacity: 0, y: 40 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 1,
-          stagger: 0.3,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: manifestoRef.current,
-            start: 'top 80%',
-            toggleActions: 'play none none reverse',
+    const ctx = gsap.context(() => {
+      // Abertura: selo, título e frase entram em sequência
+      if (heroRef.current) {
+        gsap.fromTo(
+          heroRef.current.children,
+          { opacity: 0, y: 60, filter: 'blur(10px)' },
+          { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.3, stagger: 0.18, ease: 'power3.out' },
+        );
+      }
+      if (calm) return;
+
+      // Ao descer, o título do topo sobe mais devagar, encolhe e apaga (profundidade)
+      gsap.to('#home h1', {
+        yPercent: -35,
+        scale: 0.86,
+        opacity: 0.15,
+        ease: 'none',
+        scrollTrigger: { trigger: '#home', start: 'top top', end: 'bottom top', scrub: true },
+      });
+      gsap.to('#home .hero-glow', {
+        yPercent: 40,
+        ease: 'none',
+        scrollTrigger: { trigger: '#home', start: 'top top', end: 'bottom top', scrub: true },
+      });
+
+      // Manifesto: as palavras acendem uma a uma conforme a rolagem
+      if (manifestoRef.current) {
+        gsap.fromTo(
+          manifestoRef.current.querySelectorAll('.mf-word'),
+          { opacity: 0.12 },
+          {
+            opacity: 1,
+            stagger: 0.04,
+            ease: 'none',
+            scrollTrigger: { trigger: manifestoRef.current, start: 'top 78%', end: 'bottom 45%', scrub: 0.6 },
           },
-        }
-      );
-    }
+        );
+      }
 
-    // 4. Grade de Programas com efeito em cascata
-    if (progRef.current) {
-      gsap.fromTo(
-        progRef.current.children,
-        { opacity: 0, y: 40 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.8,
-          stagger: 0.2,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: progRef.current,
-            start: 'top 85%',
-            toggleActions: 'play none none reverse',
-          },
-        }
-      );
-    }
+      // Barra de progresso da página, logo abaixo do topo
+      gsap.to('.scroll-progress', {
+        scaleX: 1,
+        ease: 'none',
+        scrollTrigger: { trigger: document.body, start: 'top top', end: 'bottom bottom', scrub: 0.3 },
+      });
+    });
 
+    return () => {
+      stopReveal();
+      ctx.revert();
+    };
   }, []);
 
   return (
@@ -118,11 +135,12 @@ export default function Home() {
             <a href="#historia" className="flex-shrink-0 hover:text-white">Manifesto</a>
             <a href="#fale-conosco" className="flex-shrink-0 hover:text-white">Fale conosco</a>
           </nav>
+          <div className="scroll-progress absolute left-0 right-0 -bottom-px h-[2px] bg-gradient-to-r from-red-600 via-rose-500 to-purple-600" aria-hidden />
         </header>
 
         {/* CENA 1: HERO */}
-        <section id="home" className="relative min-h-[85vh] flex flex-col items-center justify-center text-center px-6 pt-20 pb-12 z-10">
-          <div className="absolute w-[600px] h-[600px] bg-red-600/15 rounded-full blur-[140px] pointer-events-none -top-32 -left-32 animate-pulse"></div>
+        <section id="home" className="relative min-h-[72vh] flex flex-col items-center justify-center text-center px-6 pt-24 pb-8 z-10">
+          <div className="hero-glow absolute w-[600px] h-[600px] bg-red-600/15 rounded-full blur-[140px] pointer-events-none -top-32 -left-32 animate-pulse"></div>
           <div className="absolute w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[140px] pointer-events-none -bottom-32 -right-32"></div>
 
           <div ref={heroRef} className="max-w-4xl z-10 space-y-6">
@@ -141,68 +159,76 @@ export default function Home() {
         </section>
 
         {/* PLAYER AO VIVO + O QUE TOCA AGORA */}
-        <section id="player" className="py-6 px-6 lg:px-16 max-w-5xl mx-auto relative z-20 -mt-10">
-          <LivePlayer />
+        <section id="player" className="py-4 px-6 lg:px-16 max-w-5xl mx-auto relative z-20 -mt-6">
+          <div data-reveal="zoom">
+            <LivePlayer />
+          </div>
         </section>
 
         {/* WIDGET DE PEDIDOS DE MÚSICA */}
-        <section id="pedidos" className="py-8 px-6 lg:px-16 max-w-4xl mx-auto relative z-10">
-          <SongRequestWidget />
+        <section id="pedidos" className="py-6 px-6 lg:px-16 max-w-4xl mx-auto relative z-10">
+          <div data-reveal="tilt">
+            <SongRequestWidget />
+          </div>
         </section>
 
         {/* CARROSSEL MAGNÉTICO DE LENDAS DO ROCK */}
-        <section className="py-10 bg-transparent relative">
+        <section className="py-2 bg-transparent relative">
           <RockMagneticCarousel />
         </section>
 
         {/* ÚLTIMAS TOCADAS + CURIOSIDADE DO DIA */}
-        <section className="py-10 px-6 lg:px-16 max-w-6xl mx-auto relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
-          <RecentTracks />
-          <CuriosityPost />
+        <section className="py-6 px-6 lg:px-16 max-w-6xl mx-auto relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+          <div data-reveal="left">
+            <RecentTracks />
+          </div>
+          <div data-reveal="right">
+            <CuriosityPost />
+          </div>
         </section>
 
         {/* MANIFESTO */}
-        <section id="historia" className="py-16 px-6 lg:px-16 max-w-5xl mx-auto text-center space-y-8 relative z-10">
+        <section id="historia" className="py-12 px-6 lg:px-16 max-w-5xl mx-auto text-center relative z-10">
           <div ref={manifestoRef} className="space-y-6">
-            <h2 className="text-xs uppercase tracking-[0.4em] text-red-500 font-bold">O Manifesto</h2>
+            <h2 data-reveal="title" className="text-xs uppercase tracking-[0.4em] text-red-500 font-bold">O Manifesto</h2>
             <h3 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
-              De Sorocaba para o mundo, no volume que o rock merece.
+              <Words text="De Sorocaba para o mundo, no volume que o rock merece." />
             </h3>
-            <p className="text-gray-400 text-base sm:text-lg font-light leading-relaxed max-w-3xl mx-auto">
-              A Antena Rock é uma rádio feita em Sorocaba por quem gosta de rock alto. Aqui toca o riff que fez muita gente pegar numa guitarra e o refrão que um estádio inteiro canta junto.
+            <p className="text-gray-300 text-base sm:text-lg font-light leading-relaxed max-w-3xl mx-auto">
+              <Words text="A Antena Rock é uma rádio feita em Sorocaba por quem gosta de rock alto. Aqui toca o riff que fez muita gente pegar numa guitarra e o refrão que um estádio inteiro canta junto." />
             </p>
-            <p className="text-gray-400 text-base sm:text-lg font-light leading-relaxed max-w-3xl mx-auto">
-              Tem Raul e Legião, tem Iron Maiden e Elvis. A programação atravessa as décadas sem pedir licença, de dia e de madrugada. Esteja você aqui na cidade, do outro lado do país ou fora dele, aumenta o som. A gente toca para quem ouve.
+            <p className="text-gray-300 text-base sm:text-lg font-light leading-relaxed max-w-3xl mx-auto">
+              <Words text="Tem Raul e Legião, tem Iron Maiden e Elvis. A programação atravessa as décadas sem pedir licença, de dia e de madrugada. Esteja você aqui na cidade, do outro lado do país ou fora dele, aumenta o som. A gente toca para quem ouve." />
             </p>
           </div>
         </section>
 
         {/* GRADE DE PROGRAMAS */}
-        <section id="programacao" className="py-16 px-6 lg:px-16 max-w-7xl mx-auto relative z-10">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-10 gap-4">
+        <section id="programacao" className="py-10 px-6 lg:px-16 max-w-7xl mx-auto relative z-10">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 gap-4">
             <div>
-              <h2 className="text-xs uppercase tracking-[0.4em] text-red-500 font-bold mb-2">Grade de Conteúdo</h2>
-              <h3 className="text-3xl font-black tracking-tight">Programação de hoje</h3>
+              <h2 data-reveal="title" className="text-xs uppercase tracking-[0.4em] text-red-500 font-bold mb-2">Grade de Conteúdo</h2>
+              <h3 data-reveal="up" className="text-3xl font-black tracking-tight">No ar e a seguir hoje</h3>
             </div>
           </div>
 
-          <div ref={progRef}>
-            <ProgramGrid />
-          </div>
+          <ProgramGrid />
         </section>
 
         {/* FALE CONOSCO */}
-        <section id="fale-conosco" className="py-16 px-6 lg:px-16 max-w-6xl mx-auto relative z-10 scroll-mt-24">
-          <ContactSection />
+        <section id="fale-conosco" className="py-10 px-6 lg:px-16 max-w-6xl mx-auto relative z-10 scroll-mt-24">
+          <div data-reveal="up">
+            <ContactSection />
+          </div>
         </section>
 
         {/* SMOOTH SCROLL SLIDER */}
-        <section className="py-10 bg-transparent overflow-hidden relative z-10">
+        <section className="py-8 bg-transparent overflow-hidden relative z-10">
           <div className="max-w-7xl mx-auto px-6 lg:px-16 mb-6">
-            <h2 className="text-xs uppercase tracking-[0.4em] text-red-500 font-bold mb-1">Galeria Dinâmica</h2>
+            <h2 data-reveal="title" className="text-xs uppercase tracking-[0.4em] text-red-500 font-bold mb-1">Galeria Dinâmica</h2>
             <h3 className="text-2xl font-black tracking-tight">Destaques Visuais & Comunidade</h3>
           </div>
-          <div className="w-full h-[380px]">
+          <div data-reveal="zoom" className="w-full h-[380px]">
             <SmoothScrollSlider />
           </div>
         </section>
