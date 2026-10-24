@@ -1,0 +1,14 @@
+Adesivos Antena Rock
+
+Arquivos:
+- adesivo-redondo-8cm.pdf: corte redondo de 80 mm.
+- adesivo-retangular-10x5cm.pdf: corte de 100 x 50 mm com cantos arredondados de 4 mm.
+- cartela-A4.pdf: 4 redondos e 2 retangulares na mesma folha A4, para impressão em papel adesivo e corte em plotter.
+
+Cada PDF individual tem 2 páginas. A página 1 é a arte final, com 2 mm de sangria em volta. A página 2 mostra a linha de corte em rosa e a área segura em azul tracejado. A página 2 é só referência e não deve ser impressa.
+
+Cores em RGB. Fundo preto #0B0A10, vermelho #E11D2E, roxo #7C3AED, creme #F4EDE0. As fontes já estão embutidas no PDF.
+
+Material sugerido: vinil branco com laminação fosca, que aguenta sol e chuva em carro, notebook e garrafa.
+
+O QR code do adesivo retangular abre antenarock.com.br. Testar a leitura na prova antes de rodar a tiragem.
