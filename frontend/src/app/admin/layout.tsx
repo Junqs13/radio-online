@@ -3,6 +3,7 @@
 import AdminAuth from '@/components/AdminAuth';
 import { API_URL } from '@/lib/config';
 import Link from 'next/link';
+import { BrandMark, BrandWordmark } from '@/components/BrandLogo';
 import { usePathname } from 'next/navigation';
 import { Radio, Music, Calendar, Inbox, LogOut, Mail, BookOpen, BarChart3 } from 'lucide-react';
 
@@ -32,11 +33,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <header className="border-b border-white/10 bg-[#050507]/90 backdrop-blur-md px-4 md:px-8 py-4 flex items-center justify-between sticky top-0 z-50">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-red-600/20 border border-red-500/30 flex items-center justify-center text-red-500">
-                <Radio className="w-4 h-4 animate-pulse" />
-              </div>
-              <span className="font-black tracking-wider text-xs lg:text-sm">
-                ADMIN <span className="text-red-600">ANTENA ROCK</span>
+              <BrandMark size={34} simple />
+              <span className="flex flex-col leading-none gap-0.5">
+                <BrandWordmark size="sm" />
+                <span className="font-brand text-[8px] tracking-[0.4em] text-gray-500">PAINEL</span>
               </span>
             </div>
 

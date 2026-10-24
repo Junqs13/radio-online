@@ -1,6 +1,7 @@
 import cron from 'node-cron';
 import { syncMediaDir } from './MediaLibrary.js';
 import { purgeOld } from './Stats.js';
+import { trimPending } from './SilenceTrim.js';
 
 export class RadioScheduler {
   private static running = false;
@@ -12,6 +13,10 @@ export class RadioScheduler {
       const r = await syncMediaDir();
       if (r.added > 0 || r.removed > 0) {
         console.log(`[Auto-DJ] +${r.added} / -${r.removed} arquivo(s). Total na pasta: ${r.total}.`);
+      }
+      // Mede o silêncio das pontas das faixas novas (em lotes, até medir tudo)
+      while ((await trimPending(40)) > 0) {
+        /* segue até não sobrar faixa pendente */
       }
     } catch (error) {
       console.error('[Auto-DJ] Erro ao sincronizar a pasta de mídia:', error);

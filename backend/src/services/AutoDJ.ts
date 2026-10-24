@@ -153,6 +153,9 @@ export function toLiquidsoapUri(t: NextTrack) {
     source: t.source,
     liq_cross_duration: t.crossfade.toFixed(1),
   };
+  // Corta o silêncio do começo e do fim do arquivo (medido pelo SilenceTrim)
+  if (t.media.cueIn != null) meta.liq_cue_in = t.media.cueIn.toFixed(2);
+  if (t.media.cueOut != null) meta.liq_cue_out = t.media.cueOut.toFixed(2);
   if (t.requestId) meta.request_id = String(t.requestId);
   if (t.programId) meta.program_id = String(t.programId);
   const annotations = Object.entries(meta).map(([k, v]) => `${k}="${v}"`).join(',');

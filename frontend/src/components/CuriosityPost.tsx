@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Radio, Heart, Share2, Check, Lightbulb, Shuffle } from 'lucide-react';
+import { Heart, Share2, Check, Lightbulb, Shuffle } from 'lucide-react';
+import { BrandMark } from './BrandLogo';
 import { API_URL } from '@/lib/config';
 import { track } from '@/lib/analytics';
 
@@ -98,8 +99,8 @@ export default function CuriosityPost() {
 
       <article className="border border-white/10 bg-black/50 rounded-3xl p-5 sm:p-6 backdrop-blur-xl" aria-live="polite">
         <header className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-red-600 to-purple-600 flex items-center justify-center flex-shrink-0">
-            <Radio className="w-5 h-5 text-white" />
+          <div className="w-11 h-11 rounded-full bg-[#0B0A10] border border-white/10 flex items-center justify-center flex-shrink-0">
+            <BrandMark size={30} simple />
           </div>
           <div className="min-w-0 leading-tight">
             <p className="font-bold text-white text-sm">Antena Rock</p>

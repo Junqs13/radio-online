@@ -2,7 +2,8 @@
 
 
 import { useEffect, useRef } from 'react';
-import { Radio, Sparkles } from 'lucide-react';
+import { BrandMark, BrandWordmark } from '@/components/BrandLogo';
+import { SITE } from '@/lib/site';
 import SmoothScroll from '@/components/SmoothScroll';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -111,12 +112,10 @@ export default function Home() {
 
         {/* HEADER REATIVO */}
         <header className="fixed top-0 left-0 w-full z-50 backdrop-blur-2xl bg-[#050507]/70 border-b border-white/5 px-5 sm:px-8 lg:px-16 py-4 lg:py-5 flex flex-wrap items-center justify-between gap-y-3 transition-all">
-          <div className="flex items-center gap-3 group cursor-pointer">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-red-600 to-purple-600 flex items-center justify-center shadow-lg shadow-red-600/20 group-hover:scale-105 transition-transform">
-              <Radio className="text-white w-5 h-5 animate-pulse" />
-            </div>
-            <span className="font-black tracking-[0.2em] text-sm lg:text-base">ANTENA<span className="text-red-600">ROCK</span></span>
-          </div>
+          <a href="#home" aria-label="Antena Rock, voltar ao início" className="flex items-center gap-2.5 group">
+            <BrandMark size={40} simple className="group-hover:scale-105 transition-transform" />
+            <BrandWordmark />
+          </a>
 
           <nav className="hidden lg:flex items-center gap-6 xl:gap-10 text-xs uppercase tracking-widest text-gray-400 font-medium">
             <a href="#home" className="hover:text-white transition-colors">Início</a>
@@ -144,15 +143,20 @@ export default function Home() {
           <div className="absolute w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[140px] pointer-events-none -bottom-32 -right-32"></div>
 
           <div ref={heroRef} className="max-w-4xl z-10 space-y-6">
-            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-white/10 bg-white/[0.03] text-xs text-gray-300 backdrop-blur-md">
-              <Sparkles className="w-4 h-4 text-red-500" /> De Sorocaba, no ar 24 horas
-            </div>
-            
-            <h1 className="text-6xl sm:text-7xl lg:text-9xl font-black tracking-tighter uppercase leading-[0.9]">
-              Antena <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-rose-400 to-purple-600">Rock</span>.
+            <BrandMark size={150} className="mx-auto w-28 h-28 sm:w-[150px] sm:h-[150px]" />
+
+            <h1 className="flex flex-col items-center leading-none" aria-label="Antena Rock">
+              <span className="font-brand font-extrabold text-[#F4EDE0] text-2xl sm:text-4xl tracking-[0.55em] pl-[0.55em]">ANTENA</span>
+              <span className="font-neon text-[#E11D2E] text-[5.5rem] sm:text-[8rem] lg:text-[10rem] leading-[0.95]">ROCK</span>
             </h1>
-            
-            <p className="text-gray-400 text-base sm:text-xl max-w-2xl mx-auto font-light leading-relaxed">
+
+            <p className="flex items-center justify-center gap-4 font-semibold text-xs sm:text-sm tracking-[0.35em] text-[#CFC8DA] uppercase">
+              <span className="w-10 h-0.5 bg-[#E11D2E]" aria-hidden />
+              {SITE.slogan}
+              <span className="w-10 h-0.5 bg-[#7C3AED]" aria-hidden />
+            </p>
+
+            <p className="text-gray-400 text-base sm:text-lg max-w-2xl mx-auto font-light leading-relaxed">
               Rock nacional e internacional, das décadas de 50 até hoje, tocando sem parar.
             </p>
           </div>
@@ -235,11 +239,10 @@ export default function Home() {
 
         {/* RODAPÉ */}
         <footer className="border-t border-white/10 pt-12 pb-28 px-8 lg:px-16 text-center text-xs text-gray-500 space-y-6 relative z-10 bg-[#050507]/90 backdrop-blur-md">
-          <div className="flex items-center justify-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-red-600/20 flex items-center justify-center">
-              <Radio className="text-red-500 w-4 h-4" />
-            </div>
-            <span className="font-bold tracking-[0.2em] text-gray-300">ANTENA <span className="text-red-500">ROCK</span></span>
+          <div className="flex flex-col items-center gap-3">
+            <BrandMark size={64} />
+            <BrandWordmark />
+            <p className="font-semibold text-[10px] tracking-[0.35em] text-[#CFC8DA] uppercase">{SITE.slogan}</p>
           </div>
 
           <div className="flex justify-center">

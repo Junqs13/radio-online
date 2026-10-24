@@ -3,8 +3,9 @@
 import { API_URL, apiFetch } from '@/lib/config';
 
 import { useState, useEffect } from 'react';
-import { Radio, Database, Server, Plus, Music, CheckCircle2, ArrowLeft, Users, TrendingUp, Calendar, Clock } from 'lucide-react';
+import { Database, Server, Plus, Music, CheckCircle2, ArrowLeft, Users, TrendingUp, Calendar, Clock } from 'lucide-react';
 import Link from 'next/link';
+import { BrandMark } from '@/components/BrandLogo';
 
 export default function AdminDashboard() {
   const [mediaList, setMediaList] = useState<any[]>([]);
@@ -84,12 +85,10 @@ export default function AdminDashboard() {
       {/* HEADER */}
       <div className="flex justify-between items-center mb-12 border-b border-white/10 pb-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-red-600 flex items-center justify-center shadow-lg shadow-red-600/30">
-            <Radio className="text-white w-5 h-5 animate-pulse" />
-          </div>
+          <BrandMark size={44} simple />
           <div>
-            <h1 className="font-black tracking-widest text-lg">ANTENA ROCK <span className="text-red-500">ADMIN</span></h1>
-            <p className="text-xs text-gray-400">Dashboard de Métricas e Controle de Programação</p>
+            <h1 className="font-brand font-extrabold tracking-[0.2em] text-lg">PAINEL</h1>
+            <p className="text-xs text-gray-400">Ouvintes, acervo e o que está no ar agora</p>
           </div>
         </div>
         <Link href="/" className="flex items-center gap-2 text-xs text-gray-400 hover:text-white transition-colors bg-white/5 border border-white/10 px-4 py-2 rounded-full">

@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'Antena Rock',
     short_name: 'Antena Rock',
-    description: 'Rádio online de rock, 24 horas no ar.',
+    description: 'O rock não sai do ar. Rádio online de rock, 24 horas.',
     lang: 'pt-BR',
     start_url: '/',
     scope: '/',

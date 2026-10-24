@@ -34,6 +34,12 @@ reserva = playlist(mode="randomize", reload=300, reload_mode="seconds", media_di
 
 radio = fallback(track_sensitive=true, [autodj, reserva])
 
+# Silêncio entre faixas: a API manda liq_cue_in / liq_cue_out em cada faixa, medidos pelo
+# backend, e o Liquidsoap já começa onde o som começa e termina onde o som acaba.
+# Rede de segurança: se ainda assim ficar mais de 6 s de silêncio (faixa não medida, faixa
+# escondida depois de um silêncio longo), pula para a próxima em vez de deixar o ar mudo.
+radio = blank.skip(max_blank=6., threshold=-50., radio)
+
 # --- Avisa a API quando uma faixa começa, para o histórico e a rotação ---
 # Fica antes do crossfade: depois dele o Liquidsoap 2.2 só sinaliza o início da primeira faixa.
 # Por isso o aviso chega alguns segundos antes da faixa entrar de fato no ar.
@@ -63,7 +69,8 @@ radio = replaygain(radio)
 
 # Transição entre faixas. A API ajusta a duração por faixa (liq_cross_duration)
 # conforme o tipo escolhido no bloco da grade: crossfade, fade-in ou corte seco.
-radio = crossfade(duration=5., fade_in=3., fade_out=3., radio)
+# Com as pontas sem silêncio, o cruzamento acontece em cima de música, sem buraco no meio.
+radio = crossfade(duration=4., fade_in=2., fade_out=3., radio)
 
 # Se tudo falhar, transmite silêncio em vez de derrubar o stream
 radio = mksafe(radio)

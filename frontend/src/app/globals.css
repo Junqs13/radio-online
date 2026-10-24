@@ -8,8 +8,11 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Letras da marca, servidas pelo próprio site (pacotes @fontsource, sem Google) */
+  --font-sans: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-brand: 'Orbitron', 'Space Grotesk', sans-serif;
+  --font-neon: 'Monoton', 'Orbitron', cursive;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,7 +25,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
 }
 
 /* Âncoras do menu não ficam escondidas atrás do topo fixo */

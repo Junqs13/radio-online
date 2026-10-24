@@ -1,6 +1,6 @@
 FROM node:20-alpine
-# openssl é exigido pelo motor do Prisma no Alpine
-RUN apk add --no-cache openssl
+# openssl é exigido pelo motor do Prisma no Alpine; ffmpeg mede o silêncio das pontas das faixas
+RUN apk add --no-cache openssl ffmpeg
 WORKDIR /app
 ENV NODE_ENV=production
 

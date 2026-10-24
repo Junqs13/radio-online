@@ -46,6 +46,10 @@ model MediaItem {
   enabled      Boolean       @default(true) // false = fora da rotação
   playCount    Int           @default(0)
   lastPlayedAt DateTime?
+  // Onde o som começa e termina de verdade (segundos), sem o silêncio das pontas do arquivo
+  cueIn        Float?    @map("cue_in")
+  cueOut       Float?    @map("cue_out")
+  cueCheckedAt DateTime? @map("cue_checked_at")
   programId    Int?
   program      Program?      @relation(fields: [programId], references: [id], onDelete: SetNull)
   requests     SongRequest[]
