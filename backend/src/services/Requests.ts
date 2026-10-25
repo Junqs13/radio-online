@@ -20,6 +20,27 @@ export async function searchMedia(q: string, limit = 8) {
     .map(({ m }) => m);
 }
 
+/**
+ * Sorteia uma música do acervo para as sugestões prontas do pedido.
+ * Só entra o que pode ser pedido agora: ativa, fora da fila e sem ter tocado há pouco.
+ * folders = subpastas do acervo (ex: ["Iron Maiden", "Megadeth"]). Vazio = acervo inteiro.
+ */
+export async function randomPick(folders: string[] = []) {
+  const cooldown = new Date(Date.now() - config.requestCooldownMin * 60_000);
+  const base = {
+    type: 'music',
+    enabled: true,
+    OR: [{ lastPlayedAt: null }, { lastPlayedAt: { lt: cooldown } }],
+    requests: { none: { status: { in: ['queued', 'sent'] } } },
+  };
+  const select = { id: true, title: true, artist: true };
+  let pool = folders.length
+    ? await prisma.mediaItem.findMany({ where: { ...base, category: { in: folders } }, select })
+    : [];
+  if (pool.length === 0) pool = await prisma.mediaItem.findMany({ where: base, select });
+  return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
+}
+
 export type QueueResult =
   | { queued: true; position: number }
   | { queued: false; reason: string };

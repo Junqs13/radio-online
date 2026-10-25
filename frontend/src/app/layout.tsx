@@ -61,7 +61,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" suppressHydrationWarning>
+      <head>
+        {/* Abertura da página inicial só na primeira visita da aba (ver IntroSplash.tsx) */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{var h=document.documentElement;if(sessionStorage.getItem('ar_intro'))h.classList.add('intro-seen');else{sessionStorage.setItem('ar_intro','1');h.classList.add('intro-play')}}catch(e){document.documentElement.classList.add('intro-seen')}",
+          }}
+        />
+      </head>
       <body
         className="antialiased"
       >

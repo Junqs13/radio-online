@@ -38,7 +38,7 @@ export function BrandMark({
             <stop offset="1" stopColor="#7C3AED" />
           </linearGradient>
         </defs>
-        <path d="M84 20 A22 22 0 0 0 84 52 M116 20 A22 22 0 0 1 116 52" fill="none" stroke={red} strokeWidth="10" strokeLinecap="round" />
+        <path className="bm-w1" d="M84 20 A22 22 0 0 0 84 52 M116 20 A22 22 0 0 1 116 52" fill="none" stroke={red} strokeWidth="10" strokeLinecap="round" />
         <circle cx="100" cy="36" r="12" fill={fg} />
         <path d="M100 52 L150 184 H50 Z" fill="none" stroke={fg} strokeWidth="13" strokeLinejoin="round" />
         <path d="M68 138 H132 M60 162 H140" stroke={stripes} strokeWidth="11" strokeLinecap="round" />
@@ -57,8 +57,8 @@ export function BrandMark({
           <path d="M100 46 L152 184 H48 Z" />
         </clipPath>
       </defs>
-      <path d="M84 20 A22 22 0 0 0 84 52 M116 20 A22 22 0 0 1 116 52" fill="none" stroke={red} strokeWidth="6" strokeLinecap="round" />
-      <path d="M70 6 A40 40 0 0 0 70 66 M130 6 A40 40 0 0 1 130 66" fill="none" stroke={purple} strokeWidth="6" strokeLinecap="round" />
+      <path className="bm-w1" d="M84 20 A22 22 0 0 0 84 52 M116 20 A22 22 0 0 1 116 52" fill="none" stroke={red} strokeWidth="6" strokeLinecap="round" />
+      <path className="bm-w2" d="M70 6 A40 40 0 0 0 70 66 M130 6 A40 40 0 0 1 130 66" fill="none" stroke={purple} strokeWidth="6" strokeLinecap="round" />
       <circle cx="100" cy="36" r="9" fill={fg} />
       <g clipPath={`url(#c${id})`} fill={stripes}>
         <rect x="40" y="132" width="120" height="13" />

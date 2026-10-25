@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Send, Music2, CheckCircle2, Search } from 'lucide-react';
+import { Send, Music2, CheckCircle2, Search, Shuffle } from 'lucide-react';
 import { API_URL } from '@/lib/config';
 
 interface Result {
@@ -9,6 +9,16 @@ interface Result {
   title: string;
   artist: string | null;
 }
+
+// Sugestões prontas: cada cartão sorteia uma música dessas pastas do acervo (vazio = acervo inteiro)
+const SUGGESTIONS = [
+  { label: 'Um clássico nacional', folders: ['Clássicos Nacionais'] },
+  { label: 'Volta pros anos 70', folders: ['Rock Anos 70', 'David Bowie'] },
+  { label: 'Algo pesado', folders: ['Iron Maiden', 'Megadeth', 'Black Sabbath'] },
+  { label: 'Hino de estádio', folders: ['Queen', 'Kiss', 'Def Leppard'] },
+  { label: 'Um Elvis', folders: ['Elvis Presley'] },
+  { label: 'Me surpreenda', folders: [] as string[] },
+];
 
 export default function SongRequestWidget() {
   const [query, setQuery] = useState('');
@@ -18,6 +28,7 @@ export default function SongRequestWidget() {
   const [sent, setSent] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [drawing, setDrawing] = useState('');
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Busca no acervo enquanto o ouvinte digita, para ele escolher uma música que existe
@@ -41,6 +52,22 @@ export default function SongRequestWidget() {
     setChosen(r);
     setQuery(`${r.artist ?? ''} - ${r.title}`.replace(/^ - /, ''));
     setResults([]);
+  };
+
+  // Toque num cartão: sorteia uma música que pode ser pedida agora e já deixa escolhida
+  const suggest = async (label: string, folders: string[]) => {
+    setDrawing(label);
+    setError('');
+    try {
+      const res = await fetch(`${API_URL}/requests/random?folders=${encodeURIComponent(folders.join('|'))}`, { cache: 'no-store' });
+      const d = await res.json().catch(() => ({}));
+      if (res.ok && d.result) choose(d.result);
+      else setError('Não achamos uma música livre agora. Tente outro cartão.');
+    } catch {
+      setError('Sem conexão com a rádio. Tente de novo.');
+    } finally {
+      setDrawing('');
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -89,6 +116,29 @@ export default function SongRequestWidget() {
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <p className="text-[11px] uppercase tracking-widest text-gray-500 mb-2.5 flex items-center gap-1.5">
+              <Shuffle className="w-3.5 h-3.5" /> Sem ideia? Toque num cartão e a gente escolhe
+            </p>
+            <div className="flex gap-2 overflow-x-auto sm:flex-wrap -mx-1 px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {SUGGESTIONS.map((sug) => (
+                <button
+                  key={sug.label}
+                  type="button"
+                  data-track={`Sugestão: ${sug.label}`}
+                  onClick={() => suggest(sug.label, sug.folders)}
+                  disabled={!!drawing}
+                  className={`flex-shrink-0 rounded-full border px-3.5 py-2 text-xs transition-all cursor-pointer disabled:cursor-wait ${
+                    drawing === sug.label
+                      ? 'border-red-500 bg-red-600/20 text-white animate-pulse'
+                      : 'border-white/10 bg-white/[0.03] text-gray-300 hover:border-red-500/60 hover:text-white hover:-translate-y-0.5'
+                  }`}
+                >
+                  {sug.label}
+                </button>
+              ))}
+            </div>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="relative">
               <Search className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -133,6 +183,11 @@ export default function SongRequestWidget() {
               className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-red-500 text-white placeholder-gray-500"
             />
           </div>
+          {chosen && (
+            <p className="text-xs text-gray-400" role="status">
+              Escolhida: <span className="text-white">{chosen.title}</span>. Envie, ou toque no cartão de novo para sortear outra.
+            </p>
+          )}
           {error && <p className="text-xs text-red-400" role="alert">{error}</p>}
           <button
             type="submit"

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef } from "react"
-import { Music, Sparkles, X } from "lucide-react"
+import { Sparkles, BookOpen } from "lucide-react"
+import LegendBook from "./LegendBook"
 import { API_URL } from "@/lib/config"
 import { gradientClasses, imageSrc } from "@/lib/gradients"
 import { track } from "@/lib/analytics"
@@ -59,22 +60,18 @@ export default function RockMagneticCarousel(props: any) {
     const hoverWidth = props.hoverWidth || 220;
     const collapsedHeight = props.collapsedHeight || 380;
     const hoverHeight = props.hoverHeight || 440;
-    const openSize = props.openSize || 600;
     const gap = props.gap || 16;
     const influence = props.influence || 220;
-    const blur = props.blur || 2;
 
     const list = items ?? [];
     const count = list.length;
     const containerRef = useRef<HTMLDivElement>(null);
     const [factors, setFactors] = useState<number[]>(() => list.map(() => 0));
     const [open, setOpen] = useState<number | null>(null);
-    const [closing, setClosing] = useState(false);
 
     const targetRef = useRef<number[]>(list.map(() => 0));
     const curRef = useRef<number[]>(list.map(() => 0));
     const loopRef = useRef(0);
-    const closeTimer = useRef<any>(0);
 
     useEffect(() => {
         targetRef.current = list.map(() => 0);
@@ -84,7 +81,6 @@ export default function RockMagneticCarousel(props: any) {
 
     useEffect(() => () => {
         cancelAnimationFrame(loopRef.current);
-        clearTimeout(closeTimer.current);
     }, []);
 
     const startLoop = () => {
@@ -139,20 +135,11 @@ export default function RockMagneticCarousel(props: any) {
 
     const close = () => {
         targetRef.current = list.map(() => 0);
-        curRef.current = list.map(() => 0);
-        setFactors(list.map(() => 0));
-        setClosing(true);
-        clearTimeout(closeTimer.current);
-        closeTimer.current = setTimeout(() => setClosing(false), 300);
+        startLoop();
         setOpen(null);
     };
 
-    const sizeFor = (i: number): { width: number | string; height: number | string } => {
-        if (open !== null) {
-            return i === open
-                ? { width: `min(${openSize}px, calc(100vw - 2rem))`, height: `min(${openSize}px, calc(100dvh - 6rem))` }
-                : { width: collapsedWidth, height: collapsedHeight };
-        }
+    const sizeFor = (i: number) => {
         const f = factors[i] ?? 0;
         return {
             width: collapsedWidth + (hoverWidth - collapsedWidth) * f,
@@ -161,13 +148,13 @@ export default function RockMagneticCarousel(props: any) {
     };
 
     return (
-        <div data-section="lendas" className={`w-full max-w-7xl mx-auto px-6 lg:px-16 py-6 flex flex-col relative ${open !== null ? "z-[60]" : "z-10"}`}>
+        <div data-section="lendas" className="w-full max-w-7xl mx-auto px-6 lg:px-16 py-6 flex flex-col relative z-10">
             <div className="mb-6 space-y-2">
                 <span data-reveal="title" className="text-xs uppercase tracking-[0.3em] text-red-500 font-bold flex items-center gap-2">
                     <Sparkles className="w-4 h-4" /> Arquivos Secretos do Rock
                 </span>
                 <h2 data-reveal="up" className="text-3xl sm:text-4xl font-black tracking-tight text-white">Lendas & Histórias</h2>
-                <p className="text-gray-400 text-xs sm:text-sm">Toque numa lenda para ler a história. A cada visita aparecem lendas diferentes.</p>
+                <p className="text-gray-400 text-xs sm:text-sm">Toque numa lenda e a história abre como um livro. A cada visita aparecem lendas diferentes.</p>
             </div>
 
             <div data-reveal="zoom" className="-mx-6 px-6 overflow-x-auto lg:overflow-visible [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -187,14 +174,6 @@ export default function RockMagneticCarousel(props: any) {
                 onMouseMove={onMove}
                 onMouseLeave={onLeave}
             >
-                {/* Backdrop escuro ao abrir */}
-                {open !== null && (
-                    <div
-                        className="fixed inset-0 bg-black/80 backdrop-blur-md z-40 transition-opacity"
-                        onClick={close}
-                    />
-                )}
-
                 {/* Enquanto carrega: cards vazios no lugar, para a página não pular */}
                 {items === null && Array.from({ length: 6 }, (_, i) => (
                     <div key={`ph-${i}`} className="rounded-3xl border border-white/5 bg-white/[0.03] animate-pulse flex-none" style={{ width: collapsedWidth, height: collapsedHeight }} />
@@ -202,16 +181,20 @@ export default function RockMagneticCarousel(props: any) {
 
                 {list.map((item, i) => {
                     const { width, height } = sizeFor(i);
-                    const isOpen = open === i;
-                    const blurred = open !== null && !isOpen;
 
                     return (
                         <div
                             key={item.id || i}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                if (isOpen) close();
-                                else {
+                            role="button"
+                            tabIndex={0}
+                            aria-label={`Abrir a história: ${item.artist}`}
+                            onClick={() => {
+                                setOpen(i);
+                                track("open", item.artist, { section: "lendas" });
+                            }}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter" || e.key === " ") {
+                                    e.preventDefault();
                                     setOpen(i);
                                     track("open", item.artist, { section: "lendas" });
                                 }
@@ -222,14 +205,9 @@ export default function RockMagneticCarousel(props: any) {
                                 height,
                                 transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
                                 willChange: "width, height",
-                                position: isOpen ? "fixed" : "relative",
-                                zIndex: isOpen ? 50 : 2,
-                                filter: blurred ? `blur(${blur}px)` : "none",
-                                opacity: blurred ? 0.4 : 1,
+                                position: "relative",
                             }}
-                            className={`rounded-3xl overflow-hidden cursor-pointer shadow-2xl border border-white/10 relative group ${
-                                isOpen ? 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2' : ''
-                            }`}
+                            className="rounded-3xl overflow-hidden cursor-pointer shadow-2xl border border-white/10 relative group focus-visible:outline-2 focus-visible:outline-red-500"
                         >
                             {/* Foto, ou degradê com o nome da banda quando não há foto */}
                             {!item.src ? (
@@ -237,7 +215,7 @@ export default function RockMagneticCarousel(props: any) {
                                     <span
                                         aria-hidden
                                         className="absolute inset-0 flex items-center justify-center font-black uppercase text-white/15 leading-none select-none whitespace-nowrap"
-                                        style={{ fontSize: isOpen ? "7rem" : "3.2rem", writingMode: isOpen ? "horizontal-tb" : "vertical-rl" }}
+                                        style={{ fontSize: "3.2rem", writingMode: "vertical-rl" }}
                                     >
                                         {item.artist}
                                     </span>
@@ -252,46 +230,21 @@ export default function RockMagneticCarousel(props: any) {
                             {/* Gradiente Escuro para Legibilidade */}
                             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
 
-                            {/* Conteúdo do Card (Colapsado / Hover) */}
-                            {!isOpen && (
-                                <div className="absolute bottom-6 left-6 right-6 z-10">
-                                    <span className="text-[10px] uppercase tracking-widest text-red-400 font-bold block mb-1">{i === 0 ? "Novidade" : "Ícone"}</span>
-                                    <h4 className="text-white font-black text-sm truncate">{item.artist}</h4>
-                                </div>
-                            )}
+                            {/* Nome da banda e o convite para abrir */}
+                            <div className="absolute bottom-6 left-6 right-6 z-10">
+                                <span className="text-[10px] uppercase tracking-widest text-red-400 font-bold block mb-1">{i === 0 ? "Novidade" : "Ícone"}</span>
+                                <h4 className="text-white font-black text-sm truncate">{item.artist}</h4>
+                                <span className="mt-2 inline-flex items-center gap-1 text-[10px] uppercase tracking-widest text-white/70 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity">
+                                    <BookOpen className="w-3 h-3" /> Ler
+                                </span>
+                            </div>
 
-                            {/* Conteúdo Expandido (Modo Storytelling Cinematográfico) */}
-                            {isOpen && (
-                                <div className="absolute inset-0 p-8 lg:p-12 flex flex-col justify-between z-10 text-white animate-fade-in">
-                                    <div className="flex justify-between items-start">
-                                        <div className="inline-flex items-center gap-2 bg-red-600/30 border border-red-500/40 px-4 py-1.5 rounded-full text-xs font-bold tracking-widest uppercase text-red-400 backdrop-blur-md">
-                                            <Music className="w-3.5 h-3.5" /> História em Destaque
-                                        </div>
-                                        <button 
-                                            onClick={(e) => { e.stopPropagation(); close(); }}
-                                            className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center hover:bg-red-600 transition-colors"
-                                        >
-                                            <X className="w-5 h-5 text-white" />
-                                        </button>
-                                    </div>
-
-                                    <div className="space-y-4 max-w-lg">
-                                        <span className="text-xs uppercase tracking-[0.2em] text-red-400 font-bold block">{item.artist}</span>
-                                        <h3 className="text-3xl sm:text-4xl font-black tracking-tight">{item.title}</h3>
-                                        {(item.origin || item.year) && (
-                                            <p className="text-xs text-gray-300 uppercase tracking-widest">{[item.origin, item.year].filter(Boolean).join(" · ")}</p>
-                                        )}
-                                        <p className="text-gray-300 text-sm sm:text-base leading-relaxed font-light">
-                                            {item.description}
-                                        </p>
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     );
                 })}
             </div>
             </div>
+            {open !== null && list[open] && <LegendBook item={list[open]} onClose={close} />}
         </div>
     );
 }

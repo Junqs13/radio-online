@@ -89,3 +89,96 @@ section[id] { scroll-margin-top: 7rem; }
     transition: none !important;
   }
 }
+
+/* ---------- Abertura curta na primeira visita (ver IntroSplash.tsx) ---------- */
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  background: #050507;
+  pointer-events: none;
+  animation: intro-out 0.32s ease-in 0.62s forwards;
+}
+.intro .i-dot { transform-origin: 100px 36px; animation: intro-pop 0.22s ease-out both; }
+.intro .i-w1 { animation: intro-wave 0.24s ease-out 0.12s both; }
+.intro .i-w2 { animation: intro-wave 0.24s ease-out 0.24s both; }
+.intro .i-tower { animation: intro-fade 0.26s ease-out 0.05s both; }
+.intro .i-name { animation: intro-fade 0.24s ease-out 0.3s both; }
+@keyframes intro-pop { from { transform: scale(0); } to { transform: scale(1); } }
+@keyframes intro-wave { from { opacity: 0; } 60% { opacity: 1; filter: drop-shadow(0 0 10px currentColor); } to { opacity: 1; } }
+@keyframes intro-fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes intro-out { to { opacity: 0; visibility: hidden; } }
+html.intro-seen .intro { display: none; }
+@media (prefers-reduced-motion: reduce) { .intro { display: none; } }
+
+/* ---------- Antena que reage ao cursor (ver ReactiveMark.tsx) ---------- */
+.reactive-mark { --sig: 0; position: relative; }
+.reactive-mark .bm-w1 { opacity: calc(0.6 + var(--sig) * 0.4); }
+.reactive-mark .bm-w2 { opacity: calc(0.4 + var(--sig) * 0.6); }
+
+/* ---------- Relógio do topo: os dois-pontos piscam ---------- */
+.clock-colon { animation: clock-blink 1s steps(1) infinite; }
+@keyframes clock-blink { 50% { opacity: 0.15; } }
+
+/* ---------- Equalizador do botão de play do topo ---------- */
+.eq { display: inline-flex; align-items: flex-end; gap: 2px; height: 14px; }
+.eq i { display: block; width: 3px; height: 45%; border-radius: 2px; background: currentColor; transition: height 0.3s; }
+.eq i:nth-child(2) { height: 80%; }
+.eq i:nth-child(3) { height: 60%; }
+.eq i:nth-child(4) { height: 95%; }
+.eq.on i { animation: eq-bounce 0.9s ease-in-out infinite alternate; }
+.eq.on i:nth-child(2) { animation-duration: 0.65s; animation-delay: -0.2s; }
+.eq.on i:nth-child(3) { animation-duration: 0.8s; animation-delay: -0.45s; }
+.eq.on i:nth-child(4) { animation-duration: 0.55s; animation-delay: -0.1s; }
+.eq.wait i { animation: eq-wait 1.2s ease-in-out infinite; }
+.eq.wait i:nth-child(2) { animation-delay: 0.15s; }
+.eq.wait i:nth-child(3) { animation-delay: 0.3s; }
+.eq.wait i:nth-child(4) { animation-delay: 0.45s; }
+@keyframes eq-bounce { 0% { height: 20%; } 50% { height: 100%; } 100% { height: 45%; } }
+@keyframes eq-wait { 0%, 100% { height: 25%; } 50% { height: 60%; } }
+
+/* ---------- Letreiro das últimas tocadas (ver NowTicker.tsx) ---------- */
+.ticker-track { display: flex; width: max-content; animation: ticker 60s linear infinite; }
+.ticker:hover .ticker-track, .ticker:focus-within .ticker-track { animation-play-state: paused; }
+@keyframes ticker { to { transform: translateX(-50%); } }
+
+/* ---------- Livro das lendas (ver LegendBook.tsx) ---------- */
+.book-stage { perspective: 1800px; }
+/* Sem "position" aqui: o Tailwind (absolute) é quem posiciona o livro */
+.book { transform-style: preserve-3d; transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+.book-page {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform-origin: left center;
+  transition: transform 0.9s cubic-bezier(0.645, 0.045, 0.355, 1), opacity 0.3s;
+}
+.book-face { position: absolute; inset: 0; border-radius: 6px 22px 22px 6px; }
+/* Sem overflow: hidden aqui de propósito: ele achataria as camadas em profundidade.
+   Os fundos herdam o arredondamento da folha. */
+.book-face, .face-3d { transform-style: preserve-3d; }
+.book-face, .face-3d > * { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.book-face [class*='inset-0'] { border-radius: inherit; }
+.book-face.back { transform: rotateY(180deg); border-radius: 22px 6px 6px 22px; }
+/* Sombra que corre pela folha enquanto ela vira */
+.book-face::after { content: ''; position: absolute; inset: 0; transform: translateZ(1px); border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity 0.45s; background: linear-gradient(90deg, rgba(0, 0, 0, 0.55), transparent 55%); }
+.book-page.turning .book-face::after { opacity: 1; }
+/* Camadas em profundidade, só na página aberta: depois que a folha assenta,
+   o texto e os detalhes sobem do papel (como num livro pop-up) */
+.layer-1, .layer-2, .layer-3 { transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+.book-page.is-current .layer-1 { transform: translateZ(18px); transition-delay: 0.45s; }
+.book-page.is-current .layer-2 { transform: translateZ(40px); transition-delay: 0.5s; }
+.book-page.is-current .layer-3 { transform: translateZ(64px); transition-delay: 0.55s; }
+@media (prefers-reduced-motion: reduce) {
+  .book-page { transition: opacity 0.2s; }
+  .book, .book-page.is-current [class*='layer-'] { transform: none !important; }
+  .ticker-track { animation: none; }
+  .eq.on i, .eq.wait i, .clock-colon { animation: none; }
+}
+.animate-fade-in { animation: fade-in 0.3s ease-out both; }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }

@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import rateLimit from 'express-rate-limit';
 import { prisma } from '../lib/prisma.js';
 import { requireAdmin } from '../lib/auth.js';
-import { searchMedia, tryQueue } from '../services/Requests.js';
+import { searchMedia, tryQueue, randomPick } from '../services/Requests.js';
 
 const router = Router();
 
@@ -97,6 +97,23 @@ router.get('/search', async (req: Request, res: Response): Promise<void> => {
   } catch (err) {
     console.error('Erro na busca:', err);
     res.status(500).json({ success: false, error: 'Erro na busca.' });
+  }
+});
+
+// GET: sugestão sorteada para os cartões do pedido (?folders=Iron Maiden|Megadeth)
+router.get('/random', async (req: Request, res: Response): Promise<void> => {
+  const folders = String(req.query.folders ?? '')
+    .split('|')
+    .map((f) => f.trim())
+    .filter(Boolean)
+    .slice(0, 12);
+  try {
+    const pick = await randomPick(folders);
+    res.set('Cache-Control', 'no-store');
+    res.json({ success: true, result: pick });
+  } catch (err) {
+    console.error('Erro ao sortear sugestão:', err);
+    res.status(500).json({ success: false, error: 'Erro ao sortear.' });
   }
 });
 

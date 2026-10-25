@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { prisma } from '../lib/prisma.js';
 import { getIcecastSource, splitTitle } from '../lib/icecast.js';
-import { currentSlot } from '../services/Schedule.js';
+import { currentSlot, localTime } from '../services/Schedule.js';
 
 const router = Router();
 
@@ -50,6 +50,26 @@ router.get('/history', async (req: Request, res: Response): Promise<void> => {
   } catch (err) {
     console.error('Erro ao buscar histórico:', err);
     res.status(500).json({ success: false, error: 'Erro ao buscar o histórico.' });
+  }
+});
+
+// GET: números de hoje (desde a meia-noite no fuso da rádio), sem vinhetas
+router.get('/today', async (req: Request, res: Response): Promise<void> => {
+  const now = new Date();
+  const { minute } = localTime(now);
+  const since = new Date(now.getTime() - (minute * 60 + now.getUTCSeconds()) * 1000 - now.getUTCMilliseconds());
+  try {
+    const where = { playedAt: { gte: since }, source: { in: ['music', 'request'] } };
+    const [songs, requests, artists] = await Promise.all([
+      prisma.playHistory.count({ where }),
+      prisma.playHistory.count({ where: { playedAt: { gte: since }, source: 'request' } }),
+      prisma.playHistory.groupBy({ by: ['artist'], where: { ...where, artist: { not: null } } }),
+    ]);
+    res.set('Cache-Control', 'public, max-age=30');
+    res.json({ success: true, since, songs, artists: artists.length, requests });
+  } catch (err) {
+    console.error('Erro nos números de hoje:', err);
+    res.status(500).json({ success: false, error: 'Erro ao contar.' });
   }
 });
 

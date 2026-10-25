@@ -21,6 +21,12 @@ import { startReveal } from '@/lib/reveal';
 import ProgramGrid from '@/components/ProgramGrid';
 import ContactSection from '@/components/ContactSection';
 import CuriosityPost from '@/components/CuriosityPost';
+import SectionNav, { BackToTop } from '@/components/SectionNav';
+import { HeaderClock, HeaderPlay } from '@/components/HeaderLive';
+import ReactiveMark from '@/components/ReactiveMark';
+import NowTicker from '@/components/NowTicker';
+import TodayNumbers from '@/components/TodayNumbers';
+import IntroSplash from '@/components/IntroSplash';
 
 // Registra o plugin de ScrollTrigger no GSAP
 if (typeof window !== 'undefined') {
@@ -49,13 +55,16 @@ export default function Home() {
     const stopReveal = startReveal(); // entradas no scroll (data-reveal)
     const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+    // Na primeira visita a abertura cobre a tela por menos de um segundo: o topo entra depois dela
+    const afterIntro = document.documentElement.classList.contains('intro-play') && !calm ? 0.7 : 0;
+
     const ctx = gsap.context(() => {
       // Abertura: selo, título e frase entram em sequência
       if (heroRef.current) {
         gsap.fromTo(
           heroRef.current.children,
           { opacity: 0, y: 60, filter: 'blur(10px)' },
-          { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.3, stagger: 0.18, ease: 'power3.out' },
+          { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.3, stagger: 0.18, ease: 'power3.out', delay: afterIntro },
         );
       }
       if (calm) return;
@@ -104,6 +113,7 @@ export default function Home() {
 
   return (
     <PlayerProvider>
+    <IntroSplash />
     <SmoothScroll>
       <div className="min-h-screen bg-[#050507] text-white selection:bg-red-600 selection:text-white font-sans overflow-x-hidden relative">
         
@@ -117,23 +127,12 @@ export default function Home() {
             <BrandWordmark />
           </a>
 
-          <nav className="hidden lg:flex items-center gap-6 xl:gap-10 text-xs uppercase tracking-widest text-gray-400 font-medium">
-            <a href="#home" className="hover:text-white transition-colors">Início</a>
-            <a href="#player" className="hover:text-white transition-colors">Ao vivo</a>
-            <a href="#pedidos" className="hover:text-white transition-colors">Pedidos</a>
-            <a href="#historia" className="hover:text-white transition-colors">Manifesto</a>
-            <a href="#programacao" className="hover:text-white transition-colors">Grade</a>
-            <a href="#fale-conosco" className="hover:text-white transition-colors">Fale conosco</a>
-          </nav>
+          <SectionNav />
 
-          {/* Celular e tablet: links numa faixa que rola para o lado */}
-          <nav className="lg:hidden w-full flex gap-4 sm:gap-6 overflow-x-auto text-[11px] uppercase tracking-wider text-gray-400 font-medium -mb-1 pb-1">
-            <a href="#player" className="flex-shrink-0 hover:text-white">Ouvir</a>
-            <a href="#pedidos" className="flex-shrink-0 hover:text-white">Pedidos</a>
-            <a href="#programacao" className="flex-shrink-0 hover:text-white">Grade</a>
-            <a href="#historia" className="flex-shrink-0 hover:text-white">Manifesto</a>
-            <a href="#fale-conosco" className="flex-shrink-0 hover:text-white">Fale conosco</a>
-          </nav>
+          <div className="flex items-center gap-3 sm:gap-4">
+            <HeaderClock className="hidden min-[400px]:flex" />
+            <HeaderPlay />
+          </div>
           <div className="scroll-progress absolute left-0 right-0 -bottom-px h-[2px] bg-gradient-to-r from-red-600 via-rose-500 to-purple-600" aria-hidden />
         </header>
 
@@ -143,7 +142,7 @@ export default function Home() {
           <div className="absolute w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[140px] pointer-events-none -bottom-32 -right-32"></div>
 
           <div ref={heroRef} className="max-w-4xl z-10 space-y-6">
-            <BrandMark size={150} className="mx-auto w-28 h-28 sm:w-[150px] sm:h-[150px]" />
+            <ReactiveMark size={150} className="mx-auto w-28 h-28 sm:w-[150px] sm:h-[150px]" />
 
             <h1 className="flex flex-col items-center leading-none" aria-label="Antena Rock">
               <span className="font-brand font-extrabold text-[#F4EDE0] text-2xl sm:text-4xl tracking-[0.55em] pl-[0.55em]">ANTENA</span>
@@ -169,6 +168,11 @@ export default function Home() {
           </div>
         </section>
 
+        {/* LETREIRO COM AS ÚLTIMAS TOCADAS */}
+        <div className="relative z-10 mt-6">
+          <NowTicker />
+        </div>
+
         {/* WIDGET DE PEDIDOS DE MÚSICA */}
         <section id="pedidos" className="py-6 px-6 lg:px-16 max-w-4xl mx-auto relative z-10">
           <div data-reveal="tilt">
@@ -177,7 +181,7 @@ export default function Home() {
         </section>
 
         {/* CARROSSEL MAGNÉTICO DE LENDAS DO ROCK */}
-        <section className="py-2 bg-transparent relative">
+        <section id="lendas" className="py-2 bg-transparent relative">
           <RockMagneticCarousel />
         </section>
 
@@ -214,6 +218,10 @@ export default function Home() {
               <h2 data-reveal="title" className="text-xs uppercase tracking-[0.4em] text-red-500 font-bold mb-2">Grade de Conteúdo</h2>
               <h3 data-reveal="up" className="text-3xl font-black tracking-tight">No ar e a seguir hoje</h3>
             </div>
+          </div>
+
+          <div data-reveal="up" className="mb-8">
+            <TodayNumbers />
           </div>
 
           <ProgramGrid />
@@ -259,6 +267,7 @@ export default function Home() {
       </div>
     </SmoothScroll>
     <StickyPlayer />
+    <BackToTop />
     </PlayerProvider>
   );
 }
