@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ArrowUp } from 'lucide-react';
 import { scrollToTarget } from '@/lib/scrollTo';
 
-export const SECTIONS = [
+const SECTIONS = [
   { id: 'player', label: 'Ao vivo' },
   { id: 'pedidos', label: 'Pedidos' },
   { id: 'lendas', label: 'Lendas' },

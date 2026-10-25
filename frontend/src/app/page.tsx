@@ -9,7 +9,6 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import RecentTracks from '@/components/RecentTracks';
 import RockMagneticCarousel from '@/components/RockMagneticCarousel';
-import SmoothScrollSlider from '@/components/SmoothScrollSlider';
 import InteractiveGrid from '@/components/InteractiveGrid';
 import ScrollLineBackground from '@/components/ScrollLineBackground'; 
 import SongRequestWidget from '@/components/SongRequestWidget';
@@ -234,16 +233,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* SMOOTH SCROLL SLIDER */}
-        <section className="py-8 bg-transparent overflow-hidden relative z-10">
-          <div className="max-w-7xl mx-auto px-6 lg:px-16 mb-6">
-            <h2 data-reveal="title" className="text-xs uppercase tracking-[0.4em] text-red-500 font-bold mb-1">Galeria Dinâmica</h2>
-            <h3 className="text-2xl font-black tracking-tight">Destaques Visuais & Comunidade</h3>
-          </div>
-          <div data-reveal="zoom" className="w-full h-[380px]">
-            <SmoothScrollSlider />
-          </div>
-        </section>
 
         {/* RODAPÉ */}
         <footer className="border-t border-white/10 pt-12 pb-28 px-8 lg:px-16 text-center text-xs text-gray-500 space-y-6 relative z-10 bg-[#050507]/90 backdrop-blur-md">
