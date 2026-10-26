@@ -91,44 +91,109 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   }, [reportListen]);
   const nowPlayingRef = useRef('');
 
+  // Quer dizer "a pessoa mandou tocar e não mandou parar". Enquanto for true, a rádio
+  // reconecta sozinha se a internet cair, travar ou o servidor reiniciar.
+  const wantPlay = useRef(false);
+  const switching = useRef(false); // trocando a conexão: ignora o "pause" que o navegador dispara
+  const retries = useRef(0);
+  const retryTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const volumeRef = useRef(volume);
+  volumeRef.current = volume;
+  const mutedRef = useRef(muted);
+  mutedRef.current = muted;
+
+  const clearRetry = () => {
+    if (retryTimer.current) clearTimeout(retryTimer.current);
+    retryTimer.current = null;
+  };
+
+  // Fecha a conta do tempo ouvindo quando o som para por qualquer motivo
+  const pauseListen = useCallback(() => {
+    if (listenFrom.current === null) return;
+    reportListen();
+    listenFrom.current = null;
+  }, [reportListen]);
+
+  const connectRef = useRef<(retry: boolean) => void>(() => {});
+
+  // Espera 1, 2, 4, 8, 15 e depois 30 s entre as tentativas, até a pessoa apertar pause
+  const scheduleRetry = useCallback(() => {
+    if (!wantPlay.current) return;
+    clearRetry();
+    const delays = [1, 2, 4, 8, 15, 30];
+    const wait = delays[Math.min(retries.current, delays.length - 1)] * 1000;
+    retries.current += 1;
+    setLoading(true);
+    retryTimer.current = setTimeout(() => connectRef.current(true), wait);
+  }, []);
+
+  const connect = useCallback(
+    (retry: boolean) => {
+      const audio = audioRef.current;
+      if (!audio || !wantPlay.current) return;
+      clearRetry();
+      switching.current = true;
+      // Endereço novo a cada conexão: o navegador não reaproveita áudio velho guardado
+      audio.src = `${STREAM_URL}?t=${Date.now()}`;
+      audio.volume = volumeRef.current;
+      audio.muted = mutedRef.current;
+      setLoading(true);
+      audio
+        .play()
+        .then(() => {
+          switching.current = false;
+          retries.current = 0;
+          setIsPlaying(true);
+          setLoading(false);
+          if (listenFrom.current === null) listenFrom.current = Date.now();
+          if (!retry) track('play', nowPlayingRef.current, { section: 'player' });
+        })
+        .catch((err: unknown) => {
+          switching.current = false;
+          const name = err instanceof DOMException ? err.name : '';
+          if (name === 'AbortError') return; // outra conexão começou por cima desta
+          if (name === 'NotAllowedError') {
+            // O navegador exige um toque da pessoa (comum depois de ficar em segundo plano)
+            wantPlay.current = false;
+            setIsPlaying(false);
+            setLoading(false);
+            return;
+          }
+          scheduleRetry();
+        });
+    },
+    [scheduleRetry],
+  );
+  connectRef.current = connect;
+
   const stop = useCallback(() => {
     const audio = audioRef.current;
-    if (!audio) return;
+    wantPlay.current = false;
+    clearRetry();
+    retries.current = 0;
     if (listenFrom.current !== null) {
-      reportListen();
-      listenFrom.current = null;
+      pauseListen();
       track('pause', nowPlayingRef.current, { section: 'player' });
     }
+    if (!audio) return;
     // Em rádio ao vivo, pausar = desconectar. Senão o navegador segue baixando
     // e, no próximo play, toca o áudio atrasado que ficou guardado.
+    switching.current = true;
     audio.pause();
     audio.removeAttribute('src');
     audio.load();
+    switching.current = false;
     setIsPlaying(false);
     setLoading(false);
-  }, [reportListen]);
+  }, [pauseListen]);
 
   const start = useCallback(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    audio.src = `${STREAM_URL}?t=${Date.now()}`;
-    audio.volume = volume;
-    audio.muted = muted;
-    setLoading(true);
-    audio
-      .play()
-      .then(() => {
-        setIsPlaying(true);
-        listenFrom.current = Date.now();
-        track('play', nowPlayingRef.current, { section: 'player' });
-      })
-      .catch(() => setIsPlaying(false))
-      .finally(() => setLoading(false));
-  }, [volume, muted]);
+    wantPlay.current = true;
+    retries.current = 0;
+    connect(false);
+  }, [connect]);
 
-  const isPlayingRef = useRef(isPlaying);
-  isPlayingRef.current = isPlaying;
-  const toggle = useCallback(() => (isPlayingRef.current ? stop() : start()), [start, stop]);
+  const toggle = useCallback(() => (wantPlay.current ? stop() : start()), [start, stop]);
 
   const setVolume = useCallback((v: number) => {
     setVolumeState(v);
@@ -146,38 +211,112 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  // Se a conexão cair, o botão volta para "play" em vez de ficar mentindo que está tocando
+  // Quedas e travadas: reconecta sozinha. Interrupção por outro app: mostra pausado.
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
-    const onError = () => {
-      if (listenFrom.current !== null) {
-        reportListen();
-        listenFrom.current = null; // conexão caiu: para de contar tempo ouvindo
+
+    const lost = () => {
+      if (switching.current || !audio.getAttribute('src')) return;
+      pauseListen();
+      if (wantPlay.current) scheduleRetry();
+      else {
+        setIsPlaying(false);
+        setLoading(false);
       }
-      if (audio.getAttribute('src')) setIsPlaying(false);
+    };
+
+    // Ligação, áudio do WhatsApp, GPS falando ou outro app de música tomou o som.
+    // Não volta sozinha para não brigar com o outro app; o play da tela, do fone
+    // ou do carro reconecta na hora.
+    const onPause = () => {
+      if (switching.current || !wantPlay.current) return;
+      wantPlay.current = false;
+      clearRetry();
+      pauseListen();
+      setIsPlaying(false);
       setLoading(false);
     };
-    const onWaiting = () => setLoading(true);
-    const onPlaying = () => setLoading(false);
-    audio.addEventListener('error', onError);
+
+    let waitingSince = 0;
+    const onWaiting = () => {
+      waitingSince = Date.now();
+      setLoading(true);
+    };
+    const onPlaying = () => {
+      waitingSince = 0;
+      setLoading(false);
+      setIsPlaying(true);
+      if (listenFrom.current === null) listenFrom.current = Date.now();
+    };
+
+    // Vigia: se o som parou de andar há 10 s (rede presa sem dar erro), troca a conexão
+    let lastTime = -1;
+    let stuckSince = 0;
+    const watchdog = setInterval(() => {
+      if (!wantPlay.current || switching.current || retryTimer.current || audio.paused) {
+        stuckSince = 0;
+        return;
+      }
+      const t = audio.currentTime;
+      const moving = t !== lastTime;
+      lastTime = t;
+      if (moving && !waitingSince) {
+        stuckSince = 0;
+        return;
+      }
+      if (!stuckSince) stuckSince = Date.now();
+      if (Date.now() - stuckSince > 10_000) {
+        stuckSince = 0;
+        pauseListen();
+        connectRef.current(true);
+      }
+    }, 2_000);
+
+    // Voltou a internet ou a pessoa voltou para a aba: se era para estar tocando, reconecta já
+    const revive = () => {
+      if (!wantPlay.current) return;
+      if (retryTimer.current || audio.paused || audio.error) {
+        retries.current = 0;
+        connectRef.current(true);
+      }
+    };
+    const onVisible = () => document.visibilityState === 'visible' && revive();
+
+    audio.addEventListener('error', lost);
+    audio.addEventListener('ended', lost);
+    audio.addEventListener('pause', onPause);
     audio.addEventListener('waiting', onWaiting);
     audio.addEventListener('playing', onPlaying);
+    window.addEventListener('online', revive);
+    document.addEventListener('visibilitychange', onVisible);
     return () => {
-      audio.removeEventListener('error', onError);
+      clearInterval(watchdog);
+      audio.removeEventListener('error', lost);
+      audio.removeEventListener('ended', lost);
+      audio.removeEventListener('pause', onPause);
       audio.removeEventListener('waiting', onWaiting);
       audio.removeEventListener('playing', onPlaying);
+      window.removeEventListener('online', revive);
+      document.removeEventListener('visibilitychange', onVisible);
     };
-  }, [reportListen]);
+  }, [pauseListen, scheduleRetry]);
 
-  // Tela bloqueada, fone Bluetooth, central do carro e CarPlay: nome da música e play/pause
-  const toggleRef = useRef(toggle);
-  toggleRef.current = toggle;
+  // Tela bloqueada, fone Bluetooth, central do carro e CarPlay: nome da música e play/pause.
+  // O play daqui sempre abre uma conexão nova, então funciona mesmo depois de uma interrupção.
+  const startRef = useRef(start);
+  startRef.current = start;
+  const stopRef = useRef(stop);
+  stopRef.current = stop;
   useEffect(() => {
     if (typeof navigator === 'undefined' || !('mediaSession' in navigator)) return;
     const ms = navigator.mediaSession;
-    const play = () => { if (!isPlayingRef.current) toggleRef.current(); };
-    const pause = () => { if (isPlayingRef.current) toggleRef.current(); };
+    const play = () => {
+      // Algumas centrais de carro mandam "play" repetido: se já está tocando, não reconecta
+      if (wantPlay.current && audioRef.current && !audioRef.current.paused) return;
+      startRef.current();
+    };
+    const pause = () => stopRef.current();
     const actions: [MediaSessionAction, MediaSessionActionHandler][] = [['play', play], ['pause', pause], ['stop', pause]];
     for (const [a, h] of actions) {
       try { ms.setActionHandler(a, h); } catch { /* ação não suportada neste navegador */ }
