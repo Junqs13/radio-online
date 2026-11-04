@@ -84,7 +84,7 @@ export function BrandWordmark({ size = 'md', className = '' }: { size?: 'sm' | '
   const small = size === 'sm';
   return (
     <span className={`inline-flex items-center gap-2 leading-none ${className}`}>
-      <span className={`font-brand font-extrabold text-[#F4EDE0] ${small ? 'text-[10px] tracking-[0.3em]' : 'text-xs sm:text-sm tracking-[0.32em]'}`}>
+      <span className={`font-brand font-extrabold text-[#F4EDE0] ${small ? 'text-[0.6875rem] tracking-[0.3em]' : 'text-xs sm:text-sm tracking-[0.32em]'}`}>
         ANTENA
       </span>
       <span className={`font-neon text-[#E11D2E] ${small ? 'text-xl' : 'text-2xl sm:text-3xl'}`}>ROCK</span>

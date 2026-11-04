@@ -4,9 +4,11 @@ import Lenis from 'lenis';
 
 export default function SmoothScroll({ children }: { children: ReactNode }) {
   useEffect(() => {
+    // Quem pede menos movimento fica com a rolagem nativa do navegador
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    // lerp 0,2: suaviza a roda do mouse sem atrasar (assenta em uns 0,3 s, antes eram 1,2 s)
     const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      lerp: 0.2,
       orientation: 'vertical',
       smoothWheel: true,
     });
@@ -14,14 +16,16 @@ export default function SmoothScroll({ children }: { children: ReactNode }) {
     // Menu e "voltar ao topo" usam o mesmo Lenis para descer suave (lib/scrollTo.ts)
     (window as unknown as { __lenis?: Lenis }).__lenis = lenis;
 
+    let id = 0;
     function raf(time: number) {
       lenis.raf(time);
-      requestAnimationFrame(raf);
+      id = requestAnimationFrame(raf);
     }
 
-    requestAnimationFrame(raf);
+    id = requestAnimationFrame(raf);
 
     return () => {
+      cancelAnimationFrame(id);
       lenis.destroy();
       delete (window as unknown as { __lenis?: Lenis }).__lenis;
     };

@@ -94,7 +94,7 @@ export default function CuriosityPost() {
     <div className="space-y-4" data-section="curiosidade">
       <div className="flex items-center gap-2">
         <Lightbulb className="w-4 h-4 text-red-500" />
-        <h2 className="text-xs uppercase tracking-[0.3em] text-red-500 font-bold">Curiosidade do dia</h2>
+        <h2 className="text-xs uppercase tracking-[0.14em] text-red-500 font-bold">Curiosidade do dia</h2>
       </div>
 
       <article className="border border-white/10 bg-black/50 rounded-3xl p-5 sm:p-6 backdrop-blur-xl" aria-live="polite">
@@ -104,7 +104,7 @@ export default function CuriosityPost() {
           </div>
           <div className="min-w-0 leading-tight">
             <p className="font-bold text-white text-sm">Antena Rock</p>
-            <p className="text-xs text-gray-500">Sorocaba, SP{date && ` · ${date}`}</p>
+            <p className="text-xs text-gray-400">Sorocaba, SP{date && ` · ${date}`}</p>
           </div>
         </header>
 
@@ -121,9 +121,9 @@ export default function CuriosityPost() {
           </>
         ) : (
           <div className="mt-4 space-y-2" aria-hidden>
-            <div className="h-4 bg-white/5 rounded w-full animate-pulse" />
-            <div className="h-4 bg-white/5 rounded w-5/6 animate-pulse" />
-            <div className="h-4 bg-white/5 rounded w-2/3 animate-pulse" />
+            <div className="h-4 bg-white/5 rounded w-full motion-safe:animate-pulse" />
+            <div className="h-4 bg-white/5 rounded w-5/6 motion-safe:animate-pulse" />
+            <div className="h-4 bg-white/5 rounded w-2/3 motion-safe:animate-pulse" />
           </div>
         )}
 

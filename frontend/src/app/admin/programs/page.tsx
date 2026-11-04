@@ -202,7 +202,7 @@ export default function AdminProgramsPage() {
                 <div key={p.id} className="border border-white/10 bg-white/[0.02] p-5 rounded-2xl relative overflow-hidden space-y-3">
                   <div className="absolute top-0 left-0 w-1.5 h-full" style={{ backgroundColor: p.color }} />
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-[11px] uppercase tracking-widest bg-white/5 px-2.5 py-1 rounded-md text-gray-300 font-bold">{p.category}</span>
+                    <span className="text-xs uppercase tracking-widest bg-white/5 px-2.5 py-1 rounded-md text-gray-300 font-bold">{p.category}</span>
                     <div className="flex items-center gap-1">
                       <button onClick={() => startEdit(p)} aria-label={`Editar ${p.title}`} className="p-2 text-gray-400 hover:text-white cursor-pointer">
                         <Pencil className="w-4 h-4" />

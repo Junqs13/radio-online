@@ -1,18 +1,21 @@
 "use client";
 
 import { motion, useScroll, useTransform } from "framer-motion";
+import { useCalm } from '@/lib/useCalm';
 
 export default function ScrollLineBackground() {
   const { scrollYProgress } = useScroll();
+  // Com menos movimento pedido, a linha fica desenhada inteira e parada
+  const calm = useCalm();
 
   return (
     <div className="absolute inset-0 h-[350vh] w-full overflow-hidden pointer-events-none z-0 opacity-40">
-      <LinePath scrollYProgress={scrollYProgress} />
+      <LinePath scrollYProgress={scrollYProgress} calm={!!calm} />
     </div>
   );
 }
 
-const LinePath = ({ scrollYProgress }: { scrollYProgress: any }) => {
+const LinePath = ({ scrollYProgress, calm }: { scrollYProgress: any; calm: boolean }) => {
   const pathLength = useTransform(scrollYProgress, [0, 1], [0.1, 1]);
   
   // Tipagem explícita 'value: number' para evitar o erro de implicit any
@@ -33,10 +36,7 @@ const LinePath = ({ scrollYProgress }: { scrollYProgress: any }) => {
         stroke="url(#paint0_linear)"
         strokeWidth="16"
         strokeLinecap="round"
-        style={{
-          pathLength,
-          strokeDashoffset,
-        }}
+        style={calm ? undefined : { pathLength, strokeDashoffset }}
       />
       <defs>
         <linearGradient id="paint0_linear" x1="0" y1="0" x2="1278" y2="2319" gradientUnits="userSpaceOnUse">

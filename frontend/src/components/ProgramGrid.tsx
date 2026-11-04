@@ -89,15 +89,15 @@ export default function ProgramGrid() {
           <div className={`text-xs font-bold tracking-widest mb-3 flex items-center gap-2 ${s.live ? 'text-emerald-400' : 'text-red-400'}`}>
             <Clock className="w-4 h-4" /> {s.startTime} - {s.endTime}
             {s.live && (
-              <span className="ml-auto inline-flex items-center gap-1.5 text-[11px] bg-emerald-600 text-white px-2.5 py-0.5 rounded-full">
-                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+              <span className="ml-auto inline-flex items-center gap-1.5 text-xs bg-emerald-600 text-white px-2.5 py-0.5 rounded-full">
+                <span className="w-1.5 h-1.5 rounded-full bg-white motion-safe:animate-pulse" />
                 <Radio className="w-3 h-3" /> no ar
               </span>
             )}
           </div>
           <h4 className="text-xl font-black mb-2">{s.program_title}</h4>
           <p className="text-xs text-gray-400 mb-4">Com {s.host}</p>
-          <span className="inline-block text-[11px] uppercase tracking-widest bg-white/5 border border-white/10 px-3 py-1.5 rounded-full text-gray-300 font-semibold">
+          <span className="inline-block text-xs uppercase tracking-widest bg-white/5 border border-white/10 px-3 py-1.5 rounded-full text-gray-300 font-semibold">
             {s.category}
           </span>
         </div>

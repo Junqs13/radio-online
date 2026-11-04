@@ -181,11 +181,11 @@ export default function AdminStatsPage() {
                 <Ranking items={data.devices} />
                 <div className="grid grid-cols-2 gap-4 mt-4">
                   <div>
-                    <p className="text-[11px] text-gray-500 mb-2">Sistema</p>
+                    <p className="text-xs text-gray-500 mb-2">Sistema</p>
                     <Ranking items={data.os} compact />
                   </div>
                   <div>
-                    <p className="text-[11px] text-gray-500 mb-2">Navegador</p>
+                    <p className="text-xs text-gray-500 mb-2">Navegador</p>
                     <Ranking items={data.browsers} compact />
                   </div>
                 </div>
@@ -223,7 +223,7 @@ export default function AdminStatsPage() {
               </div>
             </Card>
 
-            <p className="text-[11px] text-gray-600">
+            <p className="text-xs text-gray-600">
               A cidade é estimada pela conexão e pode apontar para a cidade do provedor de internet. Localização por IP:{' '}
               <a href="https://db-ip.com" target="_blank" rel="noreferrer" className="underline">
                 DB-IP
@@ -240,9 +240,9 @@ export default function AdminStatsPage() {
 function Kpi({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
     <div className="border border-white/10 bg-white/[0.02] rounded-2xl p-4">
-      <p className="text-[11px] uppercase tracking-widest text-gray-500">{label}</p>
+      <p className="text-xs uppercase tracking-widest text-gray-500">{label}</p>
       <p className="text-2xl font-black mt-1">{value}</p>
-      {hint && <p className="text-[11px] text-gray-500 mt-1">{hint}</p>}
+      {hint && <p className="text-xs text-gray-500 mt-1">{hint}</p>}
     </div>
   );
 }
@@ -264,7 +264,7 @@ function Ranking({ items, empty = 'Sem dados neste período.', compact }: { item
       {items.map((it, i) => (
         <li key={`${it.label}-${i}`} className="relative">
           <div className="absolute inset-y-0 left-0 rounded-md bg-red-600/15" style={{ width: `${(it.n / max) * 100}%` }} />
-          <div className={`relative flex justify-between gap-3 px-2 ${compact ? 'py-0.5 text-[11px]' : 'py-1 text-xs'}`}>
+          <div className={`relative flex justify-between gap-3 px-2 ${compact ? 'py-0.5 text-xs' : 'py-1 text-xs'}`}>
             <span className="truncate text-gray-200" title={it.label}>
               {it.label}
             </span>
@@ -292,12 +292,12 @@ function DayChart({ rows }: { rows: Summary['byDay'] }) {
       </div>
       <div className="flex gap-1 mt-1">
         {rows.map((r, i) => (
-          <span key={r.day} className="flex-1 text-center text-[10px] text-gray-500">
+          <span key={r.day} className="flex-1 text-center text-[0.6875rem] text-gray-500">
             {rows.length <= 14 || i % Math.ceil(rows.length / 10) === 0 ? r.day.slice(8, 10) + '/' + r.day.slice(5, 7) : ''}
           </span>
         ))}
       </div>
-      <p className="text-[11px] text-gray-500 mt-3 flex gap-4">
+      <p className="text-xs text-gray-500 mt-3 flex gap-4">
         <span className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 rounded-sm bg-red-600/70" /> visitas
         </span>
@@ -322,7 +322,7 @@ function HourChart({ hours }: { hours: number[] }) {
       </div>
       <div className="flex gap-1 mt-1">
         {hours.map((_, h) => (
-          <span key={h} className="flex-1 text-center text-[10px] text-gray-500">
+          <span key={h} className="flex-1 text-center text-[0.6875rem] text-gray-500">
             {h % 3 === 0 ? `${h}h` : ''}
           </span>
         ))}

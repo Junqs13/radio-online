@@ -41,7 +41,7 @@ export default function NowTicker() {
         <span className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-red-600 to-purple-600 flex-shrink-0" />
         <span className="text-white font-semibold">{t.artist || 'Antena Rock'}</span>
         <span className="text-gray-400">{t.title}</span>
-        {t.request && <span className="text-[10px] uppercase tracking-widest text-red-300 border border-red-500/40 rounded-full px-2 py-0.5">pedido</span>}
+        {t.request && <span className="text-[0.6875rem] uppercase tracking-widest text-red-300 border border-red-500/40 rounded-full px-2 py-0.5">pedido</span>}
       </li>
     ));
 
@@ -49,7 +49,7 @@ export default function NowTicker() {
     <div className="ticker relative border-y border-white/10 bg-white/[0.02] py-3 overflow-x-auto motion-safe:overflow-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" aria-label="Músicas que tocaram há pouco">
       <div className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-[#050507] to-transparent z-10" />
       <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-[#050507] to-transparent z-10" />
-      <span className="absolute left-0 inset-y-0 z-20 hidden sm:flex items-center pl-6 pr-4 bg-[#050507] shadow-[20px_0_20px_#050507] text-[10px] uppercase tracking-[0.3em] text-red-500 font-bold">
+      <span className="absolute left-0 inset-y-0 z-20 hidden sm:flex items-center pl-6 pr-4 bg-[#050507] shadow-[20px_0_20px_#050507] text-[0.6875rem] uppercase tracking-[0.14em] text-red-500 font-bold">
         Tocou agora há pouco
       </span>
       <ul className="ticker-track text-sm">

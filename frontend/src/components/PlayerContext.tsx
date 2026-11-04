@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { API_URL, STREAM_URL } from '@/lib/config';
 import { track, onLeave } from '@/lib/analytics';
+import { haptic } from '@/lib/haptics';
 
 export interface NowPlaying {
   title: string;
@@ -146,7 +147,10 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
           setIsPlaying(true);
           setLoading(false);
           if (listenFrom.current === null) listenFrom.current = Date.now();
-          if (!retry) track('play', nowPlayingRef.current, { section: 'player' });
+          if (!retry) {
+            track('play', nowPlayingRef.current, { section: 'player' });
+            haptic(10); // começou a tocar: vibração curta no mesmo instante do botão mudar
+          }
         })
         .catch((err: unknown) => {
           switching.current = false;

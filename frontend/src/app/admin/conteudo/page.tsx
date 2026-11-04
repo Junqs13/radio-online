@@ -167,7 +167,7 @@ function Legends() {
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               maxLength={1200}
             />
-            <p className="text-[11px] text-gray-500 text-right">{form.description.length}/1200</p>
+            <p className="text-xs text-gray-500 text-right">{form.description.length}/1200</p>
 
             <div className="space-y-2">
               <p className="text-xs text-gray-400">Foto do card (opcional). Use só imagem que você tem direito de usar.</p>
@@ -233,7 +233,7 @@ function Legends() {
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
               <div className="absolute bottom-4 left-4 right-4">
-                <span className="text-[9px] uppercase tracking-widest text-red-400 font-bold block">Ícone</span>
+                <span className="text-[0.6875rem] uppercase tracking-widest text-red-400 font-bold block">Ícone</span>
                 <span className="text-white font-black text-xs truncate block">{form.artist || 'Banda'}</span>
               </div>
             </div>
@@ -261,9 +261,9 @@ function Legends() {
               </p>
               <p className="text-xs text-gray-500 line-clamp-1">{l.description}</p>
               <div className="flex gap-2 mt-1">
-                {l.id === opener && <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-600/20 text-red-300">Abre o carrossel</span>}
-                {l.id === closer && <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-600/20 text-red-300">Fecha o carrossel</span>}
-                {!l.enabled && <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-gray-300">Escondida</span>}
+                {l.id === opener && <span className="text-[0.6875rem] px-2 py-0.5 rounded-full bg-red-600/20 text-red-300">Abre o carrossel</span>}
+                {l.id === closer && <span className="text-[0.6875rem] px-2 py-0.5 rounded-full bg-red-600/20 text-red-300">Fecha o carrossel</span>}
+                {!l.enabled && <span className="text-[0.6875rem] px-2 py-0.5 rounded-full bg-white/10 text-gray-300">Escondida</span>}
               </div>
             </div>
             <div className="flex flex-wrap justify-end gap-1 flex-shrink-0">
@@ -353,7 +353,7 @@ function Curiosities() {
         />
         <div className="flex flex-wrap gap-3 items-center">
           <input className={`${field} flex-1 min-w-[220px]`} placeholder="Hashtags, separadas por espaço (ex: Queen Anos70)" value={tags} onChange={(e) => setTags(e.target.value)} />
-          <span className="text-[11px] text-gray-500">{text.length}/600</span>
+          <span className="text-xs text-gray-500">{text.length}/600</span>
         </div>
         {msg && <p className={`text-sm p-3 rounded-xl ${msg.ok ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>{msg.text}</p>}
         <div className="flex gap-2">

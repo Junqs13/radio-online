@@ -131,7 +131,6 @@ export default function SmoothScrollSlider({
     const ease = 0.15 - (clamp(smoothness, 0, 10) / 10) * 0.13
     const dimAmount = (clamp(dim, 0, 10) / 10) * 0.85
     const wheelMultiplier = 0.4 + (clamp(sensitivity, 0, 10) / 10) * 1.2
-    const dragMultiplier = 0.6 + (clamp(sensitivity, 0, 10) / 10) * 1.8
 
     const flip = direction === "left"
 
@@ -171,8 +170,8 @@ export default function SmoothScrollSlider({
         flip,
     }
 
-    const input = useRef({ wheelMultiplier, dragMultiplier, flip })
-    input.current = { wheelMultiplier, dragMultiplier, flip }
+    const input = useRef({ wheelMultiplier, flip })
+    input.current = { wheelMultiplier, flip }
 
     useEffect(() => {
         const node = containerRef.current
@@ -189,42 +188,30 @@ export default function SmoothScrollSlider({
         nodes.current.length = slides.length
     }, [slides.length])
 
+    // Movimento da galeria: posição (x) e velocidade (v) andam numa mola.
+    // Arrastando, a galeria cola no dedo (1:1). Ao soltar, ela segue na velocidade
+    // do gesto, calcula onde o arremesso pararia e assenta na foto mais próxima dali.
+    const motion = useRef({ v: 0, dragging: false, zeta: 1, wake: () => {} })
+
     useEffect(() => {
+        const node = containerRef.current
+        if (!node) return
+        const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches
         let raf = 0
         let last = 0
+        let visible = false
+        const m = motion.current
 
-        const tick = (now: number) => {
-            raf = requestAnimationFrame(tick)
+        const render = () => {
             const c = frame.current
-            const delta = last ? Math.min((now - last) / 1000, 0.1) : 1 / 60
-            last = now
-            if (!c.count || c.step <= 0 || c.width <= 0) return
-
-            const span = c.count * c.step
-
-            if (c.loop) {
-                if (current.current > span || current.current < -span) {
-                    const shift = Math.trunc(current.current / span) * span
-                    current.current -= shift
-                    target.current -= shift
-                }
-            } else {
-                target.current = clamp(target.current, 0, (c.count - 1) * c.step)
-            }
-
-            const k = 1 - Math.pow(1 - c.ease, delta * 60)
-            current.current += (target.current - current.current) * k
-
             const pad = (c.width - c.slideWidth) / 2
             const half = c.width / 2
-
+            const span = c.count * c.step
             for (let i = 0; i < c.count; i += 1) {
-                const node = nodes.current[i]
-                if (!node) continue
-
+                const el = nodes.current[i]
+                if (!el) continue
                 const raw = i * c.step - current.current + pad
                 const x = c.loop ? wrap(raw + c.step, span) - c.step : raw
-
                 const distance = x + c.slideWidth / 2 - half
                 let scale: number
                 let push: number
@@ -235,61 +222,168 @@ export default function SmoothScrollSlider({
                     scale = Math.max(c.minScale, 1 + distance / c.width)
                     push = 0
                 }
-
                 const left = c.flip ? c.width - c.slideWidth - (x + push) : x + push
-                node.style.transform = `translate3d(${left}px, -50%, 0) scale(${scale})`
-
-                if (c.dim > 0 && scale < 1) {
-                    const t = (1 - scale) / Math.max(0.001, 1 - c.minScale)
-                    node.style.filter = `brightness(${1 - t * c.dim})`
-                } else {
-                    node.style.filter = "none"
+                el.style.transform = `translate3d(${left}px, -50%, 0) scale(${scale})`
+                // Escurece as laterais com uma camada de opacidade (mais leve que filtro)
+                const shade = el.firstElementChild as HTMLElement | null
+                if (shade) {
+                    const t = c.dim > 0 && scale < 1 ? (1 - scale) / Math.max(0.001, 1 - c.minScale) : 0
+                    shade.style.opacity = String(t * c.dim)
                 }
             }
         }
 
-        raf = requestAnimationFrame(tick)
-        return () => cancelAnimationFrame(raf)
+        const tick = (now: number) => {
+            raf = 0
+            const c = frame.current
+            const dt = last ? Math.min((now - last) / 1000, 0.05) : 1 / 60
+            last = now
+            if (!c.count || c.step <= 0 || c.width <= 0) return
+
+            const span = c.count * c.step
+            if (c.loop) {
+                if (current.current > span || current.current < -span) {
+                    const shift = Math.trunc(current.current / span) * span
+                    current.current -= shift
+                    target.current -= shift
+                }
+            } else {
+                target.current = clamp(target.current, 0, (c.count - 1) * c.step)
+            }
+
+            if (m.dragging || calm) {
+                current.current = target.current
+            } else {
+                // Mola com "response" de 0,4 s (padrão da Apple para mover coisas)
+                const response = 0.4
+                const k = Math.pow((2 * Math.PI) / response, 2)
+                const damp = (4 * Math.PI * m.zeta) / response
+                let left = dt
+                while (left > 0) {
+                    const h = Math.min(left, 1 / 240)
+                    const a = k * (target.current - current.current) - damp * m.v
+                    m.v += a * h
+                    current.current += m.v * h
+                    left -= h
+                }
+            }
+            render()
+
+            const settled = !m.dragging && Math.abs(target.current - current.current) < 0.05 && Math.abs(m.v) < 1
+            if (settled) {
+                current.current = target.current
+                m.v = 0
+                render()
+                last = 0
+                return
+            }
+            if (visible) raf = requestAnimationFrame(tick)
+        }
+
+        m.wake = () => {
+            if (!raf && visible) raf = requestAnimationFrame(tick)
+        }
+
+        // Só anima enquanto a galeria está na tela
+        const io = new IntersectionObserver(([e]) => {
+            visible = e.isIntersecting
+            if (visible) {
+                last = 0
+                m.wake()
+            } else if (raf) {
+                cancelAnimationFrame(raf)
+                raf = 0
+            }
+        })
+        io.observe(node)
+        return () => {
+            io.disconnect()
+            cancelAnimationFrame(raf)
+        }
     }, [])
 
+    // Encaixa na foto mais próxima de um ponto
+    const snapTo = (value: number) => {
+        const c = frame.current
+        if (c.step <= 0) return value
+        const snapped = Math.round(value / c.step) * c.step
+        return c.loop ? snapped : clamp(snapped, 0, (c.count - 1) * c.step)
+    }
+
+    // Roda do mouse: só o movimento lateral (trackpad) mexe na galeria.
+    // A rolagem vertical passa direto para a página, que não fica mais presa aqui.
     useEffect(() => {
         const node = containerRef.current
         if (!node) return
+        let settle: ReturnType<typeof setTimeout> | null = null
         const onWheel = (event: WheelEvent) => {
+            if (Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return
             event.preventDefault()
-            const dominant =
-                Math.abs(event.deltaX) > Math.abs(event.deltaY)
-                    ? event.deltaX
-                    : event.deltaY
-            target.current += dominant * input.current.wheelMultiplier
+            target.current += event.deltaX * input.current.wheelMultiplier
+            motion.current.zeta = 1
+            motion.current.wake()
+            if (settle) clearTimeout(settle)
+            settle = setTimeout(() => {
+                target.current = snapTo(target.current)
+                motion.current.wake()
+            }, 140)
         }
         node.addEventListener("wheel", onWheel, { passive: false })
-        return () => node.removeEventListener("wheel", onWheel)
+        return () => {
+            node.removeEventListener("wheel", onWheel)
+            if (settle) clearTimeout(settle)
+        }
     }, [])
 
+    // Arrastar: cola no dedo desde o ponto agarrado e, ao soltar, entrega a velocidade à mola
     useEffect(() => {
         const node = containerRef.current
         if (!node) return
         let pointer: number | null = null
         let lastX = 0
+        let history: { x: number; t: number }[] = []
 
         const onDown = (event: PointerEvent) => {
             if (pointer !== null) return
             pointer = event.pointerId
             lastX = event.clientX
+            history = [{ x: current.current, t: event.timeStamp }]
             node.setPointerCapture(event.pointerId)
+            // Agarrou no meio do movimento: para onde está, sem pulo
+            target.current = current.current
+            motion.current.dragging = true
+            motion.current.v = 0
+            node.style.cursor = "grabbing"
         }
         const onMove = (event: PointerEvent) => {
             if (pointer !== event.pointerId) return
             const dx = event.clientX - lastX
             lastX = event.clientX
-            target.current += (input.current.flip ? dx : -dx) * input.current.dragMultiplier
+            target.current += input.current.flip ? dx : -dx
+            history.push({ x: target.current, t: event.timeStamp })
+            if (history.length > 8) history.shift()
+            motion.current.wake()
         }
         const onUp = (event: PointerEvent) => {
             if (pointer !== event.pointerId) return
             pointer = null
-            if (node.hasPointerCapture(event.pointerId))
-                node.releasePointerCapture(event.pointerId)
+            if (node.hasPointerCapture(event.pointerId)) node.releasePointerCapture(event.pointerId)
+            node.style.cursor = "grab"
+            // Velocidade dos últimos ~100 ms do gesto, em px/s
+            const end = history[history.length - 1]
+            const start = history.find((h) => end.t - h.t <= 100) ?? history[0]
+            const ms = Math.max(1, end.t - start.t)
+            const still = event.timeStamp - end.t > 80 // dedo parado antes de soltar
+            const v = event.type === "pointercancel" || still ? 0 : ((end.x - start.x) / ms) * 1000
+            // Onde o arremesso pararia (desaceleração de rolagem da Apple) e a foto mais perto dali
+            const d = 0.998
+            const projected = current.current + ((v / 1000) * d) / (1 - d)
+            target.current = snapTo(projected)
+            const m = motion.current
+            m.dragging = false
+            m.v = v
+            m.zeta = Math.abs(v) > 400 ? 0.85 : 1 // um leve quique só quando houve arremesso
+            m.wake()
         }
 
         node.addEventListener("pointerdown", onDown)
@@ -303,6 +397,11 @@ export default function SmoothScrollSlider({
             node.removeEventListener("pointercancel", onUp)
         }
     }, [])
+
+    // Mudou o tamanho da tela: redesenha no lugar
+    useEffect(() => {
+        motion.current.wake()
+    }, [width, slides.length])
 
     return (
         <div
@@ -335,12 +434,13 @@ export default function SmoothScrollSlider({
                         borderRadius: radius,
                         overflow: "hidden",
                         background: slide.src ? "#111" : placeholderFill(i),
-                        willChange: "transform, filter",
+                        willChange: "transform",
                         transform: "translate3d(0, -50%, 0)",
                         pointerEvents: "none",
                     }}
                 >
-                   {slide.src ? (
+                    <div aria-hidden style={{ position: "absolute", inset: 0, background: "#000", opacity: 0, zIndex: 1, pointerEvents: "none" }} />
+                    {slide.src ? (
                         <img
                             src={slide.src}
                             alt={slide.alt || ""}

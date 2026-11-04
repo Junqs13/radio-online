@@ -66,6 +66,7 @@ export default function RockMagneticCarousel(props: any) {
     const list = items ?? [];
     const count = list.length;
     const containerRef = useRef<HTMLDivElement>(null);
+    const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
     const [factors, setFactors] = useState<number[]>(() => list.map(() => 0));
     const [open, setOpen] = useState<number | null>(null);
 
@@ -85,14 +86,19 @@ export default function RockMagneticCarousel(props: any) {
 
     const startLoop = () => {
         if (loopRef.current) return;
-        const step = () => {
+        let last = 0;
+        const step = (now: number) => {
             const tgt = targetRef.current;
             const cur = curRef.current;
+            // Passo por tempo, não por quadro: igual em telas de 60 ou 120 Hz
+            const dt = last ? Math.min((now - last) / 1000, 0.05) : 1 / 60;
+            last = now;
+            const k = 1 - Math.pow(1 - 0.2, dt * 60);
             let moving = false;
             for (let i = 0; i < cur.length; i++) {
                 const d = (tgt[i] ?? 0) - cur[i];
                 if (Math.abs(d) > 0.001) {
-                    cur[i] += d * 0.2;
+                    cur[i] += d * k;
                     moving = true;
                 } else {
                     cur[i] = tgt[i] ?? 0;
@@ -150,14 +156,14 @@ export default function RockMagneticCarousel(props: any) {
     return (
         <div data-section="lendas" className="w-full max-w-7xl mx-auto px-6 lg:px-16 py-6 flex flex-col relative z-10">
             <div className="mb-6 space-y-2">
-                <span data-reveal="title" className="text-xs uppercase tracking-[0.3em] text-red-500 font-bold flex items-center gap-2">
+                <span data-reveal="title" className="text-xs uppercase tracking-[0.14em] text-red-500 font-bold flex items-center gap-2">
                     <Sparkles className="w-4 h-4" /> Arquivos Secretos do Rock
                 </span>
                 <h2 data-reveal="up" className="text-3xl sm:text-4xl font-black tracking-tight text-white">Lendas & Histórias</h2>
                 <p className="text-gray-400 text-xs sm:text-sm">Toque numa lenda e a história abre como um livro. A cada visita aparecem lendas diferentes.</p>
             </div>
 
-            <div data-reveal="zoom" className="-mx-6 px-6 overflow-x-auto lg:overflow-visible [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div data-reveal="zoom" className="-mx-6 px-6 scroll-px-6 overflow-x-auto max-lg:snap-x max-lg:snap-mandatory lg:overflow-visible [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <div
                 ref={containerRef}
                 style={{
@@ -176,7 +182,7 @@ export default function RockMagneticCarousel(props: any) {
             >
                 {/* Enquanto carrega: cards vazios no lugar, para a página não pular */}
                 {items === null && Array.from({ length: 6 }, (_, i) => (
-                    <div key={`ph-${i}`} className="rounded-3xl border border-white/5 bg-white/[0.03] animate-pulse flex-none" style={{ width: collapsedWidth, height: collapsedHeight }} />
+                    <div key={`ph-${i}`} className="rounded-3xl border border-white/5 bg-white/[0.03] motion-safe:animate-pulse flex-none" style={{ width: collapsedWidth, height: collapsedHeight }} />
                 ))}
 
                 {list.map((item, i) => {
@@ -185,6 +191,9 @@ export default function RockMagneticCarousel(props: any) {
                     return (
                         <div
                             key={item.id || i}
+                            ref={(el) => {
+                                cardRefs.current[i] = el;
+                            }}
                             role="button"
                             tabIndex={0}
                             aria-label={`Abrir a história: ${item.artist}`}
@@ -203,11 +212,10 @@ export default function RockMagneticCarousel(props: any) {
                                 flex: "none",
                                 width,
                                 height,
-                                transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
                                 willChange: "width, height",
                                 position: "relative",
                             }}
-                            className="rounded-3xl overflow-hidden cursor-pointer shadow-2xl border border-white/10 relative group focus-visible:outline-2 focus-visible:outline-red-500"
+                            className="snap-start rounded-3xl overflow-hidden cursor-pointer shadow-2xl border border-white/10 relative group focus-visible:outline-2 focus-visible:outline-red-500"
                         >
                             {/* Foto, ou degradê com o nome da banda quando não há foto */}
                             {!item.src ? (
@@ -232,9 +240,9 @@ export default function RockMagneticCarousel(props: any) {
 
                             {/* Nome da banda e o convite para abrir */}
                             <div className="absolute bottom-6 left-6 right-6 z-10">
-                                <span className="text-[10px] uppercase tracking-widest text-red-400 font-bold block mb-1">{i === 0 ? "Novidade" : "Ícone"}</span>
+                                <span className="text-[0.6875rem] uppercase tracking-widest text-red-400 font-bold block mb-1">{i === 0 ? "Novidade" : "Ícone"}</span>
                                 <h4 className="text-white font-black text-sm truncate">{item.artist}</h4>
-                                <span className="mt-2 inline-flex items-center gap-1 text-[10px] uppercase tracking-widest text-white/70 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity">
+                                <span className="mt-2 inline-flex items-center gap-1 text-[0.6875rem] uppercase tracking-widest text-white/70 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 [@media(hover:none)]:opacity-100 transition-opacity">
                                     <BookOpen className="w-3 h-3" /> Ler
                                 </span>
                             </div>
@@ -244,7 +252,7 @@ export default function RockMagneticCarousel(props: any) {
                 })}
             </div>
             </div>
-            {open !== null && list[open] && <LegendBook item={list[open]} onClose={close} />}
+            {open !== null && list[open] && <LegendBook item={list[open]} origin={cardRefs.current[open]} onClose={close} />}
         </div>
     );
 }

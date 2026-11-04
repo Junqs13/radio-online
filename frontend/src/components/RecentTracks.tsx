@@ -60,7 +60,7 @@ export default function RecentTracks() {
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
               {track.request && (
-                <span className="text-[11px] text-red-300 flex items-center gap-1" title="Pedido de ouvinte">
+                <span className="text-xs text-red-300 flex items-center gap-1" title="Pedido de ouvinte">
                   <Heart className="w-3 h-3" /> pedido
                 </span>
               )}

@@ -256,7 +256,7 @@ export default function AdminDashboard() {
                     <Music className="w-4 h-4 text-red-500" />
                     <div>
                       <h4 className="font-bold text-xs truncate max-w-[120px]">{item.title}</h4>
-                      <p className="text-[10px] text-gray-400">{item.artist || 'Desconhecido'}</p>
+                      <p className="text-[0.6875rem] text-gray-400">{item.artist || 'Desconhecido'}</p>
                     </div>
                   </div>
                 </div>

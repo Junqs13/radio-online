@@ -68,7 +68,7 @@ function SlotCard({ slot, onRemove, overlay = false }: { slot: BoardSlot; onRemo
       } ${dragging ? 'opacity-30' : ''} ${overlay ? 'shadow-2xl shadow-black/60 rotate-2 border-red-500/60 bg-[#111]' : ''}`}
     >
       <div className="absolute top-0 left-0 w-1 h-full" style={{ backgroundColor: slot.color }} />
-      <div className="flex items-center justify-between text-[11px] text-gray-400 gap-2">
+      <div className="flex items-center justify-between text-xs text-gray-400 gap-2">
         <span className="flex items-center gap-1">
           <Clock className="w-3 h-3" /> {slot.startTime} - {slot.endTime}
         </span>
@@ -211,7 +211,7 @@ export default function ScheduleBoard({
               <div key={day} className="snap-start flex-shrink-0 w-[230px] bg-white/[0.02] border border-white/10 rounded-2xl p-3 space-y-2">
                 <div className="flex items-center justify-between border-b border-white/5 pb-2">
                   <span className="text-xs font-bold uppercase tracking-widest text-red-400">{DAYS[day]}</span>
-                  <span className="text-[11px] text-gray-500">{daySlots.length} blocos</span>
+                  <span className="text-xs text-gray-500">{daySlots.length} blocos</span>
                 </div>
                 {daySlots.length === 0 ? (
                   <p className="text-xs text-gray-400 py-6 text-center">Auto-DJ o dia todo</p>

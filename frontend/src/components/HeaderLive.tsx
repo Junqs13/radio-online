@@ -22,7 +22,7 @@ export function HeaderClock({ className = '' }: { className?: string }) {
 
   const program = nowPlaying.program?.title;
   return (
-    <div className={`flex items-center gap-2.5 text-[11px] uppercase tracking-widest text-gray-400 ${className}`} title="Horário de Brasília">
+    <div className={`flex items-center gap-2.5 text-xs uppercase tracking-widest text-gray-400 ${className}`} title="Horário de Brasília">
       <span className="font-brand text-sm text-[#F4EDE0] tabular-nums tracking-[0.12em]" aria-label={now ? `${now[0]} horas e ${now[1]} minutos` : undefined}>
         {now ? now[0] : '--'}
         <span className="clock-colon">:</span>
@@ -46,8 +46,8 @@ export function HeaderPlay() {
       onClick={toggle}
       aria-label={isPlaying ? 'Pausar a rádio' : 'Ouvir a rádio ao vivo'}
       aria-pressed={isPlaying}
-      className={`flex items-center gap-2 rounded-full border px-3.5 py-2 text-[11px] font-semibold uppercase tracking-widest transition-colors cursor-pointer ${
-        isPlaying ? 'border-red-500/60 bg-red-600/20 text-red-200' : 'border-white/15 text-gray-200 hover:border-red-500/60 hover:text-white'
+      className={`glass flex items-center gap-2 rounded-full px-3.5 py-2 text-xs font-semibold uppercase tracking-wider cursor-pointer ${
+        isPlaying ? 'is-on text-red-100' : 'text-gray-100'
       }`}
     >
       <span className={`eq ${state} ${isPlaying ? 'text-red-400' : 'text-gray-400'}`} aria-hidden>

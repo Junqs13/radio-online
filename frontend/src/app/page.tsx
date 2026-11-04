@@ -17,6 +17,7 @@ import StickyPlayer from '@/components/StickyPlayer';
 import { PlayerProvider } from '@/components/PlayerContext';
 import { startAnalytics } from '@/lib/analytics';
 import { startReveal } from '@/lib/reveal';
+import { startGlass } from '@/lib/glass';
 import ProgramGrid from '@/components/ProgramGrid';
 import ContactSection from '@/components/ContactSection';
 import CuriosityPost from '@/components/CuriosityPost';
@@ -53,18 +54,27 @@ export default function Home() {
   useEffect(() => {
     startAnalytics(); // estatísticas próprias do site, sem cookie
     const stopReveal = startReveal(); // entradas no scroll (data-reveal)
+    const stopGlass = startGlass(); // luz do vidro líquido seguindo o ponteiro
+
+    // Topo ganha o esmaecimento de borda só quando há conteúdo passando por baixo dele
+    const onScroll = () => {
+      if (window.scrollY > 8) document.documentElement.dataset.scrolled = '';
+      else delete document.documentElement.dataset.scrolled;
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
     const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     // Na primeira visita a abertura cobre a tela por menos de um segundo: o topo entra depois dela
-    const afterIntro = document.documentElement.classList.contains('intro-play') && !calm ? 0.7 : 0;
+    const afterIntro = document.documentElement.classList.contains('intro-play') && !calm ? 0.45 : 0;
 
     const ctx = gsap.context(() => {
       // Abertura: selo, título e frase entram em sequência
       if (heroRef.current) {
         gsap.fromTo(
           heroRef.current.children,
-          { opacity: 0, y: 60, filter: 'blur(10px)' },
-          { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.3, stagger: 0.18, ease: 'power3.out', delay: afterIntro },
+          { opacity: 0, y: 24 },
+          { opacity: 1, y: 0, duration: 0.6, stagger: 0.08, ease: 'power3.out', delay: afterIntro },
         );
       }
       if (calm) return;
@@ -107,6 +117,8 @@ export default function Home() {
 
     return () => {
       stopReveal();
+      stopGlass();
+      window.removeEventListener('scroll', onScroll);
       ctx.revert();
     };
   }, []);
@@ -121,7 +133,7 @@ export default function Home() {
         <ScrollLineBackground />
 
         {/* HEADER REATIVO */}
-        <header className="fixed top-0 left-0 w-full z-50 backdrop-blur-2xl bg-[#050507]/70 border-b border-white/5 px-5 sm:px-8 lg:px-16 py-4 lg:py-5 flex flex-wrap items-center justify-between gap-y-3 transition-all">
+        <header className="header-edge fixed top-0 left-0 w-full z-50 backdrop-blur-2xl bg-[#050507]/70 px-5 sm:px-8 lg:px-16 py-4 lg:py-5 flex flex-wrap items-center justify-between gap-y-3 transition-all">
           <a href="#home" aria-label="Antena Rock, voltar ao início" className="flex items-center gap-2.5 group">
             <BrandMark size={40} simple className="group-hover:scale-105 transition-transform" />
             <BrandWordmark />
@@ -138,7 +150,7 @@ export default function Home() {
 
         {/* CENA 1: HERO */}
         <section id="home" className="relative min-h-[72vh] flex flex-col items-center justify-center text-center px-6 pt-24 pb-8 z-10">
-          <div className="hero-glow absolute w-[600px] h-[600px] bg-red-600/15 rounded-full blur-[140px] pointer-events-none -top-32 -left-32 animate-pulse"></div>
+          <div className="hero-glow absolute w-[600px] h-[600px] bg-red-600/15 rounded-full blur-[140px] pointer-events-none -top-32 -left-32"></div>
           <div className="absolute w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[140px] pointer-events-none -bottom-32 -right-32"></div>
 
           <div ref={heroRef} className="max-w-4xl z-10 space-y-6">
@@ -198,7 +210,7 @@ export default function Home() {
         {/* MANIFESTO */}
         <section id="historia" className="py-12 px-6 lg:px-16 max-w-5xl mx-auto text-center relative z-10">
           <div ref={manifestoRef} className="space-y-6">
-            <h2 data-reveal="title" className="text-xs uppercase tracking-[0.4em] text-red-500 font-bold">O Manifesto</h2>
+            <h2 data-reveal="title" className="text-xs uppercase tracking-[0.14em] text-red-500 font-bold">O Manifesto</h2>
             <h3 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
               <Words text="De Sorocaba para o mundo, no volume que o rock merece." />
             </h3>
@@ -215,7 +227,7 @@ export default function Home() {
         <section id="programacao" className="py-10 px-6 lg:px-16 max-w-7xl mx-auto relative z-10">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 gap-4">
             <div>
-              <h2 data-reveal="title" className="text-xs uppercase tracking-[0.4em] text-red-500 font-bold mb-2">Grade de Conteúdo</h2>
+              <h2 data-reveal="title" className="text-xs uppercase tracking-[0.14em] text-red-500 font-bold mb-2">Grade de Conteúdo</h2>
               <h3 data-reveal="up" className="text-3xl font-black tracking-tight">No ar e a seguir hoje</h3>
             </div>
           </div>
@@ -237,7 +249,7 @@ export default function Home() {
         {/* SMOOTH SCROLL SLIDER */}
         <section className="py-8 bg-transparent overflow-hidden relative z-10">
           <div className="max-w-7xl mx-auto px-6 lg:px-16 mb-6">
-            <h2 data-reveal="title" className="text-xs uppercase tracking-[0.4em] text-red-500 font-bold mb-1">Galeria Dinâmica</h2>
+            <h2 data-reveal="title" className="text-xs uppercase tracking-[0.14em] text-red-500 font-bold mb-1">Galeria Dinâmica</h2>
             <h3 className="text-2xl font-black tracking-tight">Destaques Visuais & Comunidade</h3>
           </div>
           <div data-reveal="zoom" className="w-full h-[380px]">
@@ -246,11 +258,11 @@ export default function Home() {
         </section>
 
         {/* RODAPÉ */}
-        <footer className="border-t border-white/10 pt-12 pb-28 px-8 lg:px-16 text-center text-xs text-gray-500 space-y-6 relative z-10 bg-[#050507]/90 backdrop-blur-md">
+        <footer className="border-t border-white/10 pt-12 pb-28 px-8 lg:px-16 text-center text-xs text-gray-400 space-y-6 relative z-10 bg-[#050507]/90 backdrop-blur-md">
           <div className="flex flex-col items-center gap-3">
             <BrandMark size={64} />
             <BrandWordmark />
-            <p className="font-semibold text-[10px] tracking-[0.35em] text-[#CFC8DA] uppercase">{SITE.slogan}</p>
+            <p className="font-semibold text-[0.6875rem] tracking-[0.35em] text-[#CFC8DA] uppercase">{SITE.slogan}</p>
           </div>
 
           <div className="flex justify-center">
@@ -258,7 +270,7 @@ export default function Home() {
           </div>
 
           <p>© {new Date().getFullYear()} Antena Rock · Sorocaba, SP · <a href="#fale-conosco" className="hover:text-white">Fale conosco</a></p>
-          <p className="text-[11px] text-gray-600 max-w-xl mx-auto">
+          <p className="text-xs text-gray-400 max-w-xl mx-auto">
             Contamos visitas, cliques e tempo ouvindo para melhorar a rádio. Não usamos cookies de anúncio, não guardamos seu IP e
             a cidade é estimada pela conexão. Se o seu navegador pede para não rastrear, nada é registrado.
           </p>

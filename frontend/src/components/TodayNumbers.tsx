@@ -75,7 +75,7 @@ export default function TodayNumbers() {
 
   return (
     <div ref={ref} data-section="numeros-de-hoje" className="rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.03] to-transparent px-6 py-6 sm:px-10">
-      <p className="text-[10px] uppercase tracking-[0.35em] text-gray-400 font-bold mb-4">Hoje na Antena, desde a meia-noite</p>
+      <p className="text-[0.6875rem] uppercase tracking-[0.14em] text-gray-400 font-bold mb-4">Hoje na Antena, desde a meia-noite</p>
       <dl className="grid grid-cols-3 gap-4 sm:gap-8">
         {items.map((it) => (
           <div key={it.label} className="flex flex-col gap-1">

@@ -6,7 +6,7 @@ import { API_URL } from '@/lib/config';
 import { SITE } from '@/lib/site';
 
 const field =
-  'w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:border-red-500 transition-colors';
+  'w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-gray-400 focus:outline-none focus:border-red-500 transition-colors';
 
 export default function ContactSection() {
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '', website: '' });
@@ -43,7 +43,7 @@ export default function ContactSection() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
       <div className="lg:col-span-2 space-y-4">
-        <h2 className="text-xs uppercase tracking-[0.4em] text-red-500 font-bold">Fale conosco</h2>
+        <h2 className="text-xs uppercase tracking-[0.14em] text-red-500 font-bold">Fale conosco</h2>
         <h3 className="text-3xl sm:text-4xl font-black tracking-tight">Manda um alô para a rádio</h3>
         <p className="text-gray-400 text-sm leading-relaxed">
           Sugestão de banda, ideia de programa, parceria ou só um recado. As mensagens chegam direto para a equipe da Antena Rock.
@@ -79,7 +79,7 @@ export default function ContactSection() {
         <button
           type="submit"
           disabled={sending}
-          className="w-full sm:w-auto bg-red-600 hover:bg-red-700 disabled:opacity-60 px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 cursor-pointer"
+          className="glass glass-red w-full sm:w-auto disabled:opacity-60 text-white px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 cursor-pointer"
         >
           <Send className="w-4 h-4" /> {sending ? 'Enviando...' : 'Enviar mensagem'}
         </button>

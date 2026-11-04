@@ -140,7 +140,7 @@ export default function AdminRequestsPage() {
           </div>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full border ${STATUS[req.status].cls}`}>{STATUS[req.status].label}</span>
+          <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${STATUS[req.status].cls}`}>{STATUS[req.status].label}</span>
           {req.status === 'pending' && (
             <>
               <button

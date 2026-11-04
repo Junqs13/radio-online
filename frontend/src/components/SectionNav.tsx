@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { ArrowUp } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { useCalm } from '@/lib/useCalm';
 import { scrollToTarget } from '@/lib/scrollTo';
 
 const SECTIONS = [
@@ -94,7 +96,7 @@ export default function SectionNav() {
       <nav
         ref={stripRef}
         aria-label="Seções"
-        className="xl:hidden order-last w-full flex gap-5 overflow-x-auto text-[11px] uppercase tracking-wider text-gray-400 font-medium -mb-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="xl:hidden order-last w-full flex gap-5 overflow-x-auto text-xs uppercase tracking-wider text-gray-400 font-medium -mb-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {SECTIONS.map((s) => link(s, true))}
       </nav>
@@ -105,6 +107,7 @@ export default function SectionNav() {
 /** Botão redondo que aparece depois da primeira tela e leva de volta ao topo */
 export function BackToTop() {
   const [show, setShow] = useState(false);
+  const calm = useCalm();
   useEffect(() => {
     const on = () => setShow(window.scrollY > window.innerHeight * 1.2);
     on();
@@ -112,15 +115,17 @@ export function BackToTop() {
     return () => window.removeEventListener('scroll', on);
   }, []);
   return (
-    <button
+    <motion.button
       onClick={() => scrollToTarget(0)}
       aria-label="Voltar ao topo"
       tabIndex={show ? 0 : -1}
-      className={`fixed right-4 sm:right-6 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-40 w-11 h-11 rounded-full border border-white/15 bg-[#0c0c10]/90 backdrop-blur-xl text-gray-200 hover:text-white hover:border-red-500/60 flex items-center justify-center shadow-xl transition-all duration-300 cursor-pointer ${
-        show ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
-      }`}
+      initial={false}
+      animate={{ opacity: show ? 1 : 0, y: show || calm ? 0 : 16 }}
+      transition={calm ? { duration: 0.15 } : { type: 'spring', bounce: 0, duration: 0.35 }}
+      style={{ pointerEvents: show ? 'auto' : 'none' }}
+      className="glass fixed right-4 sm:right-6 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-40 w-11 h-11 rounded-full text-gray-100 flex items-center justify-center cursor-pointer"
     >
       <ArrowUp className="w-5 h-5" />
-    </button>
+    </motion.button>
   );
 }

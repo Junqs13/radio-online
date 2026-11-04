@@ -241,12 +241,12 @@ export default function AdminMediaPage() {
                       <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: p.color }} />
                       <span className="truncate">{p.title}</span>
                     </span>
-                    <span className="text-[11px] text-gray-400 flex-shrink-0">{hours(p.weeklyMinutes)}</span>
+                    <span className="text-xs text-gray-400 flex-shrink-0">{hours(p.weeklyMinutes)}</span>
                   </div>
                   <p className="text-xs text-gray-300">
                     {p.wholeLibrary ? `Acervo inteiro (${p.tracks} músicas)` : `${p.tracks} ${p.tracks === 1 ? 'música' : 'músicas'}`}
                   </p>
-                  <ul className="text-[11px] text-gray-500 space-y-0.5">
+                  <ul className="text-xs text-gray-500 space-y-0.5">
                     {p.schedule.map((line) => (
                       <li key={line}>{line}</li>
                     ))}
@@ -364,13 +364,13 @@ function WhereItPlays({
 }) {
   const u = usage?.usage[item.id];
   if (!usage || !u) return null;
-  if (item.enabled === false) return <p className="text-[11px] text-gray-500 mt-1">Fora da rotação: não toca em nenhum programa.</p>;
+  if (item.enabled === false) return <p className="text-xs text-gray-500 mt-1">Fora da rotação: não toca em nenhum programa.</p>;
 
   const chip = (p: UsageProgram) => (
     <span
       key={p.id}
       title={p.schedule.join(' · ')}
-      className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full border border-white/10 bg-white/5 text-gray-200"
+      className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border border-white/10 bg-white/5 text-gray-200"
     >
       <span className="w-1.5 h-1.5 rounded-full" style={{ background: p.color }} />
       {p.title}
@@ -381,10 +381,10 @@ function WhereItPlays({
     const own = u.programs.map((id) => progById.get(id)).filter(Boolean) as UsageProgram[];
     return (
       <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-        <span className="text-[11px] text-gray-500">Vinheta:</span>
-        {own.length ? own.map(chip) : <span className="text-[11px] text-gray-300">{u.rule}</span>}
+        <span className="text-xs text-gray-500">Vinheta:</span>
+        {own.length ? own.map(chip) : <span className="text-xs text-gray-300">{u.rule}</span>}
         {own.length > 0 && own[0].schedule.length > 0 && (
-          <span className="text-[11px] text-gray-500">{own[0].schedule.join(' · ')}</span>
+          <span className="text-xs text-gray-500">{own[0].schedule.join(' · ')}</span>
         )}
       </div>
     );
@@ -392,13 +392,13 @@ function WhereItPlays({
 
   const own = u.programs.map((id) => progById.get(id)).filter(Boolean) as UsageProgram[];
   if (!own.length && !wholeLib.length)
-    return <p className="text-[11px] text-amber-400 mt-1">Não entra em nenhum programa da grade. Ligue a pasta a um programa.</p>;
+    return <p className="text-xs text-amber-400 mt-1">Não entra em nenhum programa da grade. Ligue a pasta a um programa.</p>;
   return (
     <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-      <span className="text-[11px] text-gray-500">Toca em:</span>
+      <span className="text-xs text-gray-500">Toca em:</span>
       {own.map(chip)}
       {wholeLib.length > 0 && (
-        <span className="text-[11px] text-gray-400" title={wholeLib.map((p) => `${p.title}: ${p.schedule.join(' · ')}`).join('\n')}>
+        <span className="text-xs text-gray-400" title={wholeLib.map((p) => `${p.title}: ${p.schedule.join(' · ')}`).join('\n')}>
           {own.length ? '+ ' : ''}
           {wholeLib.length === 1 ? wholeLib[0].title : `${wholeLib.length} programas com o acervo inteiro (${wholeLib.map((p) => p.title).join(', ')})`}
         </span>
