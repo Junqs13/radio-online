@@ -234,10 +234,51 @@ ${amostra(C.palco, 'Palco', 'fundo', true)}${amostra(C.valvula, 'Válvula', 'tex
 mkdirSync(join(SAIDA, '6-logos'), { recursive: true });
 for (const t of ['color', 'white', 'black']) writeFileSync(join(SAIDA, '6-logos', `simbolo-${{ color: 'cor', white: 'branco', black: 'preto' }[t]}.svg`), marca(1000, t));
 
+// 8. Lançamento: três posts que formam uma linha no perfil (as faixas de baixo continuam de um para o outro)
+const faixasTrio = (i) => `<div style="position:absolute;left:0;right:0;bottom:0;height:40px">
+${[[10, 1], [6, 0.6], [3, 0.35]].map(([h, o], k) => `<div style="height:${h * 0.8}px;margin-top:${k ? 10 : 0}px;opacity:${o};background:linear-gradient(90deg,${C.sinal},${C.neon});background-size:3240px 100%;background-position:-${i * 1080}px 0"></div>`).join('')}</div>`;
+const rodapeTrio = (i) => `<div style="position:absolute;left:84px;right:84px;bottom:92px;display:flex;align-items:center;justify-content:space-between">
+<div style="display:flex;align-items:center;gap:20px">${marca(76)}${nomeLinha(44)}</div>
+<div style="font:500 28px SG;color:#a8a1b3">antenarock.com.br</div></div>${faixasTrio(i)}`;
+const fundoTrio = (i) => `background:radial-gradient(70% 50% at ${[0, 50, 100][i]}% ${[0, 0, 100][i]}%, rgba(${i === 2 ? '124,58,237' : '225,29,46'},.30), transparent 70%),radial-gradient(60% 45% at ${[100, 50, 0][i]}% 100%, rgba(${i === 2 ? '225,29,46' : '124,58,237'},.22), transparent 70%),${C.palco};`;
+const chip = (t, px = 30) => `<span style="display:inline-block;padding:${px * 0.55}px ${px * 0.9}px;border-radius:999px;border:1.5px solid rgba(255,255,255,.2);background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.03));font:600 ${px}px SG;color:${C.valvula};margin:0 12px 14px 0">${t}</span>`;
+
+add('8-lancamento/1-chegou.png', 1080, 1350, `${ondas(540, 470, 190, 70, 9, 0.07)}
+<div style="position:absolute;left:0;right:0;top:110px;display:flex;justify-content:center"><div style="display:flex;align-items:center;gap:18px">${ponto(20)}${rotulo('Estamos no ar', 32)}</div></div>
+<div style="position:absolute;left:0;right:0;top:200px;display:flex;flex-direction:column;align-items:center">
+${marca(290)}<div style="margin-top:40px">${nome(140, { alinhar: 'center' })}</div>
+<div style="font:600 44px/1.35 SG;text-align:center;margin-top:50px;color:${C.valvula}">Rádio online de rock,<br>24 horas por dia.</div>
+<div style="font:500 32px SG;color:#a8a1b3;margin-top:20px">De Sorocaba para o mundo.</div></div>
+<div style="position:absolute;left:0;right:0;bottom:84px;text-align:center;font:600 34px SG;letter-spacing:2px;color:${C.valvula}">antenarock.com.br</div>${faixasTrio(0)}`, fundoTrio(0));
+
+add('8-lancamento/2-o-que-toca.png', 1080, 1350, `${ondas(980, 200, 120, 70, 7, 0.06)}
+<div style="position:absolute;left:84px;right:84px;top:110px;bottom:250px;display:flex;flex-direction:column">
+<div>
+${rotulo('O que toca', 32)}
+<div style="font:700 100px/1.02 SG;letter-spacing:-2px;margin-top:40px">Do rock dos anos 50 ao de hoje.</div>
+<div style="font:500 42px/1.35 SG;color:#d9d2e3;margin-top:40px">Tem Raul e Legião, tem Iron Maiden e Elvis. Nacional e internacional, sem parar.</div></div>
+<div style="margin-top:auto">${['Classic Rock', 'Rock Nacional', 'Anos 70', 'Heavy Metal', 'Hard Rock', 'Alternativo', 'Rock and Roll'].map((t) => chip(t, 34)).join('')}</div></div>
+${rodapeTrio(1)}`, fundoTrio(1));
+
+add('8-lancamento/3-peca-sua-musica.png', 1080, 1350, `${ondas(100, 200, 120, 70, 7, 0.06)}
+<div style="position:absolute;left:84px;right:84px;top:110px;bottom:250px;display:flex;flex-direction:column">
+<div>
+${rotulo('Pedidos abertos', 32)}
+<div style="font:700 100px/1.02 SG;letter-spacing:-2px;margin-top:40px">A próxima quem escolhe é você.</div></div>
+<div style="margin-top:auto;border-radius:40px;border:1.5px solid rgba(255,255,255,.12);background:linear-gradient(160deg,rgba(255,255,255,.06),rgba(255,255,255,.01));padding:44px">
+<div style="display:flex;align-items:center;gap:20px"><div style="width:72px;height:72px;border-radius:20px;background:rgba(225,29,46,.18);border:1.5px solid rgba(225,29,46,.45);display:grid;place-items:center">${await icone('music-2', 40, C.sinal, 2)}</div>
+<div style="font:700 40px SG">Peça sua música</div></div>
+<div style="margin-top:30px;height:84px;border-radius:22px;border:1.5px solid rgba(255,255,255,.12);background:rgba(0,0,0,.35);display:flex;align-items:center;gap:18px;padding:0 28px;font:500 30px SG;color:#8f889c">${await icone('search', 32, '#8f889c', 2)} Música ou artista</div>
+<div style="margin-top:28px">${['Algo pesado', 'Um clássico nacional', 'Me surpreenda'].map((t) => chip(t, 26)).join('')}</div>
+<div style="margin-top:14px;height:88px;border-radius:24px;background:linear-gradient(180deg,#e8394a,#a3101f);box-shadow:0 0 50px rgba(225,29,46,.4);display:grid;place-items:center;font:700 30px SG;letter-spacing:4px;color:#fff">ENVIAR PEDIDO</div></div>
+<div style="font:500 34px/1.35 SG;color:#d9d2e3;margin-top:36px">Escolha no site. Ela entra na fila e toca na rádio.</div></div>
+${rodapeTrio(2)}`, fundoTrio(2));
+
 // ---------- Render ----------
 const nav = await chromium.launch();
 const pg = await nav.newPage();
 for (const [arq, w, h, html, transparente] of P) {
+  if (process.env.SO && !arq.startsWith(process.env.SO)) continue; // SO=8-lancamento gera só essa pasta
   const f = join(TMP, arq.replace(/\//g, '__') + '.html');
   writeFileSync(f, html);
   await pg.setViewportSize({ width: w, height: h });
