@@ -291,3 +291,16 @@ html[data-scrolled] .header-edge::after { opacity: 1; }
 @media (prefers-reduced-motion: reduce) {
   :where(button, [role='button'], summary, input[type='submit'], a.press):active { transform: none; }
 }
+
+/* ---------- Matérias: a foto do card chega um pouco mais perto ao passar o mouse ---------- */
+@layer components {
+  .materia-card .capa-img { transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+  @media (hover: hover) {
+    .materia-card:hover .capa-img { transform: scale(1.04); }
+  }
+  .materia-card:active { transform: scale(0.985); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .materia-card .capa-img { transition: none; }
+  .materia-card:hover .capa-img { transform: none; }
+}

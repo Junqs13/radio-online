@@ -1,27 +1,34 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useCalm } from '@/lib/useCalm';
 import { Play, Pause, Volume2, VolumeX, Loader2 } from 'lucide-react';
 import { usePlayer } from './PlayerContext';
 
 /**
- * Barra fixa no rodapé. Aparece quando o card do player sai da tela,
+ * Barra fixa no rodapé. Na home aparece quando o card do player sai da tela,
  * então quem desce a página continua com play, música atual e volume à mão.
+ * Nas outras páginas (matérias), onde não há o card, fica sempre visível.
  */
 export default function StickyPlayer({ watchId = 'player' }: { watchId?: string }) {
   const { nowPlaying, isPlaying, loading, volume, muted, toggle, setVolume, toggleMute } = usePlayer();
   const [visible, setVisible] = useState(false);
   const calm = useCalm();
+  const pathname = usePathname();
 
   useEffect(() => {
     const el = document.getElementById(watchId);
-    if (!el) return;
+    if (!el) {
+      setVisible(true);
+      return;
+    }
     const io = new IntersectionObserver(([entry]) => setVisible(!entry.isIntersecting), { threshold: 0 });
     io.observe(el);
     return () => io.disconnect();
-  }, [watchId]);
+  }, [watchId, pathname]);
 
   return (
     // Sobe e desce pelo mesmo caminho, numa mola sem quique que começa de onde está
@@ -50,13 +57,13 @@ export default function StickyPlayer({ watchId = 'player' }: { watchId?: string 
             )}
           </button>
 
-          <a href="#player" tabIndex={visible ? 0 : -1} className="min-w-0 flex-1 leading-tight">
+          <Link href="/#player" tabIndex={visible ? 0 : -1} className="min-w-0 flex-1 leading-tight">
             <span className="flex items-center gap-1.5 text-[0.6875rem] uppercase tracking-widest text-red-500 font-bold">
               <span className={`w-1.5 h-1.5 rounded-full bg-red-500 ${isPlaying ? 'motion-safe:animate-pulse' : ''}`} /> Antena Rock ao vivo
             </span>
             <span className="block text-sm font-bold text-white truncate">{nowPlaying.title}</span>
             <span className="block text-xs text-gray-400 truncate">{nowPlaying.artist}</span>
-          </a>
+          </Link>
 
           <button
             onClick={toggleMute}

@@ -13,8 +13,6 @@ import InteractiveGrid from '@/components/InteractiveGrid';
 import ScrollLineBackground from '@/components/ScrollLineBackground'; 
 import SongRequestWidget from '@/components/SongRequestWidget';
 import LivePlayer from '@/components/LivePlayer';
-import StickyPlayer from '@/components/StickyPlayer';
-import { PlayerProvider } from '@/components/PlayerContext';
 import { startAnalytics } from '@/lib/analytics';
 import { startReveal } from '@/lib/reveal';
 import { startGlass } from '@/lib/glass';
@@ -22,7 +20,8 @@ import ProgramGrid from '@/components/ProgramGrid';
 import ContactSection from '@/components/ContactSection';
 import CuriosityPost from '@/components/CuriosityPost';
 import SmoothScrollSlider from '@/components/SmoothScrollSlider';
-import SectionNav, { BackToTop } from '@/components/SectionNav';
+import SectionNav from '@/components/SectionNav';
+import MateriasHome from '@/components/materias/MateriasHome';
 import { HeaderClock, HeaderPlay } from '@/components/HeaderLive';
 import ReactiveMark from '@/components/ReactiveMark';
 import NowTicker from '@/components/NowTicker';
@@ -124,7 +123,7 @@ export default function Home() {
   }, []);
 
   return (
-    <PlayerProvider>
+    <>
     <IntroSplash />
     <SmoothScroll>
       <div className="min-h-screen bg-[#050507] text-white selection:bg-red-600 selection:text-white font-sans overflow-x-hidden relative">
@@ -196,6 +195,9 @@ export default function Home() {
         <section id="lendas" className="py-2 bg-transparent relative">
           <RockMagneticCarousel />
         </section>
+
+        {/* MATÉRIAS MAIS RECENTES (somem se ainda não houver nenhuma publicada) */}
+        <MateriasHome />
 
         {/* ÚLTIMAS TOCADAS + CURIOSIDADE DO DIA */}
         <section className="py-6 px-6 lg:px-16 max-w-6xl mx-auto relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
@@ -278,8 +280,6 @@ export default function Home() {
 
       </div>
     </SmoothScroll>
-    <StickyPlayer />
-    <BackToTop />
-    </PlayerProvider>
+    </>
   );
 }

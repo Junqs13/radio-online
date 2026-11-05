@@ -1,19 +1,22 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { ArrowUp } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useCalm } from '@/lib/useCalm';
 import { scrollToTarget } from '@/lib/scrollTo';
 
-const SECTIONS = [
+// page: item que abre outra página. Na home ele acende quando o bloco de mesmo id passa pela tela.
+const SECTIONS: readonly { id: string; label: string; page?: string }[] = [
   { id: 'player', label: 'Ao vivo' },
   { id: 'pedidos', label: 'Pedidos' },
   { id: 'lendas', label: 'Lendas' },
+  { id: 'materias', label: 'Matérias', page: '/materias' },
   { id: 'historia', label: 'Manifesto' },
   { id: 'programacao', label: 'Grade' },
   { id: 'fale-conosco', label: 'Fale conosco' },
-] as const;
+];
 
 /** Qual seção está passando pelo terço de cima da tela agora */
 function useActiveSection() {
@@ -53,9 +56,13 @@ const go = (e: React.MouseEvent, id: string) => {
   history.replaceState(null, '', `#${id}`);
 };
 
-/** Menu do topo que acende a seção onde a pessoa está. No celular vira uma faixa que rola para o lado. */
-export default function SectionNav() {
-  const active = useActiveSection();
+/**
+ * Menu do topo que acende a seção onde a pessoa está. No celular vira uma faixa que rola para o lado.
+ * current: fora da home (ex.: "materias"), os itens viram links de volta para as seções da home.
+ */
+export default function SectionNav({ current }: { current?: string }) {
+  const spied = useActiveSection();
+  const active = current ?? spied;
   const stripRef = useRef<HTMLElement>(null);
 
   // No celular, mantém o item aceso visível dentro da faixa
@@ -68,6 +75,24 @@ export default function SectionNav() {
 
   const link = (s: (typeof SECTIONS)[number], mobile: boolean) => {
     const on = active === s.id;
+    const cls = `relative flex-shrink-0 transition-colors ${on ? 'text-white' : 'hover:text-white'} ${mobile ? 'py-1' : 'py-1.5'}`;
+    const bar = (
+      <span
+        aria-hidden
+        className={`absolute left-0 right-0 -bottom-0.5 h-[2px] rounded-full bg-gradient-to-r from-red-600 to-purple-600 origin-left transition-transform duration-300 ${
+          on ? 'scale-x-100' : 'scale-x-0'
+        }`}
+      />
+    );
+    // Outra página, ou uma seção da home vista de fora dela: navegação normal do Next (a rádio segue tocando)
+    if (s.page || current) {
+      return (
+        <Link key={s.id} href={s.page ?? `/#${s.id}`} data-id={s.id} aria-current={on ? (current ? 'page' : 'location') : undefined} className={cls}>
+          {s.label}
+          {bar}
+        </Link>
+      );
+    }
     return (
       <a
         key={s.id}
@@ -75,15 +100,10 @@ export default function SectionNav() {
         data-id={s.id}
         onClick={(e) => go(e, s.id)}
         aria-current={on ? 'location' : undefined}
-        className={`relative flex-shrink-0 transition-colors ${on ? 'text-white' : 'hover:text-white'} ${mobile ? 'py-1' : 'py-1.5'}`}
+        className={cls}
       >
         {s.label}
-        <span
-          aria-hidden
-          className={`absolute left-0 right-0 -bottom-0.5 h-[2px] rounded-full bg-gradient-to-r from-red-600 to-purple-600 origin-left transition-transform duration-300 ${
-            on ? 'scale-x-100' : 'scale-x-0'
-          }`}
-        />
+        {bar}
       </a>
     );
   };
