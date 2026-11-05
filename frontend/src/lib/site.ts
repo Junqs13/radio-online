@@ -9,7 +9,7 @@ export const SITE = {
   state: 'SP',
   country: 'BR',
   // E-mail público de contato (opcional). Vazio = não aparece no site.
-  email: '',
+  email: 'antenarock@antenarock.com.br',
   social: {
     instagram: '',
     youtube: '',
