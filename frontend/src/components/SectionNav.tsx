@@ -10,9 +10,9 @@ import { scrollToTarget } from '@/lib/scrollTo';
 // page: item que abre outra página. Na home ele acende quando o bloco de mesmo id passa pela tela.
 const SECTIONS: readonly { id: string; label: string; page?: string }[] = [
   { id: 'player', label: 'Ao vivo' },
-  { id: 'pedidos', label: 'Pedidos' },
-  { id: 'lendas', label: 'Lendas' },
   { id: 'materias', label: 'Matérias', page: '/materias' },
+  { id: 'lendas', label: 'Lendas' },
+  { id: 'pedidos', label: 'Pedidos' },
   { id: 'historia', label: 'Manifesto' },
   { id: 'programacao', label: 'Grade' },
   { id: 'fale-conosco', label: 'Fale conosco' },

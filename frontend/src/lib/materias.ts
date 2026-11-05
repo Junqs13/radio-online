@@ -4,7 +4,7 @@
 export const MATERIAS_URL = process.env.NEXT_PUBLIC_MATERIAS_SUPABASE_URL || 'https://kjvbngcouygwfuuylzsh.supabase.co';
 export const MATERIAS_KEY = process.env.NEXT_PUBLIC_MATERIAS_SUPABASE_KEY || 'sb_publishable_XvcHgpqqn6vJOl58pxkOCw_OGG7PY6a';
 
-/** Matérias entram e saem do ar pelo painel: as páginas buscam de novo a cada 5 minutos */
+/** Só o sitemap guarda a resposta (5 minutos). Lista e matéria buscam a cada visita, para bater com o painel na hora. */
 export const MATERIAS_REVALIDATE = 300;
 export const POR_PAGINA = 12;
 
@@ -46,12 +46,12 @@ export const isCategoria = (v: unknown): v is Categoria => typeof v === 'string'
 
 const RESUMO = 'id,titulo,slug,linha_fina,categoria,imagem_url,publicada_em';
 
-/** Consulta a view pelo REST do Supabase. No servidor, a resposta fica guardada por 5 minutos. */
-async function consulta(params: URLSearchParams, extra: Record<string, string> = {}) {
+/** Consulta a view pelo REST do Supabase. Sem guardar resposta, a não ser que peça (o sitemap pede). */
+async function consulta(params: URLSearchParams, extra: Record<string, string> = {}, guardar = false) {
   const init: RequestInit & { next?: { revalidate: number } } = {
     headers: { apikey: MATERIAS_KEY, Accept: 'application/json', ...extra },
   };
-  if (typeof window === 'undefined') init.next = { revalidate: MATERIAS_REVALIDATE };
+  if (guardar && typeof window === 'undefined') init.next = { revalidate: MATERIAS_REVALIDATE };
   else init.cache = 'no-store';
   const res = await fetch(`${MATERIAS_URL}/rest/v1/materias_site?${params}`, init);
   if (!res.ok) throw new Error(`Matérias: resposta ${res.status}`);
@@ -97,7 +97,7 @@ export async function relacionadas(cat: string, slugAtual: string, quantas = 3) 
 /** Tudo que precisa entrar no sitemap */
 export async function slugsParaSitemap() {
   const p = new URLSearchParams({ select: 'slug,updated_at', order: 'publicada_em.desc', limit: '5000' });
-  return (await (await consulta(p)).json()) as { slug: string; updated_at: string }[];
+  return (await (await consulta(p, {}, true)).json()) as { slug: string; updated_at: string }[];
 }
 
 const dia = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', day: '2-digit', month: '2-digit' });

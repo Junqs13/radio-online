@@ -13,7 +13,7 @@ import { buscarMateria, categoria, relacionadas, type MateriaResumo } from '@/li
 import { SITE } from '@/lib/site';
 
 // Revalida a cada 5 minutos: edição feita no painel aparece, e matéria retirada do ar vira 404
-export const revalidate = 300;
+export const dynamic = 'force-dynamic';
 
 type Props = { params: Promise<{ slug: string }> };
 

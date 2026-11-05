@@ -184,28 +184,26 @@ export default function Home() {
           <NowTicker />
         </div>
 
-        {/* WIDGET DE PEDIDOS DE MÚSICA */}
-        <section id="pedidos" className="py-6 px-6 lg:px-16 max-w-4xl mx-auto relative z-10">
-          <div data-reveal="tilt">
-            <SongRequestWidget />
-          </div>
-        </section>
+        {/* MATÉRIAS MAIS RECENTES (somem se ainda não houver nenhuma publicada) */}
+        <MateriasHome />
 
         {/* CARROSSEL MAGNÉTICO DE LENDAS DO ROCK */}
         <section id="lendas" className="py-2 bg-transparent relative">
           <RockMagneticCarousel />
         </section>
 
-        {/* MATÉRIAS MAIS RECENTES (somem se ainda não houver nenhuma publicada) */}
-        <MateriasHome />
-
-        {/* ÚLTIMAS TOCADAS + CURIOSIDADE DO DIA */}
+        {/* ÚLTIMAS TOCADAS + PEDIDOS + CURIOSIDADE DO DIA */}
         <section className="py-6 px-6 lg:px-16 max-w-6xl mx-auto relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-          <div data-reveal="left">
+          <div data-reveal="left" className="lg:sticky lg:top-24">
             <RecentTracks />
           </div>
-          <div data-reveal="right">
-            <CuriosityPost />
+          <div className="flex flex-col gap-8">
+            <div id="pedidos" data-reveal="right" className="scroll-mt-24 [&>div]:!my-0">
+              <SongRequestWidget />
+            </div>
+            <div data-reveal="right">
+              <CuriosityPost />
+            </div>
           </div>
         </section>
 

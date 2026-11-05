@@ -16,8 +16,9 @@ export default function MateriasHome() {
       .catch(() => setItens([]));
   }, []);
 
-  if (!itens?.length) return null;
-  const [primeira, ...resto] = itens;
+  // Sem nenhuma publicada, o bloco some. Enquanto carrega, guarda o espaço para a página não pular.
+  if (itens && !itens.length) return null;
+  const [primeira, ...resto] = itens ?? [];
 
   return (
     <section id="materias" className="py-10 px-6 lg:px-16 max-w-7xl mx-auto relative z-10">
@@ -31,11 +32,22 @@ export default function MateriasHome() {
         </Link>
       </div>
       <div data-reveal-stagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        <MateriaCard m={primeira} destaque />
-        {/* Em duas colunas, a terceira ficaria sozinha na linha: só aparece com três colunas */}
-        {resto.slice(0, 3).map((m, i) => (
-          <MateriaCard key={m.id} m={m} className={i === 2 ? 'sm:hidden lg:flex' : ''} />
-        ))}
+        {primeira ? (
+          <>
+            <MateriaCard m={primeira} destaque />
+            {/* Em duas colunas, a terceira ficaria sozinha na linha: só aparece com três colunas */}
+            {resto.slice(0, 3).map((m, i) => (
+              <MateriaCard key={m.id} m={m} className={i === 2 ? 'sm:hidden lg:flex' : ''} />
+            ))}
+          </>
+        ) : (
+          <>
+            <div aria-hidden className="sm:col-span-2 lg:col-span-3 h-72 md:h-80 rounded-3xl bg-white/[0.04] animate-pulse" />
+            {[0, 1, 2].map((i) => (
+              <div key={i} aria-hidden className={`h-72 rounded-3xl bg-white/[0.04] animate-pulse ${i === 2 ? 'sm:hidden lg:block' : ''}`} />
+            ))}
+          </>
+        )}
       </div>
     </section>
   );

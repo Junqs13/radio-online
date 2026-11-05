@@ -7,7 +7,7 @@ import MateriaCard from '@/components/materias/MateriaCard';
 import { CATEGORIAS, categoria, isCategoria, listarMaterias, totalDePaginas, type Categoria, type MateriaResumo } from '@/lib/materias';
 
 // Busca de novo no Supabase a cada 5 minutos: matéria publicada ou retirada no painel aparece ou some sozinha
-export const revalidate = 300;
+export const dynamic = 'force-dynamic';
 
 type Props = { searchParams: Promise<{ categoria?: string; pagina?: string }> };
 
