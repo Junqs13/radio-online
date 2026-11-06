@@ -274,6 +274,75 @@ ${rotulo('Pedidos abertos', 32)}
 <div style="font:500 34px/1.35 SG;color:#d9d2e3;margin-top:36px">Escolha no site. Ela entra na fila e toca na rádio.</div></div>
 ${rodapeTrio(2)}`, fundoTrio(2));
 
+// 9. Posts da semana de 6 a 9 de novembro de 2026 (grade real; fatos conferidos em fonte)
+const lampada = await icone('lightbulb', 40, C.sinal, 2);
+const relogio = await icone('clock', 34, C.sinal, 2);
+/** Curiosidade com a chamada para o especial do dia logo acima do rodapé */
+const curiosidade = (texto, tag, chamada) => `${ondas(980, 160, 120, 70, 6, 0.06)}
+<div style="position:absolute;left:84px;top:96px">${rotulo(`${lampada} Curiosidade`, 30)}</div>
+<div style="position:absolute;left:84px;right:84px;top:200px;bottom:340px;display:flex;flex-direction:column;justify-content:center">
+<div style="font:600 54px/1.32 SG;color:${C.valvula};letter-spacing:-0.5px">${texto}</div>
+<div style="font:600 36px SG;color:${C.sinal};margin-top:40px">${tag}</div></div>
+<div style="position:absolute;left:84px;right:84px;bottom:220px;display:flex;align-items:center;gap:16px;padding-top:28px;border-top:1px solid rgba(255,255,255,.12);font:600 32px SG;color:#d9d2e3">${relogio}${chamada}</div>
+${rodapePost}`;
+/** Agenda: título grande e linhas de horário */
+const agenda = (rot, titulo, linhas, alto = 74) => `${ondas(980, 160, 120, 70, 6, 0.06)}
+<div style="position:absolute;left:84px;right:84px;top:92px">${rotulo(`${await_cal} ${rot}`, 28)}
+<div style="font:700 ${titulo.length > 22 ? 84 : 96}px/1.02 SG;letter-spacing:-2px;margin-top:30px;color:${C.valvula}">${titulo}</div></div>
+<div style="position:absolute;left:84px;right:84px;bottom:250px">${linhas.map(([h, t, e, cor]) => `<div style="display:flex;align-items:center;gap:30px;height:${alto}px;border-bottom:1px solid rgba(255,255,255,.08)">
+<div style="font:700 ${alto > 90 ? 40 : 34}px SG;color:${C.valvula};width:${alto > 90 ? 130 : 110}px;font-variant-numeric:tabular-nums">${h}</div>
+<div style="width:10px;height:${alto * 0.55}px;border-radius:5px;background:${cor}"></div>
+<div style="flex:1;font:600 ${alto > 90 ? 42 : 36}px SG;color:${C.valvula};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t}</div>
+<div style="font:500 ${alto > 90 ? 28 : 24}px SG;color:#a8a1b3;white-space:nowrap">${e}</div></div>`).join('')}</div>
+${rodapePost}`;
+
+const SEMANA = '9-semana-6-a-9-nov';
+add(`${SEMANA}/1-sex-a-sexta-a-noite.png`, 1080, 1350, agenda('Hoje, sexta', 'Sexta à noite tem rock até de madrugada.', [
+  ['19:00', 'Arena Rock', 'Hard Rock', '#db2777'],
+  ['21:00', 'Antena Rock Mix', 'Rock', '#dc2626'],
+  ['23:00', 'Especial Ramones', 'Especial', '#15803d'],
+  ['23:30', 'Madrugada Antena Rock', 'Rock', '#7c3aed'],
+], 110));
+add(`${SEMANA}/2-sex-b-curiosidade-ramones.png`, 1080, 1350, curiosidade(
+  'Os Ramones não eram irmãos. O sobrenome que todos adotaram veio de Paul Ramon, o nome falso que Paul McCartney usava no começo dos Beatles. A ideia foi do baixista Dee Dee.',
+  '#Ramones', 'Hoje, 23h: Especial Ramones'));
+add(`${SEMANA}/3-sab-a-grade-de-sabado.png`, 1080, 1350, agenda('Programação', 'Sábado', [
+  ['07:00', 'Antena Rock Mix', 'Rock', '#dc2626'],
+  ['10:00', 'Rock Anos 70', 'Rock / Anos 70', '#ca8a04'],
+  ['13:00', 'Rock Nacional', 'Rock Brasileiro', '#16a34a'],
+  ['14:00', 'Pesado', 'Heavy Metal', '#64748b'],
+  ['17:00', 'Arena Rock', 'Hard Rock', '#db2777'],
+  ['20:00', 'Clássicos Internacionais', 'Classic Rock', '#ea580c'],
+  ['23:00', 'Especial The Smiths', 'Especial', '#4338ca'],
+  ['23:30', 'Madrugada Antena Rock', 'Rock', '#7c3aed'],
+], 86));
+add(`${SEMANA}/4-sab-b-curiosidade-black-sabbath.png`, 1080, 1350, curiosidade(
+  'Aos 17 anos, no último dia de trabalho numa fábrica, Tony Iommi perdeu as pontas de dois dedos da mão direita, a que faz os acordes. Ele fez dedais com um frasco de detergente derretido e afinou a guitarra mais grave para doer menos.',
+  '#BlackSabbath', 'Hoje, 14h às 17h: Pesado'));
+add(`${SEMANA}/5-dom-a-domingo-pesado.png`, 1080, 1350, agenda('Hoje, domingo', 'Domingo termina no volume máximo.', [
+  ['17:00', 'Rock Anos 70', 'Rock / Anos 70', '#ca8a04'],
+  ['20:00', 'Pesado', 'Heavy Metal', '#64748b'],
+  ['23:00', 'Especial Iron Maiden', 'Especial', '#334155'],
+], 120));
+add(`${SEMANA}/6-dom-b-curiosidade-iron-maiden.png`, 1080, 1350, curiosidade(
+  'O Eddie nasceu de um desenho que Derek Riggs tinha feito pensando num disco punk. O Iron Maiden adotou a figura, deu mais cabelo para ela e estreou o mascote na capa do primeiro álbum, em 1980.',
+  '#IronMaiden', 'Hoje, 23h: Especial Iron Maiden'));
+add(`${SEMANA}/7-seg-a-grade-da-semana.png`, 1080, 1350, agenda('Segunda a sexta', 'A semana na Antena Rock', [
+  ['07:00', 'Clássicos Internacionais', 'Classic Rock', '#ea580c'],
+  ['09:00', 'Antena Rock Mix', 'Rock', '#dc2626'],
+  ['11:00', 'Especial Elvis Presley', 'Rock and Roll', '#be123c'],
+  ['12:00', 'Rock Nacional', 'Rock Brasileiro', '#16a34a'],
+  ['13:00', 'Rock Anos 70', 'Rock / Anos 70', '#ca8a04'],
+  ['15:00', 'Pesado', 'Heavy Metal', '#64748b'],
+  ['17:00', 'Alternativo', 'Rock Alternativo', '#0891b2'],
+  ['19:00', 'Arena Rock', 'Hard Rock', '#db2777'],
+  ['21:00', 'Antena Rock Mix', 'Rock', '#dc2626'],
+  ['23:00', 'Especial da noite', 'Muda a cada dia', '#7c3aed'],
+], 72));
+add(`${SEMANA}/8-seg-b-curiosidade-queen.png`, 1080, 1350, curiosidade(
+  'Em 1975, o DJ Kenny Everett recebeu uma cópia de Bohemian Rhapsody com o pedido de não tocar. Tocou 14 vezes em dois dias. Os ouvintes ligaram pedindo a música e a gravadora lançou o single.',
+  '#Queen', 'Hoje, 23h: Especial Queen'));
+
 // ---------- Render ----------
 const nav = await chromium.launch();
 const pg = await nav.newPage();
