@@ -343,6 +343,116 @@ add(`${SEMANA}/8-seg-b-curiosidade-queen.png`, 1080, 1350, curiosidade(
   'Em 1975, o DJ Kenny Everett recebeu uma cópia de Bohemian Rhapsody com o pedido de não tocar. Tocou 14 vezes em dois dias. Os ouvintes ligaram pedindo a música e a gravadora lançou o single.',
   '#Queen', 'Hoje, 23h: Especial Queen'));
 
+// 10. Semana de 10 a 15 de novembro: pouco texto, mais forma
+/** Disco de vinil com sulcos, brilho e rótulo colorido (texto curto no rótulo) */
+function vinil(size, cor, rotuloTxt = '', rotuloPx = 0) {
+  const id = `v${gid++}`;
+  const sulcos = Array.from({ length: 34 }, (_, i) => `<circle cx="500" cy="500" r="${200 + i * 8.6}" fill="none" stroke="rgba(255,255,255,${i % 5 === 0 ? 0.09 : 0.035})" stroke-width="1.4"/>`).join('');
+  return `<svg width="${size}" height="${size}" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
+<defs><radialGradient id="d${id}" cx=".5" cy=".5" r=".5"><stop offset=".3" stop-color="#17151d"/><stop offset="1" stop-color="#060509"/></radialGradient>
+<linearGradient id="b${id}" x1="0" y1="0" x2="1" y2="1"><stop offset=".25" stop-color="rgba(255,255,255,0)"/><stop offset=".5" stop-color="rgba(255,255,255,.13)"/><stop offset=".75" stop-color="rgba(255,255,255,0)"/></linearGradient>
+<radialGradient id="l${id}" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="${cor}"/><stop offset="1" stop-color="${cor}" stop-opacity=".75"/></radialGradient></defs>
+<circle cx="500" cy="500" r="498" fill="url(#d${id})"/>${sulcos}
+<circle cx="500" cy="500" r="498" fill="url(#b${id})"/>
+<circle cx="500" cy="500" r="175" fill="url(#l${id})"/>
+<circle cx="500" cy="500" r="150" fill="none" stroke="rgba(0,0,0,.18)" stroke-width="2"/>
+${rotuloTxt ? `<text x="500" y="${500 + rotuloPx * 0.36}" text-anchor="middle" font-family="Orbitron" font-weight="800" font-size="${rotuloPx}" fill="${C.palco}">${rotuloTxt}</text>` : ''}
+<circle cx="500" cy="500" r="14" fill="${C.palco}"/></svg>`;
+}
+/** Barras de equalizador (vermelho para roxo) */
+const equalizador = (w, h, n = 22, seed = 3) => {
+  let s = seed;
+  const r = () => ((s = (s * 9301 + 49297) % 233280) / 233280);
+  const bw = w / n;
+  return `<svg width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="eq${seed}" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="${C.sinal}"/><stop offset="1" stop-color="${C.neon}"/></linearGradient></defs>
+${Array.from({ length: n }, (_, i) => { const bh = h * (0.18 + 0.82 * Math.abs(Math.sin(i * 0.55 + seed)) * (0.55 + 0.45 * r())); return `<rect x="${i * bw + bw * 0.18}" y="${h - bh}" width="${bw * 0.64}" height="${bh}" rx="${bw * 0.18}" fill="url(#eq${seed})"/>`; }).join('')}</svg>`;
+};
+const contorno = (txt, px, cor = C.valvula, fam = 'Orbitron', peso = 800, extra = '') => `<div style="font:${peso} ${px}px/0.9 ${fam};color:transparent;-webkit-text-stroke:${Math.max(2, px / 70)}px ${cor};${extra}">${txt}</div>`;
+const marcaCanto = `<div style="position:absolute;z-index:5;left:84px;bottom:92px;display:flex;align-items:center;gap:20px">${marca(76)}${nomeLinha(44)}</div>`;
+
+/** Post: especial das 23h. Nome da banda enorme e o disco com 23H no rótulo */
+const especial = (dia, banda, cor) => `${marcaCanto}
+<div style="position:absolute;left:84px;top:96px;display:flex;align-items:center;gap:18px">${ponto(18)}${rotulo(`${dia}, 23h`, 30)}</div>
+<div style="position:absolute;left:84px;right:84px;top:170px;font:700 ${banda.length > 12 ? 118 : 150}px/0.95 SG;letter-spacing:-4px">${banda}</div>
+<div style="position:absolute;right:-200px;bottom:-170px;filter:drop-shadow(0 0 80px ${cor}55)">${vinil(940, cor, '23H', 120)}</div>
+${faixas(0.8, 'bottom:0;height:40px')}`;
+
+/** Post: lenda da semana. Disco grande com o ano no rótulo */
+const lenda = (musica, banda, ano, cor) => `${marcaCanto}
+<div style="position:absolute;left:84px;top:96px">${rotulo('Lenda da semana', 30)}</div>
+<div style="position:absolute;left:84px;right:84px;top:160px"><div style="font:700 ${musica.length > 16 ? 96 : 120}px/0.98 SG;letter-spacing:-3px">${musica}</div>
+<div style="font:500 40px SG;color:#d9d2e3;margin-top:24px">${banda}</div></div>
+<div style="position:absolute;left:50%;bottom:-220px;margin-left:-330px;filter:drop-shadow(0 0 90px ${cor}55)">${vinil(900, cor, ano, 104)}</div>
+${faixas(0.8, 'bottom:0;height:40px')}`;
+
+/** Story de enquete: duas metades e um VS no meio, onde vai o adesivo de enquete */
+const enquete = (a, b) => `<div style="position:absolute;left:0;right:0;top:0;height:960px;background:linear-gradient(180deg,rgba(225,29,46,.0),rgba(225,29,46,.28))"></div>
+<div style="position:absolute;left:0;right:0;bottom:0;height:960px;background:linear-gradient(0deg,rgba(124,58,237,0),rgba(124,58,237,.3))"></div>
+${topoStory}
+<div style="position:absolute;left:0;right:0;top:420px;text-align:center">${rotulo('Qual é a sua?', 34)}</div>
+<div style="position:absolute;left:60px;right:60px;top:520px;height:340px;display:grid;place-items:center;text-align:center;font:700 ${a.length > 10 ? 120 : 170}px/0.95 SG;letter-spacing:-4px">${a}</div>
+<div style="position:absolute;left:50%;top:960px;width:170px;height:170px;margin:-85px 0 0 -85px;border-radius:50%;background:${C.palco};border:3px solid rgba(255,255,255,.25);display:grid;place-items:center;font:800 54px Orbitron">VS</div>
+<div style="position:absolute;left:60px;right:60px;top:1060px;height:340px;display:grid;place-items:center;text-align:center;font:700 ${b.length > 10 ? 120 : 170}px/0.95 SG;letter-spacing:-4px">${b}</div>
+${faixas(1.2, 'bottom:120px')}`;
+
+/** Story: hoje à noite, com disco e botão */
+const storyEspecial = (dia, banda, cor) => `${topoStory}
+<div style="position:absolute;left:0;right:0;top:420px;display:flex;justify-content:center;align-items:center;gap:18px">${ponto(20)}${rotulo(`${dia}, 23h`, 34)}</div>
+<div style="position:absolute;left:60px;right:60px;top:500px;text-align:center;font:700 ${banda.length > 12 ? 120 : 150}px/0.95 SG;letter-spacing:-4px">${banda}</div>
+<div style="position:absolute;left:50%;top:${banda.length > 12 ? 800 : 720}px;margin-left:-330px;filter:drop-shadow(0 0 80px ${cor}66)">${vinil(660, cor, '23H', 110)}</div>
+<div style="position:absolute;left:0;right:0;bottom:470px;text-align:center">${pilula('&#9654; OUÇA AO VIVO')}</div>${espacoLink}
+${faixas(1.2, 'bottom:120px')}`;
+
+const S2 = '10-semana-10-a-15-nov';
+// Terça 10
+add(`${S2}/ter-10-post-1-especial-black-sabbath.png`, 1080, 1350, especial('Hoje', 'Black Sabbath', '#7C3AED'));
+add(`${S2}/ter-10-post-2-lenda-stairway.png`, 1080, 1350, lenda('Stairway to Heaven', 'Led Zeppelin', '1971', '#F59E0B'));
+add(`${S2}/ter-10-story-enquete-zeppelin-sabbath.png`, 1080, 1920, enquete('Zeppelin', 'Sabbath'));
+// Quarta 11
+add(`${S2}/qua-11-post-1-especial-david-bowie.png`, 1080, 1350, especial('Hoje', 'David Bowie', '#06B6D4'));
+add(`${S2}/qua-11-post-2-anos-70.png`, 1080, 1350, `${marcaCanto}
+<div style="position:absolute;left:84px;top:96px;display:flex;align-items:center;gap:18px">${ponto(18)}${rotulo('Hoje, 13h às 15h', 30)}</div>
+<div style="position:absolute;left:0;right:0;top:150px;text-align:center">${contorno('70s', 460, C.valvula, 'SG', 700, 'letter-spacing:-20px')}</div>
+<div style="position:absolute;left:84px;right:84px;top:600px;text-align:center;font:700 64px SG">Rock Anos 70</div>
+<div style="position:absolute;left:0;right:0;bottom:200px;display:flex;justify-content:center;opacity:.9">${equalizador(1080, 360, 24, 7)}</div>
+${faixas(0.8, 'bottom:0;height:40px')}`);
+add(`${S2}/qua-11-story-enquete-70-80.png`, 1080, 1920, enquete('Anos 70', 'Anos 80'));
+// Quinta 12
+add(`${S2}/qui-12-post-1-especial-alice-in-chains.png`, 1080, 1350, especial('Hoje', 'Alice In Chains', '#64748B'));
+add(`${S2}/qui-12-post-2-lenda-back-in-black.png`, 1080, 1350, lenda('Back in Black', 'AC/DC', '1980', '#E11D2E'));
+add(`${S2}/qui-12-story-especial-alice-in-chains.png`, 1080, 1920, storyEspecial('Hoje', 'Alice In Chains', '#64748B'));
+// Sexta 13
+const treze = (story) => `${story ? topoStory : marcaCanto}
+<div style="position:absolute;left:0;right:0;top:${story ? 420 : 200}px;text-align:center">${rotulo('Sexta-feira', story ? 40 : 34)}</div>
+<div style="position:absolute;left:0;right:0;top:${story ? 470 : 250}px;text-align:center;font:800 ${story ? 600 : 560}px/1 Orbitron;letter-spacing:-30px;margin-left:-30px;color:${C.sinal};text-shadow:0 0 80px rgba(225,29,46,.7),0 0 200px rgba(225,29,46,.45)">13</div>
+<div style="position:absolute;left:0;right:0;top:${story ? 1130 : 900}px;display:flex;justify-content:center;gap:${story ? 0 : 60}px;${story ? 'flex-direction:column;align-items:center;gap:26px' : ''}">
+<div style="font:700 ${story ? 62 : 58}px SG">Pesado <span style="color:${C.sinal}">15h</span></div>
+<div style="font:700 ${story ? 62 : 58}px SG">Ramones <span style="color:${C.sinal}">23h</span></div></div>
+${story ? `<div style="position:absolute;left:0;right:0;bottom:470px;text-align:center">${pilula('&#9654; OUÇA AO VIVO')}</div>${espacoLink}${faixas(1.2, 'bottom:120px')}` : faixas(0.8, 'bottom:0;height:40px')}`;
+add(`${S2}/sex-13-post-1-sexta-13.png`, 1080, 1350, treze(false), `background:radial-gradient(55% 40% at 50% 45%, rgba(225,29,46,.35), transparent 75%),${C.palco};`);
+add(`${S2}/sex-13-post-2-especial-ramones.png`, 1080, 1350, especial('Hoje', 'Ramones', '#16A34A'));
+add(`${S2}/sex-13-story-sexta-13.png`, 1080, 1920, treze(true), `background:radial-gradient(60% 30% at 50% 35%, rgba(225,29,46,.35), transparent 75%),${C.palco};`);
+// Sábado 14
+add(`${S2}/sab-14-post-1-especial-the-smiths.png`, 1080, 1350, especial('Hoje', 'The Smiths', '#4338CA'));
+add(`${S2}/sab-14-post-2-lenda-teen-spirit.png`, 1080, 1350, lenda('Smells Like Teen Spirit', 'Nirvana', '1991', '#06B6D4'));
+add(`${S2}/sab-14-story-enquete-nacional-gringo.png`, 1080, 1920, enquete('Nacional', 'Gringo'));
+// Domingo 15 (feriado)
+add(`${S2}/dom-15-post-1-feriado-rock-nacional.png`, 1080, 1350, `${marcaCanto}
+<div style="position:absolute;left:84px;top:96px">${rotulo('Feriado', 30)}</div>
+<div style="position:absolute;left:84px;top:150px">${contorno('15/11', 250, C.valvula, 'Orbitron', 800, 'letter-spacing:-6px')}</div>
+<div style="position:absolute;left:84px;right:84px;top:440px;font:700 96px/1 SG;letter-spacing:-3px">Rock Nacional <span style="color:${C.sinal}">12h</span></div>
+<div style="position:absolute;left:0;right:0;bottom:200px;display:flex;justify-content:center;opacity:.9">${equalizador(1080, 380, 24, 11)}</div>
+${faixas(0.8, 'bottom:0;height:40px')}`);
+add(`${S2}/dom-15-post-2-especial-iron-maiden.png`, 1080, 1350, especial('Hoje', 'Iron Maiden', '#334155'));
+add(`${S2}/dom-15-story-domingo-pesado.png`, 1080, 1920, `${topoStory}
+<div style="position:absolute;left:0;right:0;top:420px;text-align:center">${rotulo('Hoje à noite', 36)}</div>
+<div style="position:absolute;left:0;right:0;top:500px;display:flex;flex-direction:column;align-items:center;gap:10px">
+<div style="font:800 180px/1 Orbitron;letter-spacing:-6px">20H</div><div style="font:700 72px SG;color:#d9d2e3">Pesado</div>
+<div style="width:120px;height:4px;background:linear-gradient(90deg,${C.sinal},${C.neon});margin:40px 0"></div>
+<div style="font:800 180px/1 Orbitron;letter-spacing:-6px;color:${C.sinal}">23H</div><div style="font:700 72px SG;color:#d9d2e3">Iron Maiden</div></div>
+<div style="position:absolute;left:0;right:0;bottom:470px;text-align:center">${pilula('&#9654; OUÇA AO VIVO')}</div>${espacoLink}
+${faixas(1.2, 'bottom:120px')}`);
+
 // ---------- Render ----------
 const nav = await chromium.launch();
 const pg = await nav.newPage();
