@@ -9,6 +9,7 @@ import MateriaCard from '@/components/materias/MateriaCard';
 import Capa from '@/components/materias/Capa';
 import Quando from '@/components/materias/Quando';
 import Markdown from '@/components/materias/Markdown';
+import LeituraTracker from '@/components/materias/LeituraTracker';
 import { buscarMateria, categoria, relacionadas, type MateriaResumo } from '@/lib/materias';
 import { SITE } from '@/lib/site';
 
@@ -103,9 +104,10 @@ export default async function MateriaPage({ params }: Props) {
         </div>
 
         <article className="max-w-3xl mx-auto px-6">
-          <div className="mt-10 space-y-6 text-[1.0625rem] sm:text-lg leading-[1.75] text-gray-300 [text-wrap:pretty]">
+          <div id="materia-corpo" className="mt-10 space-y-6 text-[1.0625rem] sm:text-lg leading-[1.75] text-gray-300 [text-wrap:pretty]">
             <Markdown source={m.corpo_md ?? ''} />
           </div>
+          <LeituraTracker titulo={m.titulo} alvo="materia-corpo" />
 
           {!!m.tags?.length && (
             <ul className="mt-10 flex flex-wrap gap-2" aria-label="Tags">

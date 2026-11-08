@@ -1,7 +1,7 @@
 import express, { Router, Request, Response } from 'express';
 import rateLimit from 'express-rate-limit';
 import { requireAdmin } from '../lib/auth.js';
-import { collect, summary } from '../services/Stats.js';
+import { collect, live, summary } from '../services/Stats.js';
 
 const router = Router();
 
@@ -30,6 +30,15 @@ router.get('/summary', requireAdmin, async (req: Request, res: Response) => {
   } catch (err) {
     console.error('[estatísticas] erro no resumo:', err);
     res.status(500).json({ success: false, error: 'Erro ao montar as estatísticas.' });
+  }
+});
+
+router.get('/live', requireAdmin, async (_req: Request, res: Response) => {
+  try {
+    res.json({ success: true, ...(await live()) });
+  } catch (err) {
+    console.error('[estatísticas] erro no ao vivo:', err);
+    res.status(500).json({ success: false, error: 'Erro ao buscar quem está no site.' });
   }
 });
 

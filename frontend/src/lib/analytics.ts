@@ -20,7 +20,23 @@ let sentMeta = false;
 const leaveHooks: (() => void)[] = [];
 
 /** Chamado antes do último envio quando a pessoa sai ou esconde a aba (ex: fechar a conta do tempo ouvindo) */
-export const onLeave = (cb: () => void) => leaveHooks.push(cb);
+export const onLeave = (cb: () => void) => {
+  leaveHooks.push(cb);
+  return () => {
+    const i = leaveHooks.indexOf(cb);
+    if (i >= 0) leaveHooks.splice(i, 1);
+  };
+};
+
+/** Nova página vista sem recarregar (navegação interna do Next) */
+export function pageview() {
+  if (!started) return;
+  track('pageview');
+  flush();
+}
+
+/** Manda já o que estiver na fila (ex: ao sair de uma matéria pela navegação interna) */
+export const flushNow = () => flush();
 
 const rid = () =>
   (typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`).replace(

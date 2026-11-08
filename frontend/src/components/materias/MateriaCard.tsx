@@ -18,6 +18,7 @@ export default function MateriaCard({
   const c = categoria(m.categoria);
   return (
     <Link
+      data-track={`Matéria: ${m.titulo}`}
       href={`/materias/${m.slug}`}
       className={`materia-card group flex flex-col rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.04] to-transparent overflow-hidden hover:border-white/25 focus-visible:border-red-500 outline-none transition-colors ${
         destaque ? 'sm:col-span-2 lg:col-span-3 md:flex-row' : ''

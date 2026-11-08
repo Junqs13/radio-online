@@ -9,6 +9,8 @@ interface DbipCity {
   city?: string;
   state1?: string;
   country_code?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 const require = createRequire(import.meta.url);
@@ -46,5 +48,12 @@ export async function locate(rawIp: string | undefined) {
   if (!r) return null;
   const hit = (ip.includes(':') ? r.v6 : r.v4).get(ip) as DbipCity | null;
   if (!hit) return null;
-  return { country: hit.country_code || null, region: hit.state1 || null, city: hit.city || null };
+  const coord = (v?: number) => (typeof v === 'number' && Number.isFinite(v) ? Math.round(v * 100) / 100 : null);
+  return {
+    country: hit.country_code || null,
+    region: hit.state1 || null,
+    city: hit.city || null,
+    lat: coord(hit.latitude),
+    lon: coord(hit.longitude),
+  };
 }

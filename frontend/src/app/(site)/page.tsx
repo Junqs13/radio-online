@@ -13,7 +13,6 @@ import InteractiveGrid from '@/components/InteractiveGrid';
 import ScrollLineBackground from '@/components/ScrollLineBackground'; 
 import SongRequestWidget from '@/components/SongRequestWidget';
 import LivePlayer from '@/components/LivePlayer';
-import { startAnalytics } from '@/lib/analytics';
 import { startReveal } from '@/lib/reveal';
 import { startGlass } from '@/lib/glass';
 import ProgramGrid from '@/components/ProgramGrid';
@@ -51,7 +50,6 @@ export default function Home() {
   const manifestoRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    startAnalytics(); // estatísticas próprias do site, sem cookie
     const stopReveal = startReveal(); // entradas no scroll (data-reveal)
     const stopGlass = startGlass(); // luz do vidro líquido seguindo o ponteiro
 

@@ -148,6 +148,11 @@ model StatSession {
   country       String?
   region        String?
   city          String?
+  lat           Float? // centro aproximado da cidade (base de IP), para o mapa
+  lon           Float?
+  // Impressão do IP embaralhada com uma chave que muda todo dia: conta IPs diferentes no dia
+  // sem guardar o IP e sem permitir ligar o mesmo IP entre dias diferentes
+  ipHash        String?     @map("ip_hash")
   device        String? // celular, computador, tablet
   os            String?
   browser       String?
@@ -160,6 +165,7 @@ model StatSession {
 
   @@index([startedAt])
   @@index([visitorId])
+  @@index([lastSeenAt])
   @@map("stat_sessions")
 }
 
@@ -167,7 +173,7 @@ model StatEvent {
   id        Int         @id @default(autoincrement())
   sessionId String      @map("session_id")
   session   StatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  type      String // pageview, click, play, pause, open, like, share
+  type      String // pageview, click, play, pause, open, like, share, read (segundos lendo), scroll (% lido)
   name      String? // o que foi clicado ou aberto
   section   String? // parte da página
   path      String?
@@ -176,5 +182,6 @@ model StatEvent {
 
   @@index([createdAt])
   @@index([type, createdAt])
+  @@index([type, path])
   @@map("stat_events")
 }
