@@ -94,10 +94,16 @@ export async function relacionadas(cat: string, slugAtual: string, quantas = 3) 
   return (await (await consulta(p)).json()) as MateriaResumo[];
 }
 
+/** As mais recentes com o texto, para o feed RSS */
+export async function paraFeed(quantas = 30) {
+  const p = new URLSearchParams({ select: 'titulo,slug,linha_fina,categoria,imagem_url,publicada_em,updated_at', order: 'publicada_em.desc', limit: String(quantas) });
+  return (await (await consulta(p, {}, true)).json()) as (MateriaResumo & { updated_at: string })[];
+}
+
 /** Tudo que precisa entrar no sitemap */
 export async function slugsParaSitemap() {
-  const p = new URLSearchParams({ select: 'slug,updated_at', order: 'publicada_em.desc', limit: '5000' });
-  return (await (await consulta(p, {}, true)).json()) as { slug: string; updated_at: string }[];
+  const p = new URLSearchParams({ select: 'slug,updated_at,imagem_url', order: 'publicada_em.desc', limit: '5000' });
+  return (await (await consulta(p, {}, true)).json()) as { slug: string; updated_at: string; imagem_url: string | null }[];
 }
 
 const dia = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', day: '2-digit', month: '2-digit' });

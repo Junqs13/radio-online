@@ -196,8 +196,10 @@ export default function InteractiveGrid(props: Partial<InteractiveGridProps>) {
         {items.map((item, i) => {
           const isBig = hovered === i;
           const isSmall = !isBig && neighbours.includes(i);
+          // Sem link ainda: vira um bloco comum, sem <a> (link sem endereço é erro de SEO)
+          const Tag = (item.url ? "a" : "div") as "a";
           return (
-            <a
+            <Tag
               key={i}
               href={item.url || undefined}
               target={item.url ? "_blank" : undefined}
@@ -248,7 +250,7 @@ export default function InteractiveGrid(props: Partial<InteractiveGridProps>) {
                   pointerEvents: "none",
                 }}
               />
-            </a>
+            </Tag>
           );
         })}
       </div>

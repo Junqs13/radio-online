@@ -2,6 +2,7 @@
 
 
 import { useEffect, useRef } from 'react';
+import dynamic from 'next/dynamic';
 import { BrandMark, BrandWordmark } from '@/components/BrandLogo';
 import { SITE } from '@/lib/site';
 import SmoothScroll from '@/components/SmoothScroll';
@@ -9,8 +10,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import RecentTracks from '@/components/RecentTracks';
 import RockMagneticCarousel from '@/components/RockMagneticCarousel';
-import InteractiveGrid from '@/components/InteractiveGrid';
-import ScrollLineBackground from '@/components/ScrollLineBackground'; 
+
 import SongRequestWidget from '@/components/SongRequestWidget';
 import LivePlayer from '@/components/LivePlayer';
 import { startReveal } from '@/lib/reveal';
@@ -18,7 +18,10 @@ import { startGlass } from '@/lib/glass';
 import ProgramGrid from '@/components/ProgramGrid';
 import ContactSection from '@/components/ContactSection';
 import CuriosityPost from '@/components/CuriosityPost';
-import SmoothScrollSlider from '@/components/SmoothScrollSlider';
+// Peças só visuais, mais abaixo na página: carregam depois, sem pesar na abertura (velocidade conta no Google)
+const ScrollLineBackground = dynamic(() => import('@/components/ScrollLineBackground'), { ssr: false });
+const SmoothScrollSlider = dynamic(() => import('@/components/SmoothScrollSlider'), { ssr: false });
+const InteractiveGrid = dynamic(() => import('@/components/InteractiveGrid'), { ssr: false });
 import SectionNav from '@/components/SectionNav';
 import MateriasHome from '@/components/materias/MateriasHome';
 import { HeaderClock, HeaderPlay } from '@/components/HeaderLive';
@@ -62,18 +65,9 @@ export default function Home() {
     window.addEventListener('scroll', onScroll, { passive: true });
     const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // Na primeira visita a abertura cobre a tela por menos de um segundo: o topo entra depois dela
-    const afterIntro = document.documentElement.classList.contains('intro-play') && !calm ? 0.45 : 0;
-
+    // A entrada do topo (selo, título e frase) é em CSS, classe .hero-in no globals.css:
+    // assim o título já aparece no primeiro desenho da página, sem esperar o JavaScript (bom para o Google).
     const ctx = gsap.context(() => {
-      // Abertura: selo, título e frase entram em sequência
-      if (heroRef.current) {
-        gsap.fromTo(
-          heroRef.current.children,
-          { opacity: 0, y: 24 },
-          { opacity: 1, y: 0, duration: 0.6, stagger: 0.08, ease: 'power3.out', delay: afterIntro },
-        );
-      }
       if (calm) return;
 
       // Ao descer, o título do topo sobe mais devagar, encolhe e apaga (profundidade)
@@ -150,12 +144,14 @@ export default function Home() {
           <div className="hero-glow absolute w-[600px] h-[600px] bg-red-600/15 rounded-full blur-[140px] pointer-events-none -top-32 -left-32"></div>
           <div className="absolute w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[140px] pointer-events-none -bottom-32 -right-32"></div>
 
-          <div ref={heroRef} className="max-w-4xl z-10 space-y-6">
+          <div ref={heroRef} className="hero-in max-w-4xl z-10 space-y-6">
             <ReactiveMark size={150} className="mx-auto w-28 h-28 sm:w-[150px] sm:h-[150px]" />
 
-            <h1 className="flex flex-col items-center leading-none" aria-label="Antena Rock">
-              <span className="font-brand font-extrabold text-[#F4EDE0] text-2xl sm:text-4xl tracking-[0.55em] pl-[0.55em]">ANTENA</span>
+            <h1 className="flex flex-col items-center leading-none">
+              <span className="font-brand font-extrabold text-[#F4EDE0] text-2xl sm:text-4xl tracking-[0.55em] pl-[0.55em]">ANTENA</span>{' '}
               <span className="font-neon text-[#E11D2E] text-[5.5rem] sm:text-[8rem] lg:text-[10rem] leading-[0.95]">ROCK</span>
+              {/* Para buscadores e leitores de tela: o título completo da página */}
+              <span className="sr-only">, rádio online de rock em Sorocaba</span>
             </h1>
 
             <p className="flex items-center justify-center gap-4 font-semibold text-xs sm:text-sm tracking-[0.35em] text-[#CFC8DA] uppercase">

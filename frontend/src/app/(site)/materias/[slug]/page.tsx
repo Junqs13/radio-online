@@ -73,14 +73,32 @@ export default async function MateriaPage({ params }: Props) {
     keywords: m.tags?.join(', '),
     inLanguage: 'pt-BR',
     mainEntityOfPage: { '@type': 'WebPage', '@id': url },
+    isAccessibleForFree: true,
     author: { '@type': 'Organization', name: SITE.name, url: SITE.url },
-    publisher: { '@type': 'Organization', name: SITE.name, url: SITE.url, logo: { '@type': 'ImageObject', url: `${SITE.url}/icons/icon-512.png` } },
+    publisher: {
+      '@type': 'Organization',
+      '@id': `${SITE.url}/#radio`,
+      name: SITE.name,
+      url: SITE.url,
+      logo: { '@type': 'ImageObject', url: `${SITE.url}/icons/icon-512.png`, width: 512, height: 512 },
+    },
+  };
+  // Trilha que o Google mostra no lugar do endereço: Antena Rock > Matérias > Categoria
+  const trilha = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: SITE.name, item: SITE.url },
+      { '@type': 'ListItem', position: 2, name: 'Matérias', item: `${SITE.url}/materias` },
+      { '@type': 'ListItem', position: 3, name: c.nome, item: `${SITE.url}/materias?categoria=${c.id}` },
+      { '@type': 'ListItem', position: 4, name: m.titulo, item: url },
+    ],
   };
 
   return (
     <div className="min-h-screen bg-[#050507] text-white selection:bg-red-600 selection:text-white font-sans overflow-x-hidden relative">
       {/* "<" escapado para nenhum texto do banco fechar a tag de script */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([jsonLd, trilha]).replace(/</g, '\\u003c') }} />
       <SiteHeader current="materias" />
       <div className="absolute w-[600px] h-[600px] rounded-full blur-[160px] pointer-events-none -top-40 -left-40 opacity-25" style={{ background: c.cor }} aria-hidden />
 

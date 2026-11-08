@@ -3,7 +3,7 @@
 export const SITE = {
   name: 'Antena Rock',
   url: 'https://antenarock.com.br',
-  description: 'Rádio online de rock feita em Sorocaba, SP. Rock nacional e internacional 24 horas no ar.',
+  description: 'Rádio online de rock feita em Sorocaba, SP. Rock nacional e internacional 24 horas no ar: ouça ao vivo e grátis, peça sua música e leia as notícias do rock.',
   slogan: 'O rock não sai do ar.',
   city: 'Sorocaba',
   state: 'SP',

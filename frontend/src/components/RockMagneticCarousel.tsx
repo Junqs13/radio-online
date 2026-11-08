@@ -241,7 +241,7 @@ export default function RockMagneticCarousel(props: any) {
                             {/* Nome da banda e o convite para abrir */}
                             <div className="absolute bottom-6 left-6 right-6 z-10">
                                 <span className="text-[0.6875rem] uppercase tracking-widest text-red-400 font-bold block mb-1">{i === 0 ? "Novidade" : "Ícone"}</span>
-                                <h4 className="text-white font-black text-sm truncate">{item.artist}</h4>
+                                <h3 className="text-white font-black text-sm truncate">{item.artist}</h3>
                                 <span className="mt-2 inline-flex items-center gap-1 text-[0.6875rem] uppercase tracking-widest text-white/70 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 [@media(hover:none)]:opacity-100 transition-opacity">
                                     <BookOpen className="w-3 h-3" /> Ler
                                 </span>

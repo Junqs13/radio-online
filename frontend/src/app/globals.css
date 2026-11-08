@@ -91,6 +91,16 @@ section[id] { scroll-margin-top: 7rem; }
 }
 
 /* ---------- Abertura curta na primeira visita (ver IntroSplash.tsx) ---------- */
+/* Entrada do topo da home: só CSS, para o título aparecer no primeiro desenho (LCP) */
+.hero-in > * { animation: hero-rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: var(--d, 0s); }
+.hero-in > :nth-child(2) { --d: 0.08s; animation-name: hero-rise-solid; } /* o título não some: só desliza */
+.hero-in > :nth-child(3) { --d: 0.16s; }
+.hero-in > :nth-child(4) { --d: 0.24s; }
+html.intro-play .hero-in > * { animation-delay: calc(0.45s + var(--d, 0s)); }
+@keyframes hero-rise { from { opacity: 0; transform: translateY(24px); } }
+@keyframes hero-rise-solid { from { transform: translateY(24px); } }
+@media (prefers-reduced-motion: reduce) { .hero-in > * { animation: none; } }
+
 .intro {
   position: fixed;
   inset: 0;
@@ -113,8 +123,28 @@ section[id] { scroll-margin-top: 7rem; }
 @keyframes intro-wave { from { opacity: 0; } 60% { opacity: 1; filter: drop-shadow(0 0 10px currentColor); } to { opacity: 1; } }
 @keyframes intro-fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @keyframes intro-out { to { opacity: 0; visibility: hidden; } }
-html.intro-seen .intro { display: none; }
-@media (prefers-reduced-motion: reduce) { .intro { display: none; } }
+html.intro-seen /* Entrada do topo da home: só CSS, para o título aparecer no primeiro desenho (LCP) */
+.hero-in > * { animation: hero-rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: var(--d, 0s); }
+.hero-in > :nth-child(2) { --d: 0.08s; animation-name: hero-rise-solid; } /* o título não some: só desliza */
+.hero-in > :nth-child(3) { --d: 0.16s; }
+.hero-in > :nth-child(4) { --d: 0.24s; }
+html.intro-play .hero-in > * { animation-delay: calc(0.45s + var(--d, 0s)); }
+@keyframes hero-rise { from { opacity: 0; transform: translateY(24px); } }
+@keyframes hero-rise-solid { from { transform: translateY(24px); } }
+@media (prefers-reduced-motion: reduce) { .hero-in > * { animation: none; } }
+
+.intro { display: none; }
+@media (prefers-reduced-motion: reduce) { /* Entrada do topo da home: só CSS, para o título aparecer no primeiro desenho (LCP) */
+.hero-in > * { animation: hero-rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: var(--d, 0s); }
+.hero-in > :nth-child(2) { --d: 0.08s; animation-name: hero-rise-solid; } /* o título não some: só desliza */
+.hero-in > :nth-child(3) { --d: 0.16s; }
+.hero-in > :nth-child(4) { --d: 0.24s; }
+html.intro-play .hero-in > * { animation-delay: calc(0.45s + var(--d, 0s)); }
+@keyframes hero-rise { from { opacity: 0; transform: translateY(24px); } }
+@keyframes hero-rise-solid { from { transform: translateY(24px); } }
+@media (prefers-reduced-motion: reduce) { .hero-in > * { animation: none; } }
+
+.intro { display: none; } }
 
 /* ---------- Antena que reage ao cursor (ver ReactiveMark.tsx) ---------- */
 .reactive-mark { --sig: 0; position: relative; }

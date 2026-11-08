@@ -44,9 +44,9 @@ export default function LivePlayer() {
 
         <div className="min-w-0 flex-1 space-y-1">
           <p className="text-xs uppercase tracking-[0.14em] text-gray-400 font-bold">O que toca agora</p>
-          <h2 className="text-2xl sm:text-3xl font-black tracking-tight truncate" title={nowPlaying.title}>
+          <p className="text-2xl sm:text-3xl font-black tracking-tight truncate" title={nowPlaying.title}>
             {nowPlaying.title}
-          </h2>
+          </p>
           <p className="text-sm uppercase tracking-[0.15em] text-red-400 font-bold truncate">{nowPlaying.artist}</p>
           {!isPlaying && <p className="text-xs text-gray-400 pt-1">Aperte o play para ouvir.</p>}
         </div>

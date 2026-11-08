@@ -6,7 +6,7 @@ import { slugsParaSitemap } from '@/lib/materias';
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  let materias: { slug: string; updated_at: string }[] = [];
+  let materias: { slug: string; updated_at: string; imagem_url: string | null }[] = [];
   try {
     materias = await slugsParaSitemap();
   } catch {
@@ -20,6 +20,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(m.updated_at),
       changeFrequency: 'weekly' as const,
       priority: 0.6,
+      ...(m.imagem_url ? { images: [m.imagem_url] } : {}),
     })),
   ];
 }

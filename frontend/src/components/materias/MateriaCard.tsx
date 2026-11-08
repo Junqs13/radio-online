@@ -9,12 +9,16 @@ export default function MateriaCard({
   destaque = false,
   priority = false,
   className = '',
+  nivel = 'h3',
 }: {
   m: MateriaResumo;
   destaque?: boolean;
   priority?: boolean;
   className?: string;
+  /** Nível do título do card: h2 na lista (logo abaixo do h1), h3 dentro de uma seção */
+  nivel?: 'h2' | 'h3';
 }) {
+  const Titulo = nivel;
   const c = categoria(m.categoria);
   return (
     <Link
@@ -39,9 +43,9 @@ export default function MateriaCard({
           <span className="text-gray-500" aria-hidden>·</span>
           <Quando iso={m.publicada_em} className="text-gray-400 normal-case tracking-normal font-medium" />
         </div>
-        <h3 className={`font-bold text-white leading-snug tracking-tight group-hover:text-red-100 transition-colors ${destaque ? 'text-2xl sm:text-3xl' : 'text-lg'}`}>
+        <Titulo className={`font-bold text-white leading-snug tracking-tight group-hover:text-red-100 transition-colors ${destaque ? 'text-2xl sm:text-3xl' : 'text-lg'}`}>
           {m.titulo}
-        </h3>
+        </Titulo>
         {m.linha_fina && <p className={`text-sm text-gray-400 leading-relaxed ${destaque ? 'line-clamp-3' : 'line-clamp-2'}`}>{m.linha_fina}</p>}
       </div>
     </Link>

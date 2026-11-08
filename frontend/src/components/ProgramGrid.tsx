@@ -95,7 +95,7 @@ export default function ProgramGrid() {
               </span>
             )}
           </div>
-          <h4 className="text-xl font-black mb-2">{s.program_title}</h4>
+          <h3 className="text-xl font-black mb-2">{s.program_title}</h3>
           <p className="text-xs text-gray-400 mb-4">Com {s.host}</p>
           <span className="inline-block text-xs uppercase tracking-widest bg-white/5 border border-white/10 px-3 py-1.5 rounded-full text-gray-300 font-semibold">
             {s.category}

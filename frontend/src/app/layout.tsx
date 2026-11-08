@@ -13,7 +13,13 @@ export const metadata: Metadata = {
   description: SITE.description,
   applicationName: "Antena Rock",
   keywords: ["rádio rock", "rádio online", "rádio de rock Sorocaba", "rock Sorocaba", "rádio Sorocaba", "rock nacional", "classic rock", "heavy metal"],
-  alternates: { canonical: "/" },
+  alternates: { canonical: "/", types: { "application/rss+xml": [{ url: "/rss.xml", title: "Matérias da Antena Rock" }] } },
+  // Códigos do Google Search Console e do Bing Webmaster, se forem verificar pela tag (opcional: dá para verificar pelo DNS)
+  verification: {
+    ...(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION } : {}),
+    ...(process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION ? { other: { "msvalidate.01": process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION } } : {}),
+  },
+  robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 } },
   openGraph: {
     type: "website",
     locale: "pt_BR",
@@ -28,16 +34,22 @@ export const metadata: Metadata = {
   // iPhone: "Compartilhar > Adicionar à Tela de Início" abre a rádio como app, sem a barra do Safari
   appleWebApp: { capable: true, title: "Antena Rock", statusBarStyle: "black-translucent" },
   icons: {
-    icon: [{ url: "/icons/favicon-64.png", sizes: "64x64", type: "image/png" }],
+    // O Google mostra o favicon nos resultados: pede tamanho múltiplo de 48 px
+    icon: [
+      { url: "/icons/icon-48.png", sizes: "48x48", type: "image/png" },
+      { url: "/icons/icon-96.png", sizes: "96x96", type: "image/png" },
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
     apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180" }],
   },
 };
 
-// Dados estruturados para o Google entender que é uma rádio de Sorocaba
+// Dados estruturados: a rádio (organização local de Sorocaba) e o site (nome que o Google mostra nos resultados)
 const sameAs = Object.values(SITE.social).filter(Boolean);
-const jsonLd = {
-  "@context": "https://schema.org",
+const RADIO_ID = `${SITE.url}/#radio`;
+const radio = {
   "@type": "RadioStation",
+  "@id": RADIO_ID,
   name: SITE.name,
   url: SITE.url,
   logo: `${SITE.url}/icons/icon-512.png`,
@@ -49,6 +61,21 @@ const jsonLd = {
   openingHours: "Mo-Su 00:00-23:59",
   ...(SITE.email ? { email: SITE.email } : {}),
   ...(sameAs.length ? { sameAs } : {}),
+};
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    radio,
+    {
+      "@type": "WebSite",
+      "@id": `${SITE.url}/#site`,
+      url: SITE.url,
+      name: SITE.name,
+      alternateName: ["Antena Rock Sorocaba", "Rádio Antena Rock"],
+      inLanguage: "pt-BR",
+      publisher: { "@id": RADIO_ID },
+    },
+  ],
 };
 
 export const viewport: Viewport = {

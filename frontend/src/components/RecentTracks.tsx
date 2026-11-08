@@ -54,7 +54,7 @@ export default function RecentTracks() {
                 <Disc className="w-5 h-5" />
               </div>
               <div className="min-w-0">
-                <h4 className="font-bold text-sm text-white truncate">{track.title}</h4>
+                <h3 className="font-bold text-sm text-white truncate">{track.title}</h3>
                 <p className="text-xs text-gray-400 truncate">{track.artist || 'Artista desconhecido'}</p>
               </div>
             </div>

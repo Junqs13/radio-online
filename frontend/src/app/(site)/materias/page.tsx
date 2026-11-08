@@ -19,7 +19,8 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   return {
     title: nome ? `Matérias de ${nome}${n}` : `Matérias${n}`,
     description,
-    alternates: { canonical: `/materias${isCategoria(cat) ? `?categoria=${cat}` : ''}` },
+    // Cada página da lista é a própria versão oficial (a página 2 não aponta para a 1), assim o Google segue até as matérias antigas
+    alternates: { canonical: href(isCategoria(cat) ? cat : undefined, Math.max(1, Math.floor(Number(pagina)) || 1)) },
     openGraph: { type: 'website', url: '/materias', title: 'Matérias | Antena Rock', description, images: ['/og.png'] },
   };
 }
@@ -106,9 +107,9 @@ export default async function MateriasPage({ searchParams }: Props) {
         ) : (
           <>
             <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {primeira && <MateriaCard m={primeira} destaque priority />}
+              {primeira && <MateriaCard m={primeira} destaque priority nivel="h2" />}
               {grade.map((m) => (
-                <MateriaCard key={m.id} m={m} />
+                <MateriaCard key={m.id} m={m} nivel="h2" />
               ))}
             </div>
 
