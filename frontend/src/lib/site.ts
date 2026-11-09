@@ -11,9 +11,9 @@ export const SITE = {
   // E-mail público de contato (opcional). Vazio = não aparece no site.
   email: 'antenarock@antenarock.com.br',
   social: {
-    instagram: '',
+    instagram: 'https://www.instagram.com/radio_antenarock/',
     youtube: '',
-    facebook: '',
+    facebook: 'https://www.facebook.com/radioantenarock',
     whatsapp: '', // ex: https://wa.me/5515999999999
     tiktok: '',
     spotify: '',
