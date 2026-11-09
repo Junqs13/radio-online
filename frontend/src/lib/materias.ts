@@ -1,3 +1,4 @@
+import { API_URL } from './config';
 // Matérias do site. Quem escreve e publica é o sistema geek-news (painel de curadoria);
 // o site só lê a view pública materias_site do Supabase dele, que traz apenas matérias publicadas.
 // A chave abaixo é a publishable: só enxerga essa view, por isso pode ficar no front-end.
@@ -18,6 +19,8 @@ export interface MateriaResumo {
   categoria: Categoria | string;
   imagem_url: string | null;
   publicada_em: string;
+  updated_at?: string;
+  fixada?: boolean; // fixada pelo painel do site: aparece primeiro
 }
 
 export interface Materia extends MateriaResumo {
@@ -44,7 +47,7 @@ export function categoria(id: string) {
 
 export const isCategoria = (v: unknown): v is Categoria => typeof v === 'string' && CATEGORIAS.some((c) => c.id === v);
 
-const RESUMO = 'id,titulo,slug,linha_fina,categoria,imagem_url,publicada_em';
+const RESUMO = 'id,titulo,slug,linha_fina,categoria,imagem_url,publicada_em,updated_at';
 
 /** Consulta a view pelo REST do Supabase. Sem guardar resposta, a não ser que peça (o sitemap pede). */
 async function consulta(params: URLSearchParams, extra: Record<string, string> = {}, guardar = false) {
@@ -58,6 +61,86 @@ async function consulta(params: URLSearchParams, extra: Record<string, string> =
   return res;
 }
 
+// ---------- Ajustes do painel do site ----------
+// O painel do site guarda no banco dele: edições por cima das matérias do geek-news (título, texto, foto,
+// tags, categoria, ocultar, fixar) e as matérias escritas no próprio site. O Supabase do geek-news só é lido.
+interface Ajuste {
+  slug: string;
+  origem: 'geek' | 'site';
+  titulo: string | null;
+  linhaFina: string | null;
+  corpoMd: string | null;
+  categoria: string | null;
+  tags: string[] | null;
+  imagemUrl: string | null;
+  semFoto: boolean;
+  oculta: boolean;
+  fixada: boolean;
+  publicadaEm: string | null;
+  updatedAt: string;
+}
+
+// No servidor, o Next fala com a API pela rede interna do Docker; no navegador, pelo domínio
+const API_SITE = typeof window === 'undefined' ? process.env.INTERNAL_API_URL || API_URL : API_URL;
+/** Foto enviada pelo painel do site (/api/content/images/...) vira endereço completo */
+export const urlImagem = (u: string | null) => (u && u.startsWith('/api/') ? API_URL.replace(/\/api\/?$/, '') + u : u);
+
+async function ajustes(): Promise<Map<string, Ajuste>> {
+  try {
+    const res = await fetch(`${API_SITE}/materias/ajustes`, { cache: 'no-store' });
+    if (!res.ok) throw new Error(String(res.status));
+    const { materias } = (await res.json()) as { materias: Ajuste[] };
+    return new Map(materias.map((a) => [a.slug, a]));
+  } catch {
+    return new Map(); // API fora do ar: o site mostra as do geek-news como vieram
+  }
+}
+
+/** Aplica o ajuste do painel numa matéria do geek-news */
+function aplicar<T extends MateriaResumo & Partial<Materia>>(m: T, a?: Ajuste): T {
+  if (!a) return m;
+  return {
+    ...m,
+    titulo: a.titulo ?? m.titulo,
+    linha_fina: a.linhaFina ?? m.linha_fina,
+    categoria: a.categoria ?? m.categoria,
+    imagem_url: a.semFoto ? null : (urlImagem(a.imagemUrl) ?? m.imagem_url),
+    publicada_em: a.publicadaEm ?? m.publicada_em,
+    updated_at: a.updatedAt > (m.updated_at ?? '') ? a.updatedAt : m.updated_at,
+    fixada: a.fixada,
+    ...(m.corpo_md !== undefined ? { corpo_md: a.corpoMd ?? m.corpo_md } : {}),
+    ...(a.tags ? { tags: a.tags } : {}),
+  };
+}
+
+/** Matéria escrita no painel do site, no mesmo formato das do geek-news */
+const doSite = (a: Ajuste): Materia => ({
+  id: -1,
+  slug: a.slug,
+  titulo: a.titulo ?? '',
+  linha_fina: a.linhaFina,
+  corpo_md: a.corpoMd ?? '',
+  categoria: a.categoria ?? 'outros',
+  tags: a.tags ?? [],
+  imagem_url: a.semFoto ? null : urlImagem(a.imagemUrl),
+  publicada_em: a.publicadaEm ?? a.updatedAt,
+  updated_at: a.updatedAt,
+  fixada: a.fixada,
+});
+
+/** Todas as matérias que estão no ar, já com os ajustes: fixadas primeiro, depois da mais nova para a mais antiga */
+async function todas(guardar = false): Promise<MateriaResumo[]> {
+  const [lista, aj] = await Promise.all([
+    consulta(new URLSearchParams({ select: RESUMO, order: 'publicada_em.desc', limit: '2000' }), {}, guardar).then((r) => r.json() as Promise<MateriaResumo[]>),
+    ajustes(),
+  ]);
+  const geek = lista.map((m) => aplicar(m, aj.get(m.slug))).filter((m) => !aj.get(m.slug)?.oculta);
+  const site = [...aj.values()].filter((a) => a.origem === 'site').map(doSite);
+  return [...geek, ...site].sort(
+    (a, b) => Number(!!b.fixada) - Number(!!a.fixada) || +new Date(b.publicada_em) - +new Date(a.publicada_em),
+  );
+}
+
 /**
  * Página N da lista. A primeira traz uma a mais, porque a mais recente ocupa a linha inteira em destaque
  * e as outras 12 fecham a grade certinho. total = quantas existem ao todo, para a paginação.
@@ -68,42 +151,41 @@ export const totalDePaginas = (total: number) => 1 + Math.ceil(Math.max(0, total
 export async function listarMaterias({ categoria: cat, pagina = 1, porPagina }: { categoria?: Categoria; pagina?: number; porPagina?: number } = {}) {
   const limite = porPagina ?? (pagina <= 1 ? POR_PAGINA + 1 : POR_PAGINA);
   const inicio = porPagina ? (pagina - 1) * porPagina : inicioDaPagina(pagina);
-  const p = new URLSearchParams({ select: RESUMO, order: 'publicada_em.desc', limit: String(limite), offset: String(inicio) });
-  if (cat) p.set('categoria', `eq.${cat}`);
-  const res = await consulta(p, { Prefer: 'count=exact' });
-  const itens = (await res.json()) as MateriaResumo[];
-  const total = Number(res.headers.get('content-range')?.split('/')[1]) || itens.length;
-  return { itens, total };
+  const lista = (await todas()).filter((m) => !cat || m.categoria === cat);
+  return { itens: lista.slice(inicio, inicio + limite), total: lista.length };
 }
 
-export async function buscarMateria(slug: string) {
-  const p = new URLSearchParams({ select: '*', slug: `eq.${slug}`, limit: '1' });
-  const [m] = (await (await consulta(p)).json()) as Materia[];
-  return m ?? null;
+export async function buscarMateria(slug: string): Promise<Materia | null> {
+  const [aj, lista] = await Promise.all([
+    ajustes(),
+    consulta(new URLSearchParams({ select: '*', slug: `eq.${slug}`, limit: '1' })).then((r) => r.json() as Promise<Materia[]>),
+  ]);
+  const a = aj.get(slug);
+  if (a?.origem === 'site') return doSite(a);
+  const m = lista[0];
+  if (!m || a?.oculta) return null;
+  return aplicar(m, a);
 }
 
 /** "Leia também": as mais recentes da mesma categoria, sem repetir a que está aberta */
 export async function relacionadas(cat: string, slugAtual: string, quantas = 3) {
-  const p = new URLSearchParams({
-    select: RESUMO,
-    categoria: `eq.${cat}`,
-    slug: `neq.${slugAtual}`,
-    order: 'publicada_em.desc',
-    limit: String(quantas),
-  });
-  return (await (await consulta(p)).json()) as MateriaResumo[];
+  return (await todas())
+    .filter((m) => m.categoria === cat && m.slug !== slugAtual)
+    .sort((a, b) => +new Date(b.publicada_em) - +new Date(a.publicada_em))
+    .slice(0, quantas);
 }
 
-/** As mais recentes com o texto, para o feed RSS */
+/** As mais recentes, para o feed RSS */
 export async function paraFeed(quantas = 30) {
-  const p = new URLSearchParams({ select: 'titulo,slug,linha_fina,categoria,imagem_url,publicada_em,updated_at', order: 'publicada_em.desc', limit: String(quantas) });
-  return (await (await consulta(p, {}, true)).json()) as (MateriaResumo & { updated_at: string })[];
+  return (await todas(true))
+    .sort((a, b) => +new Date(b.publicada_em) - +new Date(a.publicada_em))
+    .slice(0, quantas)
+    .map((m) => ({ ...m, updated_at: m.updated_at ?? m.publicada_em }));
 }
 
 /** Tudo que precisa entrar no sitemap */
 export async function slugsParaSitemap() {
-  const p = new URLSearchParams({ select: 'slug,updated_at,imagem_url', order: 'publicada_em.desc', limit: '5000' });
-  return (await (await consulta(p, {}, true)).json()) as { slug: string; updated_at: string; imagem_url: string | null }[];
+  return (await todas(true)).map((m) => ({ slug: m.slug, updated_at: m.updated_at ?? m.publicada_em, imagem_url: m.imagem_url }));
 }
 
 const dia = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', day: '2-digit', month: '2-digit' });

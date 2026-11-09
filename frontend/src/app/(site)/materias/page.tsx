@@ -109,7 +109,7 @@ export default async function MateriasPage({ searchParams }: Props) {
             <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {primeira && <MateriaCard m={primeira} destaque priority nivel="h2" />}
               {grade.map((m) => (
-                <MateriaCard key={m.id} m={m} nivel="h2" />
+                <MateriaCard key={m.slug} m={m} nivel="h2" />
               ))}
             </div>
 

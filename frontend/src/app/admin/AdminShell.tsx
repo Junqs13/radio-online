@@ -5,7 +5,7 @@ import { API_URL } from '@/lib/config';
 import Link from 'next/link';
 import { BrandMark, BrandWordmark } from '@/components/BrandLogo';
 import { usePathname } from 'next/navigation';
-import { Radio, Music, Calendar, Inbox, LogOut, Mail, BookOpen, BarChart3 } from 'lucide-react';
+import { Radio, Music, Calendar, Inbox, LogOut, Mail, BookOpen, BarChart3, Newspaper } from 'lucide-react';
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -21,6 +21,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     { name: 'Grade', href: '/admin/schedule', icon: Calendar },
     { name: 'Acervo', href: '/admin/media', icon: Music },
     { name: 'Mensagens', href: '/admin/messages', icon: Mail },
+    { name: 'Matérias', href: '/admin/materias', icon: Newspaper },
     { name: 'Conteúdo', href: '/admin/conteudo', icon: BookOpen },
     { name: 'Estatísticas', href: '/admin/estatisticas', icon: BarChart3 },
   ];
@@ -44,7 +45,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             <nav className="hidden md:flex items-center gap-2">
               {navItems.map((item) => {
                 const Icon = item.icon;
-                const isActive = pathname === item.href;
+                const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
                 return (
                   <Link
                     key={item.href}
@@ -76,7 +77,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         <nav className="md:hidden sticky top-[69px] z-40 flex gap-1 overflow-x-auto border-b border-white/10 bg-[#050507]/95 backdrop-blur-md px-4 py-2">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href;
+            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
             return (
               <Link
                 key={item.href}

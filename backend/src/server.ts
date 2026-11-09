@@ -13,6 +13,7 @@ import autodjRoutes from './routes/autodj.routes.js';
 import contactRoutes from './routes/contact.routes.js';
 import contentRoutes from './routes/content.routes.js';
 import statsRoutes from './routes/stats.routes.js';
+import materiasRoutes from './routes/materias.routes.js';
 import { RadioScheduler } from './services/RadioScheduler.js';
 import { HealthController } from './controllers/health.controller.js';
 import { prisma } from './lib/prisma.js';
@@ -42,7 +43,8 @@ app.use(
     limit: 300,
     standardHeaders: 'draft-7',
     legacyHeaders: false,
-    skip: (req) => req.path.startsWith('/autodj/'),
+    // /materias/ajustes: o servidor do site chama a cada página, sempre do mesmo IP interno (e a resposta fica em memória)
+    skip: (req) => req.path.startsWith('/autodj/') || req.path === '/materias/ajustes',
   }),
 );
 
@@ -56,6 +58,7 @@ app.use('/api/autodj', autodjRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/stats', statsRoutes);
+app.use('/api/materias', materiasRoutes);
 
 app.use('/api', (req, res) => {
   res.status(404).json({ success: false, error: 'Rota não encontrada.' });

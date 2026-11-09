@@ -37,7 +37,7 @@ export default function MateriasHome() {
             <MateriaCard m={primeira} destaque />
             {/* Em duas colunas, a terceira ficaria sozinha na linha: só aparece com três colunas */}
             {resto.slice(0, 3).map((m, i) => (
-              <MateriaCard key={m.id} m={m} className={i === 2 ? 'sm:hidden lg:flex' : ''} />
+              <MateriaCard key={m.slug} m={m} className={i === 2 ? 'sm:hidden lg:flex' : ''} />
             ))}
           </>
         ) : (

@@ -125,6 +125,9 @@ services:
         NEXT_PUBLIC_API_URL: https://${SITE_DOMAIN}/api
         NEXT_PUBLIC_STREAM_URL: https://${SITE_DOMAIN}${ICECAST_MOUNT:-/live.mp3}
     container_name: radio_frontend
+    environment:
+      # O servidor do Next busca os ajustes das matérias direto na API, pela rede interna
+      INTERNAL_API_URL: http://backend:3001/api
     depends_on:
       - backend
     restart: unless-stopped

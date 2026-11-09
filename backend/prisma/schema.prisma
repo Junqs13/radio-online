@@ -185,3 +185,30 @@ model StatEvent {
   @@index([type, path])
   @@map("stat_events")
 }
+
+/// Matérias no banco do site. Duas origens:
+/// - "geek": ajuste por cima de uma matéria que vem do geek-news (campos nulos = usa o original de lá)
+/// - "site": matéria escrita no próprio painel do site
+/// O Supabase do geek-news nunca é alterado: o site aplica estes ajustes na hora de mostrar.
+model Materia {
+  id            Int       @id @default(autoincrement())
+  slug          String    @unique
+  origem        String    @default("site") // geek | site
+  titulo        String?
+  linhaFina     String?   @map("linha_fina")
+  corpoMd       String?   @map("corpo_md")
+  categoria     String?
+  tags          String[]  @default([])
+  tagsDefinidas Boolean   @default(false) @map("tags_definidas") // true = usa as tags daqui (mesmo vazias)
+  imagemUrl     String?   @map("imagem_url")
+  semFoto       Boolean   @default(false) @map("sem_foto") // tira a foto do original sem pôr outra
+  oculta        Boolean   @default(false) // fora do site (para o geek-news: "excluir do site")
+  fixada        Boolean   @default(false) // aparece primeiro na lista e na home
+  rascunho      Boolean   @default(false) // só para as do site: não aparece até publicar
+  publicadaEm   DateTime? @map("publicada_em")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@index([origem])
+  @@map("materias")
+}

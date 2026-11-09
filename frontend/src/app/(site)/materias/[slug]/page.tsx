@@ -148,7 +148,7 @@ export default async function MateriaPage({ params }: Props) {
             <p className="text-2xl font-black tracking-tight mb-6">Mais de {c.nome}</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {leia.map((r, i) => (
-                <MateriaCard key={r.id} m={r} className={i === 2 ? 'sm:hidden lg:flex' : ''} />
+                <MateriaCard key={r.slug} m={r} className={i === 2 ? 'sm:hidden lg:flex' : ''} />
               ))}
             </div>
           </section>

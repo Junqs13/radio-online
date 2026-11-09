@@ -25,7 +25,8 @@ export default function Capa({
   if (src) {
     return (
       <div className={`relative overflow-hidden bg-[#0c0c10] ${className}`}>
-        <Image src={src} alt={alt} fill sizes={sizes} priority={priority} className="object-cover capa-img" />
+        {/* Fotos do Supabase passam pelo otimizador do Next; as enviadas pelo painel do site já vêm do nosso servidor */}
+        <Image src={src} alt={alt} fill sizes={sizes} priority={priority} unoptimized={!src.includes('.supabase.co/')} className="object-cover capa-img" />
       </div>
     );
   }
