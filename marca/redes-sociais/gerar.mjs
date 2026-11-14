@@ -453,6 +453,85 @@ add(`${S2}/dom-15-story-domingo-pesado.png`, 1080, 1920, `${topoStory}
 <div style="position:absolute;left:0;right:0;bottom:470px;text-align:center">${pilula('&#9654; OUÇA AO VIVO')}</div>${espacoLink}
 ${faixas(1.2, 'bottom:120px')}`);
 
+// 11. Semana de 16 a 22 de novembro (mesmo padrão da semana anterior, formatos novos)
+/** Especial em qualquer horário (o da semana anterior era fixo às 23h) */
+const especialH = (rot, banda, cor, hora) => `${marcaCanto}
+<div style="position:absolute;left:84px;top:96px;display:flex;align-items:center;gap:18px">${ponto(18)}${rotulo(rot, 30)}</div>
+<div style="position:absolute;left:84px;right:84px;top:170px;font:700 ${banda.length > 12 ? 118 : 150}px/0.95 SG;letter-spacing:-4px">${banda}</div>
+<div style="position:absolute;right:-200px;bottom:-170px;filter:drop-shadow(0 0 80px ${cor}55)">${vinil(940, cor, hora, 120)}</div>
+${faixas(0.8, 'bottom:0;height:40px')}`;
+/** Pôster de programa: palavra grande vazada, horário e equalizador */
+const poster = (rot, palavra, programa, hora, seed, px = 300) => `${marcaCanto}
+<div style="position:absolute;left:84px;top:96px;display:flex;align-items:center;gap:18px">${ponto(18)}${rotulo(rot, 30)}</div>
+<div style="position:absolute;left:0;right:0;top:170px;text-align:center">${contorno(palavra, px, C.valvula, 'SG', 700, `letter-spacing:-${px / 25}px`)}</div>
+<div style="position:absolute;left:84px;right:84px;top:${170 + px + 40}px;text-align:center;font:700 64px SG">${programa} <span style="color:${C.sinal}">${hora}</span></div>
+<div style="position:absolute;left:0;right:0;bottom:200px;display:flex;justify-content:center;opacity:.9">${equalizador(1080, 340, 24, seed)}</div>
+${faixas(0.8, 'bottom:0;height:40px')}`;
+/** Story com dois horários grandes */
+const duasHoras = (rot, [h1, p1], [h2, p2]) => `${topoStory}
+<div style="position:absolute;left:0;right:0;top:420px;text-align:center">${rotulo(rot, 36)}</div>
+<div style="position:absolute;left:0;right:0;top:500px;display:flex;flex-direction:column;align-items:center;gap:10px">
+<div style="font:800 180px/1 Orbitron;letter-spacing:-6px">${h1}</div><div style="font:700 72px SG;color:#d9d2e3">${p1}</div>
+<div style="width:120px;height:4px;background:linear-gradient(90deg,${C.sinal},${C.neon});margin:40px 0"></div>
+<div style="font:800 180px/1 Orbitron;letter-spacing:-6px;color:${C.sinal}">${h2}</div><div style="font:700 72px SG;color:#d9d2e3">${p2}</div></div>
+<div style="position:absolute;left:0;right:0;bottom:470px;text-align:center">${pilula('&#9654; OUÇA AO VIVO')}</div>${espacoLink}
+${faixas(1.2, 'bottom:120px')}`;
+
+const S3 = '11-semana-16-a-22-nov';
+// Segunda 16
+add(`${S3}/seg-16-post-1-especial-queen.png`, 1080, 1350, especial('Hoje', 'Queen', '#F59E0B'));
+add(`${S3}/seg-16-post-2-lenda-bohemian-rhapsody.png`, 1080, 1350, lenda('Bohemian Rhapsody', 'Queen', '1975', '#7C3AED'));
+add(`${S3}/seg-16-story-enquete-queen-bowie.png`, 1080, 1920, enquete('Queen', 'Bowie'));
+// Terça 17
+add(`${S3}/ter-17-post-1-especial-elvis.png`, 1080, 1350, especialH('Hoje, 11h', 'Elvis Presley', '#E11D2E', '11H'));
+add(`${S3}/ter-17-post-2-lenda-heartbreak-hotel.png`, 1080, 1350, lenda('Heartbreak Hotel', 'Elvis Presley', '1956', '#06B6D4'));
+add(`${S3}/ter-17-story-especial-black-sabbath.png`, 1080, 1920, storyEspecial('Hoje', 'Black Sabbath', '#7C3AED'));
+// Quarta 18
+add(`${S3}/qua-18-post-1-madrugada.png`, 1080, 1350, agenda('Madrugada de quinta', 'Quem fica acordado ouve.', [
+  ['01:00', 'Iron Maiden', 'Especial', '#334155'],
+  ['03:00', 'Smashing Pumpkins', 'Especial', '#7c3aed'],
+  ['05:00', 'Kiss', 'Especial', '#E11D2E'],
+], 120));
+add(`${S3}/qua-18-post-2-lenda-purple-haze.png`, 1080, 1350, lenda('Purple Haze', 'Jimi Hendrix', '1967', '#7C3AED'));
+add(`${S3}/qua-18-story-enquete-hendrix-page.png`, 1080, 1920, enquete('Hendrix', 'Page'));
+// Quinta 19
+add(`${S3}/qui-19-post-1-rock-nacional.png`, 1080, 1350, poster('Hoje, meio-dia', 'BR', 'Rock Nacional', '12h', 13, 400));
+add(`${S3}/qui-19-post-2-peca-sua-musica.png`, 1080, 1350, `${marcaCanto}
+<div style="position:absolute;left:84px;top:96px;display:flex;align-items:center;gap:18px">${ponto(18)}${rotulo('Pedidos abertos', 30)}</div>
+<div style="position:absolute;left:84px;top:160px">${contorno('SUA', 230, C.valvula, 'SG', 700, 'letter-spacing:-8px')}${contorno('VEZ', 230, C.sinal, 'SG', 700, 'letter-spacing:-8px')}</div>
+<div style="position:absolute;left:84px;right:84px;top:620px;font:600 46px/1.3 SG;color:#d9d2e3">Escolha a música no site. Ela entra na fila e toca na rádio.</div>
+<div style="position:absolute;left:84px;right:84px;top:800px">${['Algo pesado', 'Um clássico nacional', 'Hino de estádio', 'Me surpreenda'].map((t) => chip(t, 32)).join('')}</div>
+<div style="position:absolute;right:-120px;top:120px;opacity:.9;transform:rotate(-12deg)">${await icone('music-2', 420, 'rgba(225,29,46,.35)', 1.2)}</div>
+${faixas(0.8, 'bottom:0;height:40px')}`);
+add(`${S3}/qui-19-story-enquete-80-90.png`, 1080, 1920, enquete('Anos 80', 'Anos 90'));
+// Sexta 20: Dia da Consciência Negra
+add(`${S3}/sex-20-post-1-consciencia-negra.png`, 1080, 1350, `${marcaCanto}
+<div style="position:absolute;left:84px;top:96px">${rotulo('20 de novembro', 30)}</div>
+<div style="position:absolute;left:84px;right:84px;top:160px;font:700 104px/1 SG;letter-spacing:-3px">O rock nasceu da música negra.</div>
+<div style="position:absolute;left:84px;top:540px;display:flex;flex-direction:column;gap:18px">
+${['Sister Rosetta Tharpe', 'Chuck Berry', 'Little Richard', 'Jimi Hendrix'].map((n, i) => `<div style="font:700 50px SG;color:${i % 2 ? '#d9d2e3' : C.valvula};display:flex;align-items:center;gap:22px"><span style="width:14px;height:14px;border-radius:50%;background:${[C.sinal, C.neon, '#F59E0B', '#06B6D4'][i]}"></span>${n}</div>`).join('')}</div>
+<div style="position:absolute;right:-300px;bottom:-200px;filter:drop-shadow(0 0 80px rgba(245,158,11,.35))">${vinil(820, '#F59E0B')}</div>
+${faixas(0.8, 'bottom:0;height:40px')}`);
+add(`${S3}/sex-20-post-2-especial-ramones.png`, 1080, 1350, especial('Hoje', 'Ramones', '#16A34A'));
+add(`${S3}/sex-20-story-sexta-a-noite.png`, 1080, 1920, duasHoras('Sexta à noite', ['19H', 'Arena Rock'], ['23H', 'Ramones']));
+// Sábado 21
+add(`${S3}/sab-21-post-1-grade-de-sabado.png`, 1080, 1350, agenda('Programação', 'Sábado', [
+  ['07:00', 'Antena Rock Mix', 'Rock', '#dc2626'],
+  ['10:00', 'Rock Anos 70', 'Rock / Anos 70', '#ca8a04'],
+  ['13:00', 'Rock Nacional', 'Rock Brasileiro', '#16a34a'],
+  ['14:00', 'Pesado', 'Heavy Metal', '#64748b'],
+  ['17:00', 'Arena Rock', 'Hard Rock', '#db2777'],
+  ['20:00', 'Clássicos Internacionais', 'Classic Rock', '#ea580c'],
+  ['23:00', 'Especial The Smiths', 'Especial', '#4338ca'],
+  ['23:30', 'Madrugada Antena Rock', 'Rock', '#7c3aed'],
+], 86));
+add(`${S3}/sab-21-post-2-lenda-sultans-of-swing.png`, 1080, 1350, lenda('Sultans of Swing', 'Dire Straits', '1978', '#22C55E'));
+add(`${S3}/sab-21-story-enquete-vinil-streaming.png`, 1080, 1920, enquete('Vinil', 'Streaming'));
+// Domingo 22
+add(`${S3}/dom-22-post-1-lenda-pour-some-sugar.png`, 1080, 1350, lenda('Pour Some Sugar on Me', 'Def Leppard', '1987', '#EC4899'));
+add(`${S3}/dom-22-post-2-pesado.png`, 1080, 1350, poster('Hoje, 20h às 23h', 'PESADO', 'Pesado', '20h', 17, 250));
+add(`${S3}/dom-22-story-domingo-pesado.png`, 1080, 1920, duasHoras('Hoje à noite', ['20H', 'Pesado'], ['23H', 'Iron Maiden']));
+
 // ---------- Render ----------
 const nav = await chromium.launch();
 const pg = await nav.newPage();
