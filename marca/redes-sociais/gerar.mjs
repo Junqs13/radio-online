@@ -532,6 +532,57 @@ add(`${S3}/dom-22-post-1-lenda-pour-some-sugar.png`, 1080, 1350, lenda('Pour Som
 add(`${S3}/dom-22-post-2-pesado.png`, 1080, 1350, poster('Hoje, 20h às 23h', 'PESADO', 'Pesado', '20h', 17, 250));
 add(`${S3}/dom-22-story-domingo-pesado.png`, 1080, 1920, duasHoras('Hoje à noite', ['20H', 'Pesado'], ['23H', 'Iron Maiden']));
 
+// 12. Semana de 26 de novembro a 2 de dezembro
+/** "Nesta data": data grande vazada, ano, título e uma linha de contexto, com o disco no canto */
+const nestaData = (data, ano, titulo, linha, cor) => `${marcaCanto}
+<div style="position:absolute;left:84px;top:96px;display:flex;align-items:center;gap:18px">${ponto(18)}${rotulo('Nesta data', 30)}</div>
+<div style="position:absolute;left:84px;top:150px">${contorno(data, 230, C.valvula, 'SG', 700, 'letter-spacing:-8px')}</div>
+<div style="position:absolute;left:84px;top:375px;font:800 64px Orbitron;color:${C.sinal};letter-spacing:2px">${ano}</div>
+<div style="position:absolute;left:84px;right:84px;top:480px;font:700 ${titulo.length > 24 ? 80 : 96}px/1 SG;letter-spacing:-3px">${titulo}</div>
+<div style="position:absolute;left:84px;right:430px;top:${titulo.length > 24 ? 760 : 700}px;font:500 38px/1.35 SG;color:#d9d2e3">${linha}</div>
+<div style="position:absolute;right:-330px;bottom:-230px;filter:drop-shadow(0 0 80px ${cor}55)">${vinil(820, cor)}</div>
+${faixas(0.8, 'bottom:0;height:40px')}`;
+
+const S4 = '12-semana-26-nov-a-2-dez';
+// Quinta 26
+add(`${S4}/qui-26-post-1-cream-1968.png`, 1080, 1350, nestaData('26/11', '1968', 'Cream se despede', 'Clapton, Bruce e Baker no Royal Albert Hall, depois de pouco mais de dois anos de banda.', '#F59E0B'));
+add(`${S4}/qui-26-post-2-especial-alice-in-chains.png`, 1080, 1350, especial('Hoje', 'Alice In Chains', '#64748B'));
+add(`${S4}/qui-26-story-enquete-clapton-hendrix.png`, 1080, 1920, enquete('Clapton', 'Hendrix'));
+// Sexta 27
+add(`${S4}/sex-27-post-1-hendrix-84.png`, 1080, 1350, nestaData('27/11', '1942', 'Nasce Jimi Hendrix', 'Em Seattle. Hoje ele faria 84 anos.', '#7C3AED'));
+add(`${S4}/sex-27-post-2-sexta-a-noite.png`, 1080, 1350, agenda('Hoje, sexta', 'Sexta à noite tem rock até de madrugada.', [
+  ['19:00', 'Arena Rock', 'Hard Rock', '#db2777'],
+  ['21:00', 'Antena Rock Mix', 'Rock', '#dc2626'],
+  ['23:00', 'Especial Ramones', 'Especial', '#15803d'],
+  ['23:30', 'Madrugada Antena Rock', 'Rock', '#7c3aed'],
+], 110));
+add(`${S4}/sex-27-story-sexta-a-noite.png`, 1080, 1920, duasHoras('Sexta à noite', ['19H', 'Arena Rock'], ['23H', 'Ramones']));
+// Sábado 28
+add(`${S4}/sab-28-post-1-lenda-1979.png`, 1080, 1350, lenda('1979', 'The Smashing Pumpkins', '1995', '#06B6D4'));
+add(`${S4}/sab-28-post-2-pesado.png`, 1080, 1350, poster('Hoje, 14h às 17h', 'PESADO', 'Pesado', '14h', 23, 250));
+add(`${S4}/sab-28-story-especial-the-smiths.png`, 1080, 1920, storyEspecial('Hoje', 'The Smiths', '#4338CA'));
+// Domingo 29
+add(`${S4}/dom-29-post-1-george-harrison.png`, 1080, 1350, nestaData('29/11', '2001', 'George Harrison', 'O Beatle mais novo morreu aos 58 anos. Hoje faz 25 anos.', '#22C55E'));
+add(`${S4}/dom-29-post-2-especial-iron-maiden.png`, 1080, 1350, especial('Hoje', 'Iron Maiden', '#334155'));
+add(`${S4}/dom-29-story-enquete-beatles-stones.png`, 1080, 1920, enquete('Beatles', 'Stones'));
+// Segunda 30
+add(`${S4}/seg-30-post-1-the-wall-1979.png`, 1080, 1350, nestaData('30/11', '1979', 'Pink Floyd lança The Wall', 'Disco duplo. Another Brick in the Wall, Part 2 foi o único número um da banda na Inglaterra e nos Estados Unidos.', '#E11D2E'));
+add(`${S4}/seg-30-post-2-lenda-there-is-a-light.png`, 1080, 1350, lenda('There Is a Light That Never Goes Out', 'The Smiths', '1986', '#4338CA'));
+add(`${S4}/seg-30-story-especial-queen.png`, 1080, 1920, storyEspecial('Hoje', 'Queen', '#F59E0B'));
+// Terça 1/12
+add(`${S4}/ter-01-post-1-dezembro.png`, 1080, 1350, `${marcaCanto}
+<div style="position:absolute;left:84px;top:96px;display:flex;align-items:center;gap:18px">${ponto(18)}${rotulo('Pedidos abertos', 30)}</div>
+<div style="position:absolute;left:84px;top:150px">${contorno('DEZ', 330, C.valvula, 'SG', 700, 'letter-spacing:-12px')}</div>
+<div style="position:absolute;left:84px;right:84px;top:520px;font:700 84px/1.02 SG;letter-spacing:-2px">A trilha do seu dezembro <span style="color:${C.sinal}">você escolhe.</span></div>
+<div style="position:absolute;left:84px;right:84px;top:880px">${['Algo pesado', 'Um clássico nacional', 'Hino de estádio', 'Me surpreenda'].map((t) => chip(t, 32)).join('')}</div>
+${faixas(0.8, 'bottom:0;height:40px')}`);
+add(`${S4}/ter-01-post-2-lenda-clocks.png`, 1080, 1350, lenda('Clocks', 'Coldplay', '2002', '#06B6D4'));
+add(`${S4}/ter-01-story-enquete-ao-vivo-estudio.png`, 1080, 1920, enquete('Ao vivo', 'Estúdio'));
+// Quarta 2/12
+add(`${S4}/qua-02-post-1-especial-david-bowie.png`, 1080, 1350, especial('Hoje', 'David Bowie', '#06B6D4'));
+add(`${S4}/qua-02-post-2-alternativo.png`, 1080, 1350, poster('Hoje, 17h às 19h', 'ALT', 'Alternativo', '17h', 29, 400));
+add(`${S4}/qua-02-story-arena-e-bowie.png`, 1080, 1920, duasHoras('Hoje à noite', ['19H', 'Arena Rock'], ['23H', 'David Bowie']));
+
 // ---------- Render ----------
 const nav = await chromium.launch();
 const pg = await nav.newPage();
